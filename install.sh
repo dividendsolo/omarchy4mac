@@ -80,16 +80,18 @@ if ! grep -qsF "$LINE" "$HOME/.zshrc"; then
 fi
 
 # ---- 5. Light/dark listener + launchd agents ------------------------------
+LISTENER=0
 if command -v swiftc >/dev/null 2>&1; then
   say "Compiling the light/dark listener"
-  run swiftc -O -o "$HOME/.local/bin/theme-appearance-listener" "$DIR/bin/theme-appearance-listener.swift"
+  run swiftc -O -o "$HOME/.local/bin/theme-appearance-listener" "$DIR/bin/theme-appearance-listener.swift" && LISTENER=1
 else
-  say "swiftc not found; skipping the light/dark listener"
+  say "swiftc not found; skipping the light/dark listener and its launchd agent"
 fi
 say "Loading launchd agents"
 run mkdir -p "$HOME/Library/LaunchAgents" "$HOME/Library/Logs"
 for p in "$DIR"/launchd/*.plist; do
   name="${p##*/}"; dst="$HOME/Library/LaunchAgents/$name"
+  case "$name" in *theme-appearance*) [ "$LISTENER" = 1 ] || [ "$DRY" = 1 ] || continue ;; esac
   if [ "$DRY" = 1 ]; then echo "    render $p -> $dst; launchctl load"; continue; fi
   sed "s|/Users/YOU|$HOME|g" "$p" > "$dst"
   launchctl unload "$dst" 2>/dev/null || true

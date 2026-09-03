@@ -1,5 +1,7 @@
 # omarchy4mac dependencies. `install.sh` runs `brew bundle` on this file.
 
+tap "FelixKratz/formulae"   # sketchybar and borders live here, not in core
+
 # Window manager, bar, borders, terminal, prompt, editor, monitor
 cask "aerospace"
 cask "ghostty"
@@ -9,6 +11,8 @@ brew "borders"
 brew "starship"
 brew "btop"
 brew "neovim"
+brew "fastfetch"   # menu > About
+brew "bun"         # bar agents widget runs `bunx ccusage`; hidden when there is no usage
 
 # Shell defaults from Omarchy (zsh/omarchy.zsh)
 brew "eza"

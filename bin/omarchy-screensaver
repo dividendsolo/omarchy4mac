@@ -5,7 +5,7 @@
 # movement by killing this process (see hammerspoon/init.lua).
 export PATH="$HOME/.cargo/bin:$HOME/.local/bin:/opt/homebrew/bin:$PATH"
 TEXT="$HOME/.config/omarchy/branding/screensaver.txt"
-[[ -f "$TEXT" ]] || { mkdir -p "$(dirname "$TEXT")"; cp "$HOME/code/dotfiles/omarchy/screensaver.txt" "$TEXT"; }
+[[ -f "$TEXT" ]] || { mkdir -p "$(dirname "$TEXT")"; cp "$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)/omarchy/screensaver.txt" "$TEXT"; }
 
 ttfx_pid=""
 exit_screensaver() {

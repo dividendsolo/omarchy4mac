@@ -38,7 +38,10 @@ the keybindings, ⌘⌥Space for the menu.
 restarts the services. `~/code/omarchy4mac/install.sh --dry-run` prints what
 it would do without touching anything.
 
-**Options:** `SKIP_APPS=1` skips Brave, Raycast, and FluidVoice.
+**Options:** `SKIP_APPS=1` skips Brave, Raycast, and FluidVoice. Not in the
+Brewfile, install what you use: Steam (gaming mode), Claude Code and Obsidian
+(the theme reaches them), Signal, 1Password, Typora, LocalSend, HandBrake.
+Each has a key; the key does nothing until the app exists.
 `OMARCHY4MAC_DIR=/path` changes the clone location. The screensaver needs
 `cargo` (rustup); without it the script skips ttfx and says so.
 
@@ -79,10 +82,10 @@ own "start at login" if you use the watchdog.
 
 ## Wallpapers
 
-`omarchy-cycle-wallpaper` (⌘⌃P) cycles images in `~/Pictures/Wallpapers`.
-Name files `<theme>_*.jpg` to scope them to a theme (e.g. `tokyo-night_1.jpg`);
-unprefixed files act as a shared pool. Wallpapers are not bundled — bring your
-own or grab Omarchy's from the [omarchy repo](https://github.com/basecamp/omarchy).
+`theme --sync` downloads every theme's own backgrounds from the Omarchy repo
+into `~/Pictures/Wallpapers` as `<theme>_<file>`. `omarchy-cycle-wallpaper`
+(⌘⌃P) cycles the ones for the current theme; unprefixed files you add act as
+a shared pool.
 
 ## Keybindings
 
@@ -90,7 +93,7 @@ Press **⌥K** for the searchable overlay. Highlights:
 
 - **⌘⌥Space** — Omarchy system menu (nested, searchable); **⌘Esc** — System submenu
 - **⌘⌃⇧Space** — theme chooser
-- **⌘⇧ + letter** — web apps as app windows (mail, calendar, chat, photos, YouTube, X)
+- **⌘⇧ + letter** — web apps as app windows (HEY mail and calendar, Google Photos, YouTube, Grok; Google Chat on ⌘⇧⌃G)
 - **⌘⇧⌃A** — coding agent in a fresh terminal
 - **⌘⌃P** — cycle wallpaper
 - **⌘⌃I** — keep awake (caffeinate) with a bar indicator
@@ -106,7 +109,7 @@ easy, or because a Mac needed them.
 
 - **Auto re-theme on light/dark flip.** Switch macOS appearance and the whole
   desktop switches to a random theme from the matching bucket: light system,
-  light theme; dark system, dark theme. Terminal, editor, bar, borders, btop,
+  light theme; dark system, dark theme. Terminal, editor, bar, btop,
   Claude Code, Obsidian, all at once. It is the optional listener above; set
   it up once and forget it. Omarchy has no equivalent, since Hyprland has no
   system appearance to follow.
@@ -117,15 +120,15 @@ easy, or because a Mac needed them.
   Obsidian vault theme too.
 - **Crash watchdog.** AeroSpace can self-terminate on macOS 26. The launchd
   agent above relaunches it on a crash and respects a clean quit.
-- **Gaming mode (⌘⌃G).** Quits every Dock app and launches Steam. The
-  reverse is a normal quit.
+- **Gaming mode (⌘⌃G).** Quits every Dock app, drops Tailscale if it is
+  installed, and launches Steam. The reverse is a normal quit.
 
 ## How close is this to real Omarchy?
 
-**70%** of Omarchy v4.0.2 (Quattro), scored feature by feature below: ✅ we
+**71%** of Omarchy v4.0.2 (Quattro), scored feature by feature below: ✅ we
 have it, or the Mac stand-in does the same job (1 point). ⚠️ partly there,
 with a plan (half). ❌ missing, nothing planned, whatever the reason (0).
-Items with no macOS meaning are left out. That is 22 matched, 5 partial, 8
+Items with no macOS meaning are left out. That is 23 matched, 4 partial, 8
 not portable, out of 35 scored.
 
 The short version: the keybinding vocabulary, the workspace model, the menu
@@ -145,7 +148,7 @@ what changed and when is in [`CHANGELOG.md`](CHANGELOG.md).
 | Theme chooser (Super+Ctrl+Shift+Space) | Hammerspoon chooser on ⌘⌃⇧Space | ✅ |  |
 | Menu tree: Apps, Learn, Trigger, Style, Setup, Install, Update, System, nested search | Hammerspoon on ⌘⌥Space, ⌘Esc to System | ✅ |  |
 | Keybinding overlay (Super+K) | ⌥K, every binding listed | ✅ |  |
-| Web apps as app windows (Super+Shift+letter) | Brave `--app=` windows on the same keys | ✅ |  |
+| Web apps as app windows (Super+Shift+letter) | Brave `--app=` windows on the same keys (HEY, Photos, YouTube, Grok, Google Chat) | ✅ |  |
 | Screensaver: ttfx ASCII art per monitor after 150 s | Hammerspoon idle timer, Ghostty + ttfx per display | ✅ |  |
 | Shell defaults: eza, bat, fzf, zoxide, git and tool aliases | `zsh/omarchy.zsh` | ✅ |  |
 | Wallpaper per theme, cycle key | `omarchy-cycle-wallpaper` on ⌘⌃P | ✅ |  |
@@ -160,7 +163,7 @@ what changed and when is in [`CHANGELOG.md`](CHANGELOG.md).
 | App launcher (walker) | Raycast (free plan) on ⌘Space | ✅ | Works the same for launching. No walker port needed. |
 | Voice typing (voxtype) | [FluidVoice](https://fluidvoice.app) | ✅ | Free, open source, Whisper on-device. Not bundled; install it yourself. |
 | Install in one command, update in one command | `install.sh`, rerun to update | ✅ |  |
-| Theme backgrounds downloaded with the theme | Bring your own to `~/Pictures/Wallpapers` | ⚠️ | Planned: `theme --sync` pulls each theme's `backgrounds/` (webp) with the `<theme>_` prefix the cycler expects. |
+| Theme backgrounds downloaded with the theme | `theme --sync` pulls each theme's `backgrounds/` into `~/Pictures/Wallpapers` | ✅ |  |
 | Theme reaches tmux, lazygit, VS Code | Terminal, editor, btop, Claude Code, Obsidian | ⚠️ | Planned when tmux is daily: render v4's tmux template and reload live sessions. lazygit and VS Code only if asked. |
 | Night light toggle | None | ⚠️ | Planned: Night Shift via osascript on ⌘⌃N and a menu item. Small. |
 | OCR capture-text (Super+Ctrl+Print) | macOS Live Text, by hand | ⚠️ | Planned: region screenshot, Vision text extraction, clipboard, one script. |

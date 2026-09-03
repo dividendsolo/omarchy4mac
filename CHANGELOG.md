@@ -4,6 +4,14 @@ Newest first. Each entry is a sync from the private dotfiles it is exported
 from, so a date here is the day the change went public, not the day it was
 built.
 
+## 2026-09-03: audit fixes
+
+- Brewfile taps `FelixKratz/formulae` (sketchybar and borders are not in core),
+  adds `bun` and `fastfetch`. `sketchybar/colors.sh` is generated, now ignored.
+- Installer loads the light/dark launchd agent only when the listener compiled.
+- Menu Setup items resolve the repo from the init.lua symlink instead of a
+  hard-coded path. Screensaver text and gaming mode no longer assume one machine.
+
 ## 2026-09-03: one-command install
 
 - `install.sh`: Homebrew if missing, `Brewfile`, every symlink (existing files

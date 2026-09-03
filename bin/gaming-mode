@@ -17,7 +17,8 @@ repeat with bid in bids
 end repeat
 EOF
 
-/usr/local/bin/tailscale down
+# Drop the VPN for lower game latency, only if Tailscale is installed.
+command -v tailscale >/dev/null 2>&1 && tailscale down
 
 open -a Steam
 

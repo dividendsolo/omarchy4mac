@@ -259,7 +259,15 @@ local function keystroke(code, mods)
   return sh([[osascript -e 'tell application "System Events" to key code ]] .. code .. [[ using {]] .. mods .. [[}']])
 end
 local function toast(scriptName) return function() notifyFromScript("~/.local/bin/" .. scriptName) end end
-local D = os.getenv("HOME") .. "/code/dotfiles"
+-- The repo this init.lua lives in (dotfiles here, omarchy4mac for adopters):
+-- resolve the symlink ~/.hammerspoon/init.lua and go two directories up.
+local D = (function()
+  local target = hs.execute("readlink " .. os.getenv("HOME") .. "/.hammerspoon/init.lua"):gsub("%s+$", "")
+  if target == "" then target = os.getenv("HOME") .. "/.hammerspoon/init.lua" end
+  return target:match("^(.*)/hammerspoon/[^/]+$") or (os.getenv("HOME") .. "/code/omarchy4mac")
+end)()
+-- Shell file: dotfiles keeps the whole zshrc; the public repo ships only the Omarchy block.
+local ZSH = hs.fs.attributes(D .. "/zsh/omarchy.zsh") and (D .. "/zsh/omarchy.zsh") or (D .. "/zsh/zshrc")
 
 local MENU = {
   { text = "Apps", sub = "Launch an app", action = function() showAppsMenu() end },
@@ -320,7 +328,7 @@ local MENU = {
       { text = "SketchyBar", sub = "sketchybarrc", action = nvimEdit(D .. "/sketchybar/sketchybarrc") },
       { text = "Hammerspoon", sub = "init.lua", action = nvimEdit(D .. "/hammerspoon/init.lua") },
       { text = "Ghostty", sub = "Application Support config", action = nvimEdit(os.getenv("HOME") .. "/Library/Application Support/com.mitchellh.ghostty/config") },
-      { text = "Zsh", sub = "zshrc", action = nvimEdit(D .. "/zsh/zshrc") },
+      { text = "Zsh", sub = "shell defaults", action = nvimEdit(ZSH) },
       { text = "Starship", sub = "starship.toml", action = nvimEdit(D .. "/starship/starship.toml") },
     }},
   }},
