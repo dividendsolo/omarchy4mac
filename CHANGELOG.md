@@ -4,6 +4,14 @@ Newest first. Each entry is a sync from the private dotfiles it is exported
 from, so a date here is the day the change went public, not the day it was
 built.
 
+## 2026-09-03 (workspaces)
+
+- Change: apps no longer jump to a fixed workspace on open. Omarchy 4 sends
+  nothing to a preset workspace; a window opens where you are. The browser,
+  terminal, Claude, chat, and music rules that moved windows to workspaces
+  1 to 5 are gone. Browsers still open tiled and the screensaver still
+  floats. Run `aerospace reload-config` after updating.
+
 ## 2026-09-03 (later)
 
 - Fix: open Ghostty windows now pick up a theme change at once. The

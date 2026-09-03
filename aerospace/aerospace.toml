@@ -278,57 +278,25 @@ run = 'layout floating'
 if.window-title-regex-substring = 'Picture.in.Picture'
 run = 'layout floating'
 
-# ---------- Workspace auto-assignment (Omarchy-style) ----------
-# 1 Browser · 2 Claude · 3 Terminal · 4 Comms · 5 Music/Notes
+# ---------- No workspace auto-assignment (Omarchy 4 / Quattro) ----------
+# Omarchy sends no app to a fixed workspace: a window opens on the workspace
+# you are on. The only exceptions are the rules above (floats) and the ones
+# below (browsers stay tiled, the screensaver floats).
 
 # Browsers are pinned to tiling, mirroring Omarchy's own rule
-# (default/hypr/apps/browser.conf: `windowrule = tile on, match:tag
-# chromium-based-browser`). Gaps only apply to tiled windows, and the macOS menu
-# bar is auto-hidden, so a floating browser is free to sit at y=0 with its tab
+# (default/hypr/apps/browser.lua: `o.window({ tag = "chromium-based-browser" },
+# { tile = true })`). Gaps only apply to tiled windows, and the macOS menu bar
+# is auto-hidden, so a floating browser is free to sit at y=0 with its tab
 # strip and window controls stranded behind SketchyBar.
 [[on-window-detected]]
 if.app-id = 'com.brave.Browser'
-run = ['layout tiling', 'move-node-to-workspace 1']
+run = 'layout tiling'
 
 [[on-window-detected]]
 if.app-id = 'com.google.Chrome'
-run = ['layout tiling', 'move-node-to-workspace 1']
+run = 'layout tiling'
 
-[[on-window-detected]]
-if.app-id = 'com.anthropic.claudefordesktop'
-run = 'move-node-to-workspace 2'
-
-# Screensaver windows first: the first matching rule wins, and the generic
-# Ghostty rule below would tile them onto workspace 2.
 [[on-window-detected]]
 if.app-id = 'com.mitchellh.ghostty'
 if.window-title-regex-substring = 'org.omarchy.screensaver'
 run = 'layout floating'
-
-[[on-window-detected]]
-if.app-id = 'com.mitchellh.ghostty'
-run = 'move-node-to-workspace 2'
-
-[[on-window-detected]]
-if.app-id = 'org.whispersystems.signal-desktop'
-run = 'move-node-to-workspace 4'
-
-[[on-window-detected]]
-if.app-id = 'com.tinyspeck.slackmacgap'
-run = 'move-node-to-workspace 4'
-
-[[on-window-detected]]
-if.app-id = 'net.whatsapp.WhatsApp'
-run = 'move-node-to-workspace 4'
-
-[[on-window-detected]]
-if.app-id = 'com.spotify.client'
-run = 'move-node-to-workspace 5'
-
-[[on-window-detected]]
-if.app-id = 'md.obsidian'
-run = 'move-node-to-workspace 5'
-
-[[on-window-detected]]
-if.app-id = 'abnerworks.Typora'
-run = 'move-node-to-workspace 5'
