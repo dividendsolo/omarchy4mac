@@ -20,93 +20,62 @@ straight from the Omarchy repo and converts it for Ghostty, Neovim (LazyVim),
 and btop. `theme random` respects macOS light/dark appearance, and a launchd
 listener re-themes everything the instant the system flips appearance.
 
-## Prerequisites
-
-```sh
-brew install --cask aerospace ghostty hammerspoon
-brew install sketchybar borders starship btop neovim
-brew install eza bat fzf zoxide        # for zsh/omarchy.zsh (optional)
-cargo install --git https://github.com/omacom/ttfx   # screensaver (optional)
-
-# Apps the keybindings and the parity table count on. None are bundled.
-brew install --cask brave-browser      # web apps as app windows (⌘⇧ + letter)
-brew install --cask raycast            # launcher (⌘Space), emoji (⌘⌃E), clipboard (⌘⌃V); free plan is enough
-brew install --cask fluidvoice         # voice typing, on-device Whisper
-# Steam for gaming mode (⌘⌃G); Claude Code and Obsidian if you want the theme to reach them
-```
-
-Neovim theming assumes [LazyVim](https://www.lazyvim.org) (themes are written
-to `~/.config/nvim/lua/plugins/theme.lua`).
-
 ## Install
 
-Clone, then symlink what you want:
+One command. It installs Homebrew if needed, runs the `Brewfile`, links every
+config into place (anything already there is moved to `*.bak-<date>`), compiles
+the light/dark listener, loads the launchd agents, adds the shell file to
+`~/.zshrc`, pulls the Omarchy themes, and starts the services:
 
 ```sh
+curl -fsSL https://raw.githubusercontent.com/dividendsolo/omarchy4mac/main/install.sh | bash
+```
+
+Grant Accessibility to Hammerspoon and AeroSpace when macOS asks. Then ⌥K for
+the keybindings, ⌘⌥Space for the menu.
+
+**Update:** run the same script again. It pulls, relinks, resyncs themes, and
+restarts the services. `~/code/omarchy4mac/install.sh --dry-run` prints what
+it would do without touching anything.
+
+**Options:** `SKIP_APPS=1` skips Brave, Raycast, and FluidVoice.
+`OMARCHY4MAC_DIR=/path` changes the clone location. The screensaver needs
+`cargo` (rustup); without it the script skips ttfx and says so.
+
+<details>
+<summary>By hand, if you would rather see every step</summary>
+
+```sh
+brew bundle --file=Brewfile          # or pick from it
 git clone https://github.com/dividendsolo/omarchy4mac.git ~/code/omarchy4mac
 D=~/code/omarchy4mac
 
-# Window manager / bar / borders
 ln -s "$D/aerospace/aerospace.toml" ~/.aerospace.toml
 ln -s "$D/sketchybar" ~/.config/sketchybar
 ln -s "$D/borders" ~/.config/borders
-
-# Prompt
 ln -s "$D/starship/starship.toml" ~/.config/starship.toml
-
-# Hammerspoon (keybindings overlay, Omarchy menu, theme chooser)
-mkdir -p ~/.hammerspoon
-ln -s "$D/hammerspoon/init.lua" ~/.hammerspoon/init.lua
-
-# Scripts
-mkdir -p ~/.local/bin
-for f in theme omarchy-system-menu omarchy-cycle-wallpaper omarchy-notice theme-appearance-watch \
-         omarchy-tui omarchy-agent omarchy-launch-screensaver omarchy-screensaver omarchy-toggle-screensaver gaming-mode; do
-  ln -s "$D/bin/$f" ~/.local/bin/$f
-done
-ln -s ~/.cargo/bin/ttfx ~/.local/bin/ttfx   # if you installed the screensaver
+mkdir -p ~/.hammerspoon && ln -s "$D/hammerspoon/init.lua" ~/.hammerspoon/init.lua
+mkdir -p ~/.local/bin && for f in "$D"/bin/*; do [[ $f == *.swift ]] || ln -s "$f" ~/.local/bin/; done
 mkdir -p ~/.config/omarchy/branding && cp "$D/omarchy/screensaver.txt" ~/.config/omarchy/branding/
+echo "source $D/zsh/omarchy.zsh" >> ~/.zshrc
 
-# Shell aliases (optional)
-echo 'source ~/code/omarchy4mac/zsh/omarchy.zsh' >> ~/.zshrc
+# Light/dark listener + AeroSpace crash watchdog (macOS 26 can kill AeroSpace)
+swiftc -O -o ~/.local/bin/theme-appearance-listener "$D/bin/theme-appearance-listener.swift"
+for p in "$D"/launchd/*.plist; do
+  sed "s|/Users/YOU|$HOME|g" "$p" > ~/Library/LaunchAgents/"${p##*/}"
+  launchctl load ~/Library/LaunchAgents/"${p##*/}"
+done
 
-# Pull the Omarchy themes
-theme --sync
-theme tokyo-night
+# Screensaver (optional)
+cargo install --git https://github.com/omacom/ttfx && ln -s ~/.cargo/bin/ttfx ~/.local/bin/ttfx
+
+theme --sync && theme tokyo-night
+brew services start sketchybar && brew services start borders && open -a Hammerspoon
 ```
 
-Then start the services:
-
-```sh
-brew services start sketchybar
-brew services start borders
-open -a Hammerspoon    # grant Accessibility when asked
-```
-
-### Auto-theming on light/dark flip (optional)
-
-A tiny resident Swift listener reacts to `AppleInterfaceThemeChangedNotification`
-and switches to a random theme matching the new appearance:
-
-```sh
-swiftc -O -o ~/.local/bin/theme-appearance-listener bin/theme-appearance-listener.swift
-sed "s|/Users/YOU|$HOME|g" launchd/com.omarchy-mac.theme-appearance.plist \
-  > ~/Library/LaunchAgents/com.omarchy-mac.theme-appearance.plist
-launchctl load ~/Library/LaunchAgents/com.omarchy-mac.theme-appearance.plist
-```
-
-### AeroSpace crash watchdog (optional, recommended on macOS 26)
-
-AeroSpace can self-terminate on macOS Tahoe. This launchd agent starts it at
-login and relaunches it only on a crash (a clean quit is respected):
-
-```sh
-sed "s|/Users/YOU|$HOME|g" launchd/com.omarchy-mac.aerospace-keepalive.plist \
-  > ~/Library/LaunchAgents/com.omarchy-mac.aerospace-keepalive.plist
-launchctl load ~/Library/LaunchAgents/com.omarchy-mac.aerospace-keepalive.plist
-```
-
-Disable AeroSpace's own "start at login" if you use this.
+Neovim theming assumes [LazyVim](https://www.lazyvim.org). Disable AeroSpace's
+own "start at login" if you use the watchdog.
+</details>
 
 ## Wallpapers
 
@@ -153,10 +122,10 @@ easy, or because a Mac needed them.
 
 ## How close is this to real Omarchy?
 
-**69%** of Omarchy v4.0.2 (Quattro), scored feature by feature below: ✅ we
+**70%** of Omarchy v4.0.2 (Quattro), scored feature by feature below: ✅ we
 have it, or the Mac stand-in does the same job (1 point). ⚠️ partly there,
 with a plan (half). ❌ missing, nothing planned, whatever the reason (0).
-Items with no macOS meaning are left out. That is 21 matched, 6 partial, 8
+Items with no macOS meaning are left out. That is 22 matched, 5 partial, 8
 not portable, out of 35 scored.
 
 The short version: the keybinding vocabulary, the workspace model, the menu
@@ -190,12 +159,12 @@ what changed and when is in [`CHANGELOG.md`](CHANGELOG.md).
 | Notifications (mako) | macOS Notification Center | ✅ | Matched by the OS. |
 | App launcher (walker) | Raycast (free plan) on ⌘Space | ✅ | Works the same for launching. No walker port needed. |
 | Voice typing (voxtype) | [FluidVoice](https://fluidvoice.app) | ✅ | Free, open source, Whisper on-device. Not bundled; install it yourself. |
+| Install in one command, update in one command | `install.sh`, rerun to update | ✅ |  |
 | Theme backgrounds downloaded with the theme | Bring your own to `~/Pictures/Wallpapers` | ⚠️ | Planned: `theme --sync` pulls each theme's `backgrounds/` (webp) with the `<theme>_` prefix the cycler expects. |
 | Theme reaches tmux, lazygit, VS Code | Terminal, editor, btop, Claude Code, Obsidian | ⚠️ | Planned when tmux is daily: render v4's tmux template and reload live sessions. lazygit and VS Code only if asked. |
 | Night light toggle | None | ⚠️ | Planned: Night Shift via osascript on ⌘⌃N and a menu item. Small. |
 | OCR capture-text (Super+Ctrl+Print) | macOS Live Text, by hand | ⚠️ | Planned: region screenshot, Vision text extraction, clipboard, one script. |
 | Bar hide/show key | None | ⚠️ | Planned: `sketchybar --bar hidden=toggle` on ⌘⇧Space. One line. |
-| Install in one command, update in one command | Clone, brew, symlinks by hand | ⚠️ | Planned: `install.sh` (Brewfile, symlinks, first `theme --sync`) and `omarchy4mac update` (pull, relink, resync, restart services). |
 | Theme colors on the volume / brightness indicator (the box when you press a volume key) | Apple's, unthemed | ❌ | The theme cannot reach it. Apple owns it. |
 | Control panels: audio, bluetooth, network, display, power, calendar (Quickshell) | System Settings deep links | ❌ | Quickshell is one process on Wayland layer-shell. macOS has no way to draw an equivalent panel. Not portable. |
 | Themed lock screen | macOS lock screen | ❌ | Not portable. The macOS lock screen cannot be restyled. |

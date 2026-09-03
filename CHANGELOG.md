@@ -4,6 +4,14 @@ Newest first. Each entry is a sync from the private dotfiles it is exported
 from, so a date here is the day the change went public, not the day it was
 built.
 
+## 2026-09-03: one-command install
+
+- `install.sh`: Homebrew if missing, `Brewfile`, every symlink (existing files
+  backed up), the light/dark listener, both launchd agents, the shell file,
+  `theme --sync`, services. Rerun it to update. `--dry-run` prints the plan.
+- `Brewfile` lists everything, including the apps the bindings count on
+  (`SKIP_APPS=1` leaves those out).
+
 ## 2026-09-03: renamed to omarchy4mac
 
 - The repo is now `dividendsolo/omarchy4mac`: Omarchy 4, for the Mac. GitHub
