@@ -27,6 +27,12 @@ brew install --cask aerospace ghostty hammerspoon
 brew install sketchybar borders starship btop neovim
 brew install eza bat fzf zoxide        # for zsh/omarchy.zsh (optional)
 cargo install --git https://github.com/omacom/ttfx   # screensaver (optional)
+
+# Apps the keybindings and the parity table count on. None are bundled.
+brew install --cask brave-browser      # web apps as app windows (⌘⇧ + letter)
+brew install --cask raycast            # launcher (⌘Space), emoji (⌘⌃E), clipboard (⌘⌃V); free plan is enough
+brew install --cask fluidvoice         # voice typing, on-device Whisper
+# Steam for gaming mode (⌘⌃G); Claude Code and Obsidian if you want the theme to reach them
 ```
 
 Neovim theming assumes [LazyVim](https://www.lazyvim.org) (themes are written
