@@ -161,7 +161,7 @@ opacity, gap toggle). Those have no macOS equivalent and are not coming.
 The item-by-item checklist is in [`docs/parity-v4.md`](docs/parity-v4.md);
 what changed and when is in [`CHANGELOG.md`](CHANGELOG.md).
 
-| Omarchy 4 has | Here | Match | Why not, and the plan |
+| Omarchy Quattro has | omarchy4mac uses | Match | Why not, and the plan |
 |---|---|---|---|
 | Tiling WM: focus, move, swap, resize, fullscreen, 5 workspaces, monitors | AeroSpace | ✅ |  |
 | Top bar: logo opens menu, workspaces, indicators, clock, weather, updates badge, agents spend, bluetooth, wifi, audio, battery | SketchyBar, v4 layout | ✅ |  |
