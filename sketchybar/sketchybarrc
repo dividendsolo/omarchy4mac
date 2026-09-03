@@ -39,6 +39,17 @@ sketchybar --default "${default[@]}"
 # ---------- Custom events ----------
 sketchybar --add event aerospace_workspace_change
 
+# ---------- Logo: opens the Omarchy menu (v4 bar, leftmost) ----------
+sketchybar --add item logo left \
+           --set logo \
+                 icon="󰣇" \
+                 icon.color="$ACCENT" \
+                 icon.padding_left=8 \
+                 icon.padding_right=8 \
+                 label.drawing=off \
+                 background.drawing=off \
+                 click_script="/opt/homebrew/bin/hs -c 'omarchyMenu()'"
+
 # ---------- AeroSpace workspaces ----------
 for sid in 1 2 3 4 5; do
   sketchybar --add item space."$sid" left \
@@ -98,7 +109,21 @@ sketchybar --add item spotify_next left \
                  background.drawing=off \
                  click_script="osascript -e 'tell application \"Spotify\" to next track'"
 
-# ---------- Right side ----------
+# ---------- Center: indicators · clock · weather · updates · theme ----------
+# Indicators show only while their state is on (v4 bar). Pinned to the
+# external displays by clock.sh, like the clock: the notch eats the centre.
+for ind in indicator_awake indicator_dnd; do
+  sketchybar --add item "$ind" center \
+             --set "$ind" \
+                   drawing=off \
+                   label.drawing=off \
+                   background.drawing=off \
+                   update_freq=10 \
+                   script="$PLUGIN_DIR/indicators.sh"
+done
+sketchybar --subscribe indicator_awake system_woke display_change \
+           --subscribe indicator_dnd display_change
+
 sketchybar --add item clock center \
            --set clock \
                  update_freq=10 \
@@ -108,6 +133,25 @@ sketchybar --add item clock center \
                  script="$PLUGIN_DIR/clock.sh" \
                  click_script='open "x-apple.systempreferences:com.apple.Date-Time-Settings.extension"' \
            --subscribe clock display_change
+
+sketchybar --add item weather center \
+           --set weather \
+                 drawing=off \
+                 icon.drawing=off \
+                 label.color="$FG" \
+                 update_freq=1800 \
+                 script="$PLUGIN_DIR/weather.sh" \
+                 click_script='open https://wttr.in' \
+           --subscribe weather system_woke display_change
+
+# Update badge: outdated Homebrew packages, hidden at zero (v4 bar).
+sketchybar --add item updates center \
+           --set updates \
+                 drawing=off \
+                 update_freq=21600 \
+                 script="$PLUGIN_DIR/updates.sh" \
+                 click_script="open -na Ghostty --args -e $HOME/.local/bin/omarchy-tui sh -c 'brew update && brew upgrade'" \
+           --subscribe updates system_woke display_change
 
 # Current theme name — label re-reads on every `sketchybar --reload`, which the
 # `theme` script fires after each switch. Click = shuffle (theme random).
@@ -119,27 +163,8 @@ sketchybar --add item theme_name center \
                  label.color="$FG" \
                  click_script="$HOME/.local/bin/theme random"
 
-sketchybar --add item volume right \
-           --set volume \
-                 update_freq=5 \
-                 icon.color="$CYAN" \
-                 label.color="$FG" \
-                 script="$PLUGIN_DIR/volume.sh" \
-                 click_script='open "x-apple.systempreferences:com.apple.Sound-Settings.extension"' \
-           --subscribe volume volume_change
-
-sketchybar --add item wifi right \
-           --set wifi \
-                 update_freq=30 \
-                 script="$PLUGIN_DIR/wifi.sh" \
-                 click_script='open "x-apple.systempreferences:com.apple.wifi-settings-extension"'
-
-sketchybar --add item bluetooth right \
-           --set bluetooth \
-                 update_freq=60 \
-                 script="$PLUGIN_DIR/bluetooth.sh" \
-                 click_script='open "x-apple.systempreferences:com.apple.BluetoothSettings"'
-
+# v4 bar order, left to right: agents · bluetooth · network · audio · power.
+# Right items lay out right-to-left in add order, so battery goes first.
 sketchybar --add item battery right \
            --set battery \
                  update_freq=120 \
@@ -172,6 +197,36 @@ sketchybar --add item clock_right right \
                  icon.color="$MAGENTA" \
                  label.color="$FG" \
                  click_script='open "x-apple.systempreferences:com.apple.Date-Time-Settings.extension"'
+
+
+sketchybar --add item volume right \
+           --set volume \
+                 update_freq=5 \
+                 icon.color="$CYAN" \
+                 label.color="$FG" \
+                 script="$PLUGIN_DIR/volume.sh" \
+                 click_script='open "x-apple.systempreferences:com.apple.Sound-Settings.extension"' \
+           --subscribe volume volume_change
+
+sketchybar --add item wifi right \
+           --set wifi \
+                 update_freq=30 \
+                 script="$PLUGIN_DIR/wifi.sh" \
+                 click_script='open "x-apple.systempreferences:com.apple.wifi-settings-extension"'
+
+sketchybar --add item bluetooth right \
+           --set bluetooth \
+                 update_freq=60 \
+                 script="$PLUGIN_DIR/bluetooth.sh" \
+                 click_script='open "x-apple.systempreferences:com.apple.BluetoothSettings"'
+
+# Coding-agent usage: today's Claude Code spend, hidden at zero (v4 bar).
+sketchybar --add item agents right \
+           --set agents \
+                 drawing=off \
+                 update_freq=900 \
+                 script="$PLUGIN_DIR/agents.sh" \
+                 click_script="open -na Ghostty --args -e $HOME/.local/bin/omarchy-tui bunx ccusage daily"
 
 # ---------- Force first run ----------
 sketchybar --update

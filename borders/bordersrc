@@ -10,6 +10,8 @@ options=(
   active_color=0xff7aa2f7    # Tokyo Night blue
   inactive_color=0xff414868  # Tokyo Night overlay (subtle)
   background_color=0x00000000
+  # Ignore invisible system alert windows (ghost borders on empty workspaces)
+  blacklist="UserNotificationCenter"
 )
 
 borders "${options[@]}"

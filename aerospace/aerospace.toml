@@ -8,7 +8,9 @@ start-at-login = false
 enable-normalization-flatten-containers = true
 enable-normalization-opposite-orientation-for-nested-containers = true
 
-default-root-container-layout = 'tiles'
+# Accordion: focused window full width, other windows collapse to edge strips.
+# Cycle with cmd-backtick. alt-a toggles a workspace back to tiles.
+default-root-container-layout = 'accordion'
 default-root-container-orientation = 'auto'
 
 on-focused-monitor-changed = [
@@ -29,8 +31,8 @@ exec-on-workspace-change = ['/bin/bash', '-c',
 # Each workspace prefers its primary monitor but falls back through the chain
 # so it always has somewhere to display, even when some monitors are unplugged.
 1 = ['\(1\)$', '\(2\)$', 'built-in']      # browser → left, else right, else laptop
-2 = ['\(2\)$', '\(1\)$', 'built-in']      # Claude  → right, else left, else laptop
-3 = ['\(2\)$', '\(1\)$', 'built-in']      # Ghostty → right, else left, else laptop
+2 = ['\(2\)$', '\(1\)$', 'built-in']      # Claude + Ghostty → right, else left, else laptop
+3 = ['\(2\)$', '\(1\)$', 'built-in']      # spare   → right, else left, else laptop
 4 = ['built-in', '\(2\)$', '\(1\)$']      # comms   → laptop, else right, else left
 5 = ['built-in', '\(2\)$', '\(1\)$']      # music   → laptop, else right, else left
 
@@ -55,6 +57,9 @@ ctrl-alt-backspace = 'close-all-windows-but-current'
 
 alt-s = 'layout floating tiling'
 alt-j = 'layout tiles horizontal vertical'
+# Accordion: every window full width, inactive ones collapse to edge strips.
+# Toggle it per workspace; cycle windows with the normal focus keys.
+alt-a = 'layout accordion tiles'
 
 alt-f = 'fullscreen'
 cmd-alt-f = 'fullscreen'
@@ -122,6 +127,9 @@ cmd-backtick = 'focus --boundaries-action wrap-around-the-workspace dfs-next'
 cmd-shift-backtick = 'focus --boundaries-action wrap-around-the-workspace dfs-prev'
 
 # ---------- Launching apps ----------
+# Web apps open as Brave app windows (`--app=<url>`), the way Omarchy launches
+# them (bin/omarchy-launch-webapp): a window of their own that tiles, not a
+# tab. `-n` is required: a running Brave drops --args otherwise.
 alt-enter = 'exec-and-forget open -na Ghostty'
 cmd-alt-enter = 'exec-and-forget open -na Ghostty --args -e tmux'
 cmd-shift-enter = 'exec-and-forget open -a "Brave Browser"'
@@ -135,24 +143,24 @@ cmd-shift-m = 'exec-and-forget open -a Spotify'
 cmd-shift-slash = 'exec-and-forget open -a 1Password'
 cmd-shift-n = 'exec-and-forget open -na Ghostty --args -e nvim'
 
-cmd-shift-c = 'exec-and-forget open https://app.hey.com/calendar'
-cmd-shift-e = 'exec-and-forget open https://app.hey.com'
+cmd-shift-c = 'exec-and-forget open -na "Brave Browser" --args --app=https://app.hey.com/calendar'
+cmd-shift-e = 'exec-and-forget open -na "Brave Browser" --args --app=https://app.hey.com'
 
 cmd-shift-a = 'exec-and-forget open -a Claude'
-cmd-shift-alt-a = 'exec-and-forget open https://grok.com'
+cmd-shift-alt-a = 'exec-and-forget open -na "Brave Browser" --args --app=https://grok.com'
 
 cmd-shift-g = 'exec-and-forget open -a Signal'
 cmd-shift-alt-g = 'exec-and-forget open -a WhatsApp'
-cmd-shift-ctrl-g = 'exec-and-forget open https://chat.google.com'
+cmd-shift-ctrl-g = 'exec-and-forget open -na "Brave Browser" --args --app=https://chat.google.com'
 
-cmd-shift-p = 'exec-and-forget open https://photos.google.com'
+cmd-shift-p = 'exec-and-forget open -na "Brave Browser" --args --app=https://photos.google.com'
 cmd-shift-d = 'exec-and-forget open -na Ghostty --args -e lazydocker'
 cmd-shift-o = 'exec-and-forget open -a Obsidian'
 cmd-shift-w = 'exec-and-forget open -a Typora'
 
-cmd-shift-x = 'exec-and-forget open https://x.com'
-cmd-shift-alt-x = 'exec-and-forget open https://x.com/compose/post'
-cmd-shift-y = 'exec-and-forget open https://youtube.com'
+cmd-shift-x = 'exec-and-forget open https://x.com'   # Finicky → X PWA window
+cmd-shift-alt-x = 'exec-and-forget open https://x.com/compose/post'   # Finicky → X PWA window
+cmd-shift-y = 'exec-and-forget open -na "Brave Browser" --args --app=https://youtube.com'
 
 # ---------- Style: theme switcher ----------
 # cmd-ctrl-shift-space → handled by Hammerspoon (shows theme chooser UI)
@@ -172,14 +180,25 @@ cmd-ctrl-comma = 'exec-and-forget shortcuts run "Toggle Do Not Disturb"'
 cmd-ctrl-a = 'exec-and-forget open "x-apple.systempreferences:com.apple.Sound-Settings.extension"'
 cmd-ctrl-b = 'exec-and-forget open "x-apple.systempreferences:com.apple.BluetoothSettings"'
 cmd-ctrl-w = 'exec-and-forget open "x-apple.systempreferences:com.apple.wifi-settings-extension"'
-cmd-ctrl-s = 'exec-and-forget open "x-apple.systempreferences:com.apple.preferences.sharing"'
+cmd-ctrl-s = 'exec-and-forget open -a LocalSend'   # v4: share menu (LocalSend); Sharing settings live in the menu under Setup
 cmd-ctrl-t = 'exec-and-forget open -na Ghostty --args -e btop'
 alt-shift-t = 'exec-and-forget open -na Ghostty --args -e btop'
 cmd-ctrl-h = 'exec-and-forget open -a "System Information"'
 cmd-ctrl-period = 'exec-and-forget open -a HandBrake'
 
+# ---------- Omarchy v4 utilities ----------
+cmd-ctrl-e = 'exec-and-forget open "raycast://extensions/raycast/emoji-symbols/search-emoji-symbols"'   # emoji picker
+cmd-ctrl-q = 'exec-and-forget open -a Calculator'                                                       # v4: Omacalc
+# Coding agent in a fresh terminal (v4: Super+Shift+Ctrl+A), see bin/omarchy-agent.
+cmd-shift-ctrl-a = 'exec-and-forget open -na Ghostty --args -e $HOME/.local/bin/omarchy-agent'
+# Zoom (v4: Super+Ctrl+Z): fires macOS accessibility zoom (⌥⌘8). Needs
+# System Settings › Accessibility › Zoom › "Use keyboard shortcuts to zoom".
+cmd-ctrl-z = '''exec-and-forget osascript -e 'tell application "System Events" to key code 28 using {option down, command down}' '''
+# cmd-ctrl-r (reminder) handled by Hammerspoon.
+
 # ---------- Omarchy extras ----------
-cmd-esc = 'exec-and-forget ~/.local/bin/omarchy-system-menu'
+# System section of the Omarchy menu (v4: Super+Escape = System).
+cmd-esc = 'exec-and-forget /opt/homebrew/bin/hs -c "omarchyMenu(\"System\")"'
 cmd-ctrl-v = 'exec-and-forget open "raycast://extensions/raycast/clipboard-history/clipboard-history"'
 # cmd-ctrl-p, cmd-ctrl-alt-{t,w,b} handled by Hammerspoon (~/.hammerspoon/init.lua)
 # so the notifications fire through hs.notify (osascript notifs are silently
@@ -276,9 +295,16 @@ run = ['layout tiling', 'move-node-to-workspace 1']
 if.app-id = 'com.anthropic.claudefordesktop'
 run = 'move-node-to-workspace 2'
 
+# Screensaver windows first: the first matching rule wins, and the generic
+# Ghostty rule below would tile them onto workspace 2.
 [[on-window-detected]]
 if.app-id = 'com.mitchellh.ghostty'
-run = 'move-node-to-workspace 3'
+if.window-title-regex-substring = 'org.omarchy.screensaver'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.app-id = 'com.mitchellh.ghostty'
+run = 'move-node-to-workspace 2'
 
 [[on-window-detected]]
 if.app-id = 'org.whispersystems.signal-desktop'

@@ -16,18 +16,28 @@
 #   theme -s | --sync     download / refresh all themes from the Omarchy repo
 #   theme --no-reload <n> switch without trying to live-reload Ghostty
 #
-# `--sync` pulls every theme dir from github.com/basecamp/omarchy, converts
-# each colors.toml into a Ghostty theme file, and stores each neovim.lua
-# (a LazyVim colorscheme spec) locally. Switching is then offline + instant.
+# `--sync` pulls every theme from github.com/omacom/omarchy (quattro), renders
+# Ghostty, btop, and neovim from Omarchy's own templates, and fetches each
+# theme's backgrounds into ~/Pictures/Wallpapers. Switching is then offline.
 
 set -euo pipefail
 
-REPO="basecamp/omarchy"
-REF="${OMARCHY_REF:-master}"          # set OMARCHY_REF=dev for bleeding-edge themes
-RAW="https://raw.githubusercontent.com/$REPO/$REF/themes"
-API="https://api.github.com/repos/$REPO/contents/themes?ref=$REF"
+# Omarchy 4 (Quattro): the repo moved to omacom/omarchy, default branch
+# quattro. A theme ships colors.toml (24 named colours, plus mode), an
+# optional neovim.lua, and backgrounds/. btop, ghostty, and a fallback
+# neovim spec are rendered from default/themed/*.tpl, the same templates
+# Omarchy renders at theme-set time.
+REPO="omacom/omarchy"
+REF="${OMARCHY_REF:-quattro}"         # set OMARCHY_REF=master for the 3.x layout (unsupported)
+RAW="https://raw.githubusercontent.com/$REPO/$REF"
+API="https://api.github.com/repos/$REPO/contents"
+TEMPLATES=(btop.theme.tpl ghostty.conf.tpl neovim.lua.tpl claude.json.tpl obsidian.css.tpl)
 
-CACHE="$HOME/.config/theme-switcher/cache"      # cache/<name>/{colors.toml,neovim.lua,btop.theme}
+CACHE="$HOME/.config/theme-switcher/cache"      # cache/<name>/{colors.toml,neovim.lua,btop.theme,claude.json,obsidian.css}
+CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
+OBSIDIAN_JSON="$HOME/Library/Application Support/obsidian/obsidian.json"
+TPL_CACHE="$HOME/.config/theme-switcher/templates"
+WALLPAPERS="$HOME/Pictures/Wallpapers"
 STATE="$HOME/.config/theme-switcher/current"
 NVIM_THEME_FILE="$HOME/.config/nvim/lua/plugins/theme.lua"
 BTOP_THEMES_DIR="$HOME/.config/btop/themes"
@@ -59,47 +69,87 @@ ghostty_theme_dirs() {
 c_bold=$'\033[1m'; c_dim=$'\033[2m'; c_grn=$'\033[32m'; c_red=$'\033[31m'; c_yel=$'\033[33m'; c_rst=$'\033[0m'
 die() { echo "${c_red}error:${c_rst} $*" >&2; exit 1; }
 
-# colors.toml (stdin) -> SketchyBar colors.sh (stdout)
+# Render an Omarchy template ({{ key }}, {{ key_strip }}, {{ key_rgb }},
+# {{ mix a b amount }}) against a colors.toml. Mirrors
+# bin/omarchy-theme-set-templates: selection_background = selection,
+# selection_foreground = bright_foreground, legacy bg/fg names, and
+# color0..15 from the named palette. orange and brown are optional upstream
+# (Solitude, Last Horizon, White omit them) and fall back to yellow / muted.
+render_template() {
+  local colors="$1" tpl="$2"
+  COLORS="$colors" TPL="$tpl" python3 - <<'PY'
+import os, re
+c = {}
+for line in open(os.environ["COLORS"]):
+    m = re.match(r'\s*([A-Za-z0-9_]+)\s*=\s*"([^"]*)"', line)
+    if m: c[m.group(1)] = m.group(2)
+legacy = {"bg": "background", "dark_bg": "dark_background", "darker_bg": "darker_background",
+          "lighter_bg": "lighter_background", "fg": "foreground", "dark_fg": "dark_foreground",
+          "light_fg": "light_foreground", "bright_fg": "bright_foreground"}
+for short, canon in legacy.items():
+    if canon in c: c[short] = c[canon]
+    elif short in c: c[canon] = c[short]
+c.setdefault("mode", c.get("theme_type", "dark"))
+c["theme_type"] = c["mode"]
+c.setdefault("selection_background", c.get("selection", c.get("background", "#000000")))
+c.setdefault("selection_foreground", c.get("bright_foreground", c.get("foreground", "#ffffff")))
+c.setdefault("accent", c.get("blue", c.get("color4", c.get("foreground", "#ffffff"))))
+c.setdefault("muted", c.get("color8", c.get("dark_foreground", c.get("foreground", "#888888"))))
+c.setdefault("orange", c.get("bright_yellow", c.get("yellow", c.get("color3", "#ffaa00"))))
+c.setdefault("brown", c.get("muted"))
+ansi = ["background", "red", "green", "yellow", "blue", "magenta", "cyan", "foreground",
+        "muted", "bright_red", "bright_green", "bright_yellow", "bright_blue", "bright_magenta",
+        "bright_cyan", "bright_foreground"]
+for i, name in enumerate(ansi):
+    c.setdefault(f"color{i}", c.get(name, c.get("foreground", "#ffffff")))
+for name in list(c):
+    if name.startswith("bright_") and name not in c: pass
+def rgb(h):
+    h = h.lstrip("#"); return f"{int(h[0:2],16)},{int(h[2:4],16)},{int(h[4:6],16)}"
+def mix(a, b, amt):
+    amt = amt.strip()
+    f = float(amt[:-1]) / 100 if amt.endswith("%") else float(amt)
+    if f > 1: f /= 100
+    a, b = a.lstrip("#"), b.lstrip("#")
+    out = [round(int(a[i:i+2],16) * (1 - f) + int(b[i:i+2],16) * f) for i in (0, 2, 4)]
+    return "#%02x%02x%02x" % tuple(out)
+def sub(m):
+    parts = m.group(1).split()
+    if parts[0] in ("mix", "mix_strip", "mix_rgb") and len(parts) == 4:
+        v = mix(c.get(parts[1], "#000000"), c.get(parts[2], "#000000"), parts[3])
+        return v.lstrip("#") if parts[0] == "mix_strip" else rgb(v) if parts[0] == "mix_rgb" else v
+    key = parts[0]
+    if key.endswith("_strip"): return c.get(key[:-6], "").lstrip("#")
+    if key.endswith("_rgb") and key[:-4] in c: return rgb(c[key[:-4]])
+    return c.get(key, "")
+print(re.sub(r"\{\{\s*(.*?)\s*\}\}", sub, open(os.environ["TPL"]).read()), end="")
+PY
+}
+
+# colors.toml (stdin) -> SketchyBar colors.sh (stdout). v4 palette keys.
 toml_to_sketchybar() {
   awk '
     function strip(s){ sub(/^[^=]*=/,"",s); gsub(/[" \t\r]/,"",s); return s }
     function argb(hex,a){ sub(/^#/,"",hex); return "0x" a tolower(hex) }
+    function pick(a,b,c){ return colors[a] ? colors[a] : (colors[b] ? colors[b] : colors[c]) }
     { key=$0; sub(/[ \t]*=.*/,"",key); gsub(/[ \t\r]/,"",key); val=strip($0); colors[key]=val }
     END {
-      # bg/fg + structural
       print "#!/usr/bin/env bash"
       print "# Generated by `theme` from Omarchy colors.toml. Do not edit by hand."
-      print "export BG=\""        argb(colors["background"],            "ff") "\""
-      print "export BG_TRANS=\""  argb(colors["background"],            "c0") "\""
-      print "export FG=\""        argb(colors["foreground"],            "ff") "\""
-      # surface/overlay/comment — pick from bright-black + selection range
-      print "export SURFACE=\""   argb((colors["selection_background"] ? colors["selection_background"] : colors["color8"]), "ff") "\""
-      print "export OVERLAY=\""   argb(colors["color8"],                "ff") "\""
-      print "export COMMENT=\""   argb(colors["color8"],                "ff") "\""
-      # accent palette
-      print "export RED=\""       argb(colors["color1"],                "ff") "\""
-      print "export GREEN=\""     argb(colors["color2"],                "ff") "\""
-      print "export YELLOW=\""    argb(colors["color3"],                "ff") "\""
-      print "export BLUE=\""      argb(colors["color4"],                "ff") "\""
-      print "export MAGENTA=\""   argb(colors["color5"],                "ff") "\""
-      print "export CYAN=\""      argb(colors["color6"],                "ff") "\""
-      # no "orange" in 16-color palette — fall back to bright yellow (color11) or color3
-      print "export ORANGE=\""    argb((colors["color11"] ? colors["color11"] : colors["color3"]), "ff") "\""
-    }'
-}
-
-# colors.toml (stdin) -> Ghostty theme file (stdout)
-toml_to_ghostty() {
-  awk '
-    function v(s){ sub(/^[^=]*=/,"",s); gsub(/[" \t\r]/,"",s); return s }
-    {
-      key=$0; sub(/[ \t]*=.*/,"",key); gsub(/[ \t\r]/,"",key); val=v($0)
-      if      (key=="background")           print "background = " val
-      else if (key=="foreground")           print "foreground = " val
-      else if (key=="cursor")               print "cursor-color = " val
-      else if (key=="selection_background") print "selection-background = " val
-      else if (key=="selection_foreground") print "selection-foreground = " val
-      else if (key ~ /^color[0-9]+$/)       { n=key; sub(/^color/,"",n); print "palette = " n "=" val }
+      print "export BG=\""        argb(colors["background"],                 "ff") "\""
+      print "export BG_TRANS=\""  argb(colors["background"],                 "c0") "\""
+      print "export FG=\""        argb(colors["foreground"],                 "ff") "\""
+      print "export SURFACE=\""   argb(pick("selection","selection_background","color8"), "ff") "\""
+      print "export OVERLAY=\""   argb(pick("muted","color8","foreground"),  "ff") "\""
+      print "export COMMENT=\""   argb(pick("muted","color8","foreground"),  "ff") "\""
+      print "export ACCENT=\""    argb(pick("accent","blue","color4"),       "ff") "\""
+      print "export RED=\""       argb(pick("red","color1","foreground"),    "ff") "\""
+      print "export GREEN=\""     argb(pick("green","color2","foreground"),  "ff") "\""
+      print "export YELLOW=\""    argb(pick("yellow","color3","foreground"), "ff") "\""
+      print "export BLUE=\""      argb(pick("blue","color4","foreground"),   "ff") "\""
+      print "export MAGENTA=\""   argb(pick("magenta","color5","foreground"),"ff") "\""
+      print "export CYAN=\""      argb(pick("cyan","color6","foreground"),   "ff") "\""
+      print "export ORANGE=\""    argb(pick("orange","bright_yellow","yellow"), "ff") "\""
     }'
 }
 
@@ -128,9 +178,11 @@ system_appearance() {
   esac
 }
 
-# light/dark from the theme's background luminance
+# light/dark from the theme's `mode` key (v4), else background luminance
 theme_appearance() {
-  local bg
+  local bg mode
+  mode="$(awk -F= '$1 ~ /^[[:space:]]*mode[[:space:]]*$/ {gsub(/[" \t\r]/,"",$2); print $2; exit}' "$CACHE/$1/colors.toml" 2>/dev/null)"
+  case "$mode" in light|dark) echo "$mode"; return ;; esac
   bg="$(awk -F= '$1 ~ /^[[:space:]]*background[[:space:]]*$/ {gsub(/[" \t\r#]/,"",$2); print $2; exit}' "$CACHE/$1/colors.toml" 2>/dev/null)"
   [[ "$bg" =~ ^[0-9a-fA-F]{6}$ ]] || { echo dark; return; }
   local r=$((16#${bg:0:2})) g=$((16#${bg:2:2})) b=$((16#${bg:4:2}))
@@ -153,13 +205,39 @@ pick_random_theme() {
   echo "${pool[$((RANDOM % ${#pool[@]}))]}"
 }
 
+sync_templates() {
+  mkdir -p "$TPL_CACHE"
+  local t
+  for t in "${TEMPLATES[@]}"; do
+    curl -fsSL --retry 3 --retry-delay 1 "$RAW/default/themed/$t" -o "$TPL_CACHE/$t" 2>/dev/null \
+      || die "could not fetch template $t from $REPO@$REF"
+  done
+}
+
+# Backgrounds land as <theme>_<file> so apply_wallpaper and the ⌘⌃P cycler
+# find them by prefix. Existing files are kept; only missing ones download.
+sync_backgrounds() {
+  local n="$1" files f got=0
+  files="$(curl -fsSL "$API/themes/$n/backgrounds?ref=$REF" 2>/dev/null | grep '"download_url"' | sed 's/.*"download_url": *"\([^"]*\)".*/\1/')" || return 0
+  [[ -n "$files" ]] || return 0
+  mkdir -p "$WALLPAPERS"
+  while IFS= read -r f; do
+    [[ -n "$f" ]] || continue
+    local base="$WALLPAPERS/${n}_$(basename "$f")"
+    [[ -f "$base" ]] && continue
+    curl -fsSL --retry 3 --retry-delay 1 "$f" -o "$base" 2>/dev/null && got=$((got+1))
+  done <<< "$files"
+  echo "$got"
+}
+
 sync_themes() {
   command -v curl >/dev/null || die "curl is required"
-  echo "${c_bold}Fetching theme list from $REPO …${c_rst}"
+  echo "${c_bold}Fetching theme list from $REPO@$REF …${c_rst}"
   local names
-  names="$(curl -fsSL "$API" 2>/dev/null | grep '"name"' | sed 's/.*"name": *"\([^"]*\)".*/\1/')" \
+  names="$(curl -fsSL "$API/themes?ref=$REF" 2>/dev/null | grep '"name"' | sed 's/.*"name": *"\([^"]*\)".*/\1/')" \
     || die "could not list themes (GitHub API unreachable or rate-limited)"
   [[ -n "$names" ]] || die "no themes returned from API"
+  sync_templates
 
   mkdir -p "$CACHE"
   local d; while IFS= read -r d; do mkdir -p "$d"; done < <(ghostty_theme_dirs)
@@ -167,35 +245,36 @@ sync_themes() {
   while IFS= read -r n; do
     [[ -n "$n" ]] || continue
     local colors nvim
-    colors="$(curl -fsSL --retry 3 --retry-delay 1 "$RAW/$n/colors.toml" 2>/dev/null)" || colors=""
+    colors="$(curl -fsSL --retry 3 --retry-delay 1 "$RAW/themes/$n/colors.toml" 2>/dev/null)" || colors=""
     if [[ -z "$colors" ]]; then
       printf '  %s%-18s%s %sno colors.toml — skipped%s\n' "$c_dim" "$n" "$c_rst" "$c_yel" "$c_rst"
       skipped=$((skipped+1)); continue
     fi
-    nvim="$(curl -fsSL --retry 3 --retry-delay 1 "$RAW/$n/neovim.lua" 2>/dev/null)" || nvim=""
-    btop="$(curl -fsSL --retry 3 --retry-delay 1 "$RAW/$n/btop.theme" 2>/dev/null)" || btop=""
-
     mkdir -p "$CACHE/$n"
-    printf '%s' "$colors" > "$CACHE/$n/colors.toml"
-    [[ -n "$nvim" ]] && printf '%s\n' "$nvim" > "$CACHE/$n/neovim.lua" || rm -f "$CACHE/$n/neovim.lua"
-    [[ -n "$btop" ]] && printf '%s\n' "$btop" > "$CACHE/$n/btop.theme" || rm -f "$CACHE/$n/btop.theme"
+    printf '%s\n' "$colors" > "$CACHE/$n/colors.toml"
 
-    # generate Ghostty theme file into every candidate themes/ dir
+    # neovim: the theme's own spec, else Omarchy's aether template with the
+    # palette baked in (what Omarchy itself does for themes without one).
+    local nvim_src="theme"
+    nvim="$(curl -fsSL --retry 3 --retry-delay 1 "$RAW/themes/$n/neovim.lua" 2>/dev/null)" \
+      || { nvim="$(render_template "$CACHE/$n/colors.toml" "$TPL_CACHE/neovim.lua.tpl")"; nvim_src="aether"; }
+    printf '%s\n' "$nvim" > "$CACHE/$n/neovim.lua"
+
+    # btop + ghostty from the templates
+    render_template "$CACHE/$n/colors.toml" "$TPL_CACHE/btop.theme.tpl" > "$CACHE/$n/btop.theme"
+    render_template "$CACHE/$n/colors.toml" "$TPL_CACHE/claude.json.tpl" > "$CACHE/$n/claude.json"
+    render_template "$CACHE/$n/colors.toml" "$TPL_CACHE/obsidian.css.tpl" > "$CACHE/$n/obsidian.css"
+    mkdir -p "$BTOP_THEMES_DIR"
+    cp "$CACHE/$n/btop.theme" "$BTOP_THEMES_DIR/omarchy-$n.theme"
     local td
     while IFS= read -r td; do
       { echo "# Omarchy theme '$n' — generated by \`theme --sync\`. Do not edit."
-        printf '%s\n' "$colors" | toml_to_ghostty; } > "$td/omarchy-$n"
+        render_template "$CACHE/$n/colors.toml" "$TPL_CACHE/ghostty.conf.tpl"; } > "$td/omarchy-$n"
     done < <(ghostty_theme_dirs)
 
-    # install btop theme file
-    if [[ -n "$btop" ]]; then
-      mkdir -p "$BTOP_THEMES_DIR"
-      printf '%s\n' "$btop" > "$BTOP_THEMES_DIR/omarchy-$n.theme"
-    fi
-
-    printf '  %s%-18s%s ghostty✓%s%s\n' "$c_dim" "$n" "$c_rst" \
-      "$([[ -n "$nvim" ]] && echo ' nvim✓' || echo " ${c_yel}nvim✗${c_rst}")" \
-      "$([[ -n "$btop" ]] && echo ' btop✓' || echo " ${c_yel}btop✗${c_rst}")"
+    local bgs; bgs="$(sync_backgrounds "$n")"
+    printf '  %s%-18s%s ghostty✓ btop✓ claude✓ obsidian✓ nvim✓(%s)%s\n' "$c_dim" "$n" "$c_rst" "$nvim_src" \
+      "$([[ "${bgs:-0}" -gt 0 ]] && echo " +$bgs wallpapers" || echo "")"
     got=$((got+1))
   done <<< "$names"
 
@@ -299,6 +378,14 @@ for theme in sorted(os.listdir(cache)):
                 blocks.append(inner[start:i+1]); start = None
     for b in blocks:
         if 'LazyVim/LazyVim' in b: continue
+        # aether.nvim is one plugin whose colours ride in opts: several
+        # themes generate a spec for it (v4 template), and Lazy would merge
+        # them. Keep only the current theme's copy, or the first one seen.
+        if 'aether.nvim' in b:
+            if theme != current and any('aether.nvim' in x for x in specs): continue
+            if theme != current and os.path.exists(os.path.join(cache, current, 'neovim.lua')) \
+               and 'aether.nvim' in open(os.path.join(cache, current, 'neovim.lua')).read(): continue
+            specs[:] = [x for x in specs if 'aether.nvim' not in x]
         # Inject `lazy = false` right after the plugin name string
         b2 = re.sub(r'(\{\s*"[^"]+")', r'\1, lazy = false', b, count=1)
         # Strip any auto-applied colorscheme inside the spec's config() — those
@@ -395,11 +482,60 @@ reload_sketchybar() {
   fi
 }
 
+# Claude Code: ~/.claude/themes/omarchy.json + settings theme "custom:omarchy"
+# (what omarchy-theme-set-claude --activate does). New sessions pick it up.
+apply_claude() {
+  local name="$1" src="$CACHE/$1/claude.json"
+  [[ -f "$src" && -d "$CLAUDE_DIR" ]] || return 0
+  mkdir -p "$CLAUDE_DIR/themes"
+  cp "$src" "$CLAUDE_DIR/themes/omarchy.json"
+  SETTINGS="$CLAUDE_DIR/settings.json" python3 - <<'PY'
+import json, os
+p = os.environ["SETTINGS"]
+d = json.load(open(p)) if os.path.exists(p) else {}
+if d.get("theme") != "custom:omarchy":
+    d["theme"] = "custom:omarchy"
+    json.dump(d, open(p, "w"), indent=2); open(p, "a").write("\n")
+PY
+  echo "  ${c_dim}claude${c_rst}   → custom:omarchy ${c_dim}(new sessions)${c_rst}"
+}
+
+# Obsidian: an "Omarchy" theme in every vault Obsidian knows about, selected
+# in appearance.json. Obsidian reloads the css of the active theme live.
+apply_obsidian() {
+  local name="$1" src="$CACHE/$1/obsidian.css"
+  [[ -f "$src" && -f "$OBSIDIAN_JSON" ]] || return 0
+  local count
+  count="$(SRC="$src" OBS="$OBSIDIAN_JSON" python3 - <<'PY'
+import json, os, shutil
+vaults = json.load(open(os.environ["OBS"])).get("vaults", {}).values()
+n = 0
+for v in vaults:
+    root = os.path.join(v["path"], ".obsidian")
+    if not os.path.isdir(root): continue
+    tdir = os.path.join(root, "themes", "Omarchy"); os.makedirs(tdir, exist_ok=True)
+    man = os.path.join(tdir, "manifest.json")
+    if not os.path.exists(man):
+        json.dump({"name": "Omarchy", "version": "1.0.0", "minAppVersion": "0.16.0",
+                   "description": "Follows the desktop theme (theme switcher)", "author": "Omarchy",
+                   "authorUrl": "https://omarchy.org"}, open(man, "w"), indent=2)
+    shutil.copy(os.environ["SRC"], os.path.join(tdir, "theme.css"))
+    ap = os.path.join(root, "appearance.json")
+    a = json.load(open(ap)) if os.path.exists(ap) else {}
+    if a.get("cssTheme") != "Omarchy":
+        a["cssTheme"] = "Omarchy"; json.dump(a, open(ap, "w"), indent=2)
+    n += 1
+print(n)
+PY
+)"
+  echo "  ${c_dim}obsidian${c_rst} → Omarchy theme in $count vault(s)"
+}
+
 apply_wallpaper() {
   local name="$1" dir="$HOME/Pictures/Wallpapers"
   [[ -d "$dir" ]] || return 0
   shopt -s nullglob nocaseglob
-  local files=( "$dir/${name}_"*.{jpg,jpeg,png,heic} )
+  local files=( "$dir/${name}_"*.{jpg,jpeg,png,heic,webp} )
   shopt -u nocaseglob
   [[ ${#files[@]} -eq 0 ]] && { echo "  ${c_yel}wallpaper${c_rst} ! none found for '$name' in $dir — skipped"; return 0; }
 
@@ -467,6 +603,8 @@ apply_ghostty "$name"
 apply_nvim "$name"
 apply_btop "$name"
 apply_sketchybar "$name"
+apply_claude "$name"
+apply_obsidian "$name"
 apply_wallpaper "$name"
 mkdir -p "$(dirname "$STATE")"; echo "$name" > "$STATE"
 

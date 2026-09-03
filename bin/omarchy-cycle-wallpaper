@@ -15,11 +15,11 @@ THEME="$(cat "$THEME_FILE" 2>/dev/null)"
 
 shopt -s nullglob nocaseglob
 if [ -n "$THEME" ]; then
-  files=("$DIR/${THEME}_"*.{jpg,jpeg,png,heic})
+  files=("$DIR/${THEME}_"*.{jpg,jpeg,png,heic,webp})
 fi
 # Fall back to all wallpapers if the theme has none
 if [ ${#files[@]} -eq 0 ]; then
-  files=("$DIR"/*.{jpg,jpeg,png,heic})
+  files=("$DIR"/*.{jpg,jpeg,png,heic,webp})
 fi
 shopt -u nocaseglob
 [ ${#files[@]} -eq 0 ] && { echo "Wallpaper|||No image files in $DIR"; exit 0; }

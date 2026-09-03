@@ -1,0 +1,25 @@
+#!/bin/bash
+# gaming-mode — quit every Dock app except Finder (and Steam), take Tailscale down, then bring up Steam.
+# Bound to SUPER+CTRL+G in ~/.hammerspoon/init.lua; also runnable from a terminal.
+
+osascript <<'EOF'
+set keepList to {"com.apple.finder", "com.valvesoftware.steam"}
+tell application "System Events"
+	set bids to bundle identifier of every application process whose background only is false
+end tell
+repeat with bid in bids
+	set b to contents of bid
+	if b is not in keepList then
+		try
+			tell application id b to quit
+		end try
+	end if
+end repeat
+EOF
+
+/usr/local/bin/tailscale down
+
+open -a Steam
+
+# TITLE|||BODY format consumed by Hammerspoon's notifyFromScript
+echo "Gaming mode|||All apps quit, Tailscale down — Steam is up."

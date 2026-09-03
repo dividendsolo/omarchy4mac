@@ -1,0 +1,43 @@
+#!/bin/bash
+# Launch the screensaver fullscreen on every monitor, Omarchy-style
+# (bin/omarchy-launch-screensaver): one Ghostty window per monitor running
+# omarchy-screensaver. `force` ignores the screensaver-off toggle.
+export PATH="/opt/homebrew/bin:$HOME/.local/bin:$PATH"
+OFF_FLAG="$HOME/.local/state/omarchy/toggles/screensaver-off"
+
+pgrep -f '[o]marchy-screensaver$' >/dev/null && exit 0
+[[ -f "$OFF_FLAG" && "${1:-}" != "force" ]] && exit 1
+command -v ttfx >/dev/null 2>&1 || [[ -x "$HOME/.cargo/bin/ttfx" ]] || { echo "ttfx not installed (cargo install --git https://github.com/omacom/ttfx)" >&2; exit 1; }
+
+focused=$(aerospace list-monitors --focused --format '%{monitor-id}' 2>/dev/null)
+ghostty_windows() { aerospace list-windows --monitor all --app-bundle-id com.mitchellh.ghostty --format '%{window-id}' 2>/dev/null | sort; }
+
+while IFS= read -r monitor; do
+  [[ -n "$monitor" ]] || continue
+  workspace=$(aerospace list-workspaces --monitor "$monitor" --visible 2>/dev/null | head -1)
+  before=$(ghostty_windows)
+  aerospace focus-monitor "$monitor" >/dev/null 2>&1
+  # `-e` alone, no other flags: Ghostty opens a second window when config
+  # flags precede -e (tested 2026-09-02). The script sets its own title and
+  # background; fullscreen comes from AeroSpace below.
+  open -na Ghostty --args -e "$HOME/.local/bin/omarchy-screensaver"
+  # Block until this monitor's window exists, else slow starts pile onto one screen.
+  deadline=$((SECONDS + 5)); new=""
+  while ((SECONDS < deadline)); do
+    new=$(comm -13 <(echo "$before") <(ghostty_windows) | head -1)
+    [[ -n "$new" ]] && break
+    sleep 0.1
+  done
+  # The window's title is not set yet when AeroSpace's rules run, so the
+  # generic Ghostty rule tiles it onto workspace 2. Put it back where the
+  # screen was and float it: idle must never switch your workspace.
+  if [[ -n "$new" ]]; then
+    [[ -n "$workspace" ]] && aerospace move-node-to-workspace --window-id "$new" "$workspace" >/dev/null 2>&1
+    [[ -n "$workspace" ]] && aerospace workspace "$workspace" >/dev/null 2>&1
+    aerospace focus --window-id "$new" >/dev/null 2>&1
+    aerospace macos-native-fullscreen --window-id "$new" on >/dev/null 2>&1
+  fi
+done < <(aerospace list-monitors --format '%{monitor-id}' 2>/dev/null)
+
+[[ -n "$focused" ]] && aerospace focus-monitor "$focused" >/dev/null 2>&1
+exit 0

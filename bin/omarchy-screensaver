@@ -1,0 +1,34 @@
+#!/bin/bash
+# The screensaver loop, ported from Omarchy's bin/omarchy-screensaver: ttfx
+# renders ~/.config/omarchy/branding/screensaver.txt with a random effect,
+# forever, on a black canvas. Any key ends it. Hammerspoon ends it on mouse
+# movement by killing this process (see hammerspoon/init.lua).
+export PATH="$HOME/.cargo/bin:$HOME/.local/bin:/opt/homebrew/bin:$PATH"
+TEXT="$HOME/.config/omarchy/branding/screensaver.txt"
+[[ -f "$TEXT" ]] || { mkdir -p "$(dirname "$TEXT")"; cp "$HOME/code/dotfiles/omarchy/screensaver.txt" "$TEXT"; }
+
+ttfx_pid=""
+exit_screensaver() {
+  [[ -n "$ttfx_pid" ]] && kill "$ttfx_pid" 2>/dev/null
+  exit 0
+}
+trap exit_screensaver SIGINT SIGTERM SIGHUP SIGQUIT
+
+printf '\033]0;org.omarchy.screensaver\007'   # window title (AeroSpace finds it by this)
+printf '\033]11;rgb:00/00/00\007'   # black background
+printf '\033[?25l'                  # hide the cursor
+
+# The pty starts at 80x24 and only resizes once the window is laid out; ttfx
+# measures once at startup, so wait for the real size.
+deadline=$((SECONDS + 2))
+while ((SECONDS < deadline)) && [[ $(stty size 2>/dev/null) == "24 80" ]]; do sleep 0.02; done
+
+while true; do
+  # Tracked by pid: macOS pgrep cannot find a process by its tty.
+  ttfx -i "$TEXT" --frame-rate 120 --canvas-width 0 --canvas-height 0 --reuse-canvas \
+    --anchor-canvas c --anchor-text c --random-effect --no-eol --no-restore-cursor &
+  ttfx_pid=$!
+  while kill -0 "$ttfx_pid" 2>/dev/null; do
+    if read -rsn1 -t 1; then exit_screensaver; fi
+  done
+done
