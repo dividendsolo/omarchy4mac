@@ -182,7 +182,7 @@ what changed and when is in [`CHANGELOG.md`](CHANGELOG.md).
 | Screenshots, screen recording | macOS ⌘⇧5 | ✅ | Matched by the OS, not by this repo. |
 | Notifications (mako) | macOS Notification Center | ✅ | Matched by the OS. |
 | App launcher (walker) | Raycast (free plan) on ⌘Space | ✅ | Works the same for launching. No walker port needed. |
-| Volume / brightness popup (OSD) | Apple's popup | ⚠️ | Works, but the theme colors cannot reach it. Apple owns that popup. |
+| Volume / brightness indicator (the box when you press a volume key) | Apple's | ⚠️ | Works, but the theme colors cannot reach it. Apple owns it. |
 | Theme backgrounds downloaded with the theme | Bring your own to `~/Pictures/Wallpapers` | ⚠️ | Planned: `theme --sync` pulls each theme's `backgrounds/` (webp) with the `<theme>_` prefix the cycler expects. |
 | Theme reaches tmux, lazygit, VS Code | Terminal, editor, btop, Claude Code, Obsidian | ⚠️ | Planned when tmux is daily: render v4's tmux template and reload live sessions. lazygit and VS Code only if asked. |
 | Night light toggle | None | ⚠️ | Planned: Night Shift via osascript on ⌘⌃N and a menu item. Small. |
