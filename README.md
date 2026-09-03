@@ -124,7 +124,7 @@ Press **⌥K** for the searchable overlay. Highlights:
 - **⌥T** — shuffle theme (random theme in the current light/dark mode)
 - **⌥S** — float / tile the focused window
 
-## Bonus: things Omarchy itself does not do
+## Bonus features
 
 A few pieces of this port go past parity. They exist because macOS made them
 easy, or because a Mac needed them.
