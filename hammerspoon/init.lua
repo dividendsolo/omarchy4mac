@@ -545,5 +545,39 @@ showAppsMenu = function()
   chooser:show()
 end
 
+-- Let scripts reload us: osascript -e 'tell application "Hammerspoon" to execute lua code "hs.reload()"'
+hs.allowAppleScript(true)
+
 -- Tell us the config reloaded
 hs.alert.show("Hammerspoon: keybindings ready (⌥K)")
+
+-- Ghostty live reload. `theme` rewrites the Ghostty config, but Ghostty has no
+-- reload signal and the theme-appearance listener (launchd) has no
+-- Accessibility permission, so its AppleScript reload fails and open windows
+-- keep the old colors. Hammerspoon has the permission: watch the config and
+-- click Ghostty > Reload Configuration whenever it changes.
+local ghosttyConfigs = {
+  os.getenv("HOME") .. "/Library/Application Support/com.mitchellh.ghostty",
+  os.getenv("HOME") .. "/.config/ghostty",
+}
+local ghosttyReloadTimer
+local function reloadGhostty()
+  local app = hs.application.find("com.mitchellh.ghostty")
+  if not app then return end
+  if not app:selectMenuItem({ "Ghostty", "Reload Configuration" }) then
+    hs.eventtap.keyStroke({ "cmd", "shift" }, ",", 0, app)
+  end
+end
+GhosttyWatchers = {}
+for _, dir in ipairs(ghosttyConfigs) do
+  GhosttyWatchers[#GhosttyWatchers + 1] = hs.pathwatcher.new(dir, function(paths)
+    for _, p in ipairs(paths) do
+      if p:match("/config$") then
+        -- debounce: `theme` writes both configs within the same second
+        if ghosttyReloadTimer then ghosttyReloadTimer:stop() end
+        ghosttyReloadTimer = hs.timer.doAfter(0.5, reloadGhostty)
+        return
+      end
+    end
+  end):start()
+end

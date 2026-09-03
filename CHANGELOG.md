@@ -4,6 +4,15 @@ Newest first. Each entry is a sync from the private dotfiles it is exported
 from, so a date here is the day the change went public, not the day it was
 built.
 
+## 2026-09-03 (later)
+
+- Fix: open Ghostty windows now pick up a theme change at once. The
+  appearance listener (launchd) cannot drive Ghostty's Reload Configuration
+  menu (no Accessibility permission), so Hammerspoon watches both Ghostty
+  config files and clicks it. Reload Hammerspoon once after updating.
+- Hammerspoon accepts AppleScript (`hs.allowAppleScript(true)`), so scripts
+  can reload it.
+
 ## 2026-09-03: audit fixes
 
 - Brewfile taps `FelixKratz/formulae` (sketchybar and borders are not in core),
