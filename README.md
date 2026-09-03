@@ -147,10 +147,11 @@ easy, or because a Mac needed them.
 
 ## How close is this to real Omarchy?
 
-**69%** of Omarchy v4.0.2 (Quattro), scored feature by feature below: a
-match counts 1, a partial or OS substitute counts half, a gap counts 0, and
-items with no macOS meaning are left out. That is 20 matched, 8
-partial, 7 not portable, out of 35 scored.
+**69%** of Omarchy v4.0.2 (Quattro), scored feature by feature below: ✅ we
+have it, or the Mac stand-in does the same job (1 point). ⚠️ partly there,
+with a plan (half). ❌ missing, nothing planned, whatever the reason (0).
+Items with no macOS meaning are left out. That is 21 matched, 6 partial, 8
+not portable, out of 35 scored.
 
 The short version: the keybinding vocabulary, the workspace model, the menu
 tree, the bar, the theme pipeline, the screensaver, and the shell are here.
@@ -182,14 +183,14 @@ what changed and when is in [`CHANGELOG.md`](CHANGELOG.md).
 | Screenshots, screen recording | macOS ⌘⇧5 | ✅ | Matched by the OS, not by this repo. |
 | Notifications (mako) | macOS Notification Center | ✅ | Matched by the OS. |
 | App launcher (walker) | Raycast (free plan) on ⌘Space | ✅ | Works the same for launching. No walker port needed. |
-| Volume / brightness indicator (the box when you press a volume key) | Apple's | ⚠️ | Works, but the theme colors cannot reach it. Apple owns it. |
+| Voice typing (voxtype) | macOS dictation | ✅ | Same job, by the OS. |
 | Theme backgrounds downloaded with the theme | Bring your own to `~/Pictures/Wallpapers` | ⚠️ | Planned: `theme --sync` pulls each theme's `backgrounds/` (webp) with the `<theme>_` prefix the cycler expects. |
 | Theme reaches tmux, lazygit, VS Code | Terminal, editor, btop, Claude Code, Obsidian | ⚠️ | Planned when tmux is daily: render v4's tmux template and reload live sessions. lazygit and VS Code only if asked. |
 | Night light toggle | None | ⚠️ | Planned: Night Shift via osascript on ⌘⌃N and a menu item. Small. |
 | OCR capture-text (Super+Ctrl+Print) | macOS Live Text, by hand | ⚠️ | Planned: region screenshot, Vision text extraction, clipboard, one script. |
 | Bar hide/show key | None | ⚠️ | Planned: `sketchybar --bar hidden=toggle` on ⌘⇧Space. One line. |
 | Install in one command, update in one command | Clone, brew, symlinks by hand | ⚠️ | Planned: `install.sh` (Brewfile, symlinks, first `theme --sync`) and `omarchy-mac update` (pull, relink, resync, restart services). |
-| Voice typing (voxtype) | macOS dictation | ⚠️ | OS substitute. No port planned. |
+| Theme colors on the volume / brightness indicator (the box when you press a volume key) | Apple's, unthemed | ❌ | The theme cannot reach it. Apple owns it. |
 | Control panels: audio, bluetooth, network, display, power, calendar (Quickshell) | System Settings deep links | ❌ | Quickshell is one process on Wayland layer-shell. macOS has no way to draw an equivalent panel. Not portable. |
 | Themed lock screen | macOS lock screen | ❌ | Not portable. The macOS lock screen cannot be restyled. |
 | Window groups, pin, per-window opacity | None | ❌ | Hyprland dispatchers with no AeroSpace equivalent. Not portable. |
