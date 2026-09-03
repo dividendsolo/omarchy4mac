@@ -147,9 +147,9 @@ easy, or because a Mac needed them.
 
 ## How close is this to real Omarchy?
 
-**67%** of Omarchy v4.0.2 (Quattro), scored feature by feature below: a
+**69%** of Omarchy v4.0.2 (Quattro), scored feature by feature below: a
 match counts 1, a partial or OS substitute counts half, a gap counts 0, and
-items with no macOS meaning are left out. That is 19 matched, 9
+items with no macOS meaning are left out. That is 20 matched, 8
 partial, 7 not portable, out of 35 scored.
 
 The short version: the keybinding vocabulary, the workspace model, the menu
@@ -182,7 +182,7 @@ what changed and when is in [`CHANGELOG.md`](CHANGELOG.md).
 | Screenshots, screen recording | macOS ⌘⇧5 | ✅ | Matched by the OS, not by this repo. |
 | Notifications (mako) | macOS Notification Center | ✅ | Matched by the OS. |
 | Volume / brightness OSD | macOS HUD | ⚠️ | Works, not themed. No hook to restyle the system HUD. |
-| App launcher (walker) | Raycast or Spotlight on ⌘Space | ⚠️ | No walker port; Raycast is the blessed stand-in. Not planned. |
+| App launcher (walker) | Raycast (free plan) on ⌘Space | ✅ | Works the same for launching. No walker port needed. |
 | Theme backgrounds downloaded with the theme | Bring your own to `~/Pictures/Wallpapers` | ⚠️ | Planned: `theme --sync` pulls each theme's `backgrounds/` (webp) with the `<theme>_` prefix the cycler expects. |
 | Theme reaches tmux, lazygit, VS Code | Terminal, editor, btop, Claude Code, Obsidian | ⚠️ | Planned when tmux is daily: render v4's tmux template and reload live sessions. lazygit and VS Code only if asked. |
 | Night light toggle | None | ⚠️ | Planned: Night Shift via osascript on ⌘⌃N and a menu item. Small. |
