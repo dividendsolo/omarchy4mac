@@ -124,6 +124,27 @@ Press **⌥K** for the searchable overlay. Highlights:
 - **⌥T** — shuffle theme (random theme in the current light/dark mode)
 - **⌥S** — float / tile the focused window
 
+## Bonus: things Omarchy itself does not do
+
+A few pieces of this port go past parity. They exist because macOS made them
+easy, or because a Mac needed them.
+
+- **Auto re-theme on light/dark flip.** Switch macOS appearance and the whole
+  desktop switches to a random theme from the matching bucket: light system,
+  light theme; dark system, dark theme. Terminal, editor, bar, borders, btop,
+  Claude Code, Obsidian, all at once. It is the optional listener above; set
+  it up once and forget it. Omarchy has no equivalent, since Hyprland has no
+  system appearance to follow.
+- **⌥T shuffles within the bucket.** Random theme, never the current one,
+  never a dark theme on a light system.
+- **Theme reaches Claude Code and Obsidian.** Omarchy stops at the terminal
+  and editor. Here a switch recolors the Claude Code terminal theme and the
+  Obsidian vault theme too.
+- **Crash watchdog.** AeroSpace can self-terminate on macOS 26. The launchd
+  agent above relaunches it on a crash and respects a clean quit.
+- **Gaming mode (⌘⌃G).** Quits every Dock app and launches Steam. The
+  reverse is a normal quit.
+
 ## How close is this to real Omarchy?
 
 Honest answer, measured against **Omarchy v4.0.2 (Quattro)**: roughly **half**
