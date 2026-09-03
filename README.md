@@ -1,6 +1,6 @@
-# omarchy-mac
+# omarchy4mac
 
-An [Omarchy](https://github.com/basecamp/omarchy) port for macOS — for those of
+Omarchy 4, for the Mac. An [Omarchy](https://github.com/basecamp/omarchy) port for macOS — for those of
 us who want the Omarchy experience but can't (or won't) leave the Mac.
 
 Omarchy is DHH's opinionated Arch + Hyprland setup. This repo recreates the
@@ -37,8 +37,8 @@ to `~/.config/nvim/lua/plugins/theme.lua`).
 Clone, then symlink what you want:
 
 ```sh
-git clone https://github.com/dividendsolo/omarchy-mac.git ~/code/omarchy-mac
-D=~/code/omarchy-mac
+git clone https://github.com/dividendsolo/omarchy4mac.git ~/code/omarchy4mac
+D=~/code/omarchy4mac
 
 # Window manager / bar / borders
 ln -s "$D/aerospace/aerospace.toml" ~/.aerospace.toml
@@ -62,7 +62,7 @@ ln -s ~/.cargo/bin/ttfx ~/.local/bin/ttfx   # if you installed the screensaver
 mkdir -p ~/.config/omarchy/branding && cp "$D/omarchy/screensaver.txt" ~/.config/omarchy/branding/
 
 # Shell aliases (optional)
-echo 'source ~/code/omarchy-mac/zsh/omarchy.zsh' >> ~/.zshrc
+echo 'source ~/code/omarchy4mac/zsh/omarchy.zsh' >> ~/.zshrc
 
 # Pull the Omarchy themes
 theme --sync
@@ -189,7 +189,7 @@ what changed and when is in [`CHANGELOG.md`](CHANGELOG.md).
 | Night light toggle | None | ⚠️ | Planned: Night Shift via osascript on ⌘⌃N and a menu item. Small. |
 | OCR capture-text (Super+Ctrl+Print) | macOS Live Text, by hand | ⚠️ | Planned: region screenshot, Vision text extraction, clipboard, one script. |
 | Bar hide/show key | None | ⚠️ | Planned: `sketchybar --bar hidden=toggle` on ⌘⇧Space. One line. |
-| Install in one command, update in one command | Clone, brew, symlinks by hand | ⚠️ | Planned: `install.sh` (Brewfile, symlinks, first `theme --sync`) and `omarchy-mac update` (pull, relink, resync, restart services). |
+| Install in one command, update in one command | Clone, brew, symlinks by hand | ⚠️ | Planned: `install.sh` (Brewfile, symlinks, first `theme --sync`) and `omarchy4mac update` (pull, relink, resync, restart services). |
 | Theme colors on the volume / brightness indicator (the box when you press a volume key) | Apple's, unthemed | ❌ | The theme cannot reach it. Apple owns it. |
 | Control panels: audio, bluetooth, network, display, power, calendar (Quickshell) | System Settings deep links | ❌ | Quickshell is one process on Wayland layer-shell. macOS has no way to draw an equivalent panel. Not portable. |
 | Themed lock screen | macOS lock screen | ❌ | Not portable. The macOS lock screen cannot be restyled. |

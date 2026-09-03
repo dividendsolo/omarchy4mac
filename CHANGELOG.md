@@ -4,6 +4,12 @@ Newest first. Each entry is a sync from the private dotfiles it is exported
 from, so a date here is the day the change went public, not the day it was
 built.
 
+## 2026-09-03: renamed to omarchy4mac
+
+- The repo is now `dividendsolo/omarchy4mac`: Omarchy 4, for the Mac. GitHub
+  redirects the old `omarchy-mac` URL. Update your remote:
+  `git remote set-url origin https://github.com/dividendsolo/omarchy4mac.git`.
+
 ## 2026-09-03: ⌥T shuffles the theme
 
 - `alt-t` is bound in AeroSpace to `theme random`, so the shuffle key ships

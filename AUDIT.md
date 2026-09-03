@@ -19,7 +19,7 @@ them would duplicate the OS.
 - [x] Wallpaper cycling scoped to the active theme (⌘⌃P)
 - [x] Time / weather / battery notices (⌘⌃⌥ T/W/B)
 - [ ] **One-command install**: `install.sh` that runs a Brewfile + creates all symlinks + first `theme --sync`. Omarchy's whole identity is install-and-done; this repo currently asks for ~10 manual steps. Biggest lever for anyone adopting it.
-- [ ] **`omarchy-mac update`**: pull the repo, re-link, re-sync themes, restart services — the port's answer to `omarchy-update`. Keeps every adopter current with one command.
+- [ ] **`omarchy4mac update`**: pull the repo, re-link, re-sync themes, restart services — the port's answer to `omarchy-update`. Keeps every adopter current with one command.
 - [ ] **Theme backgrounds**: each Omarchy theme ships a `backgrounds/` dir; extend `theme --sync` to download them into `~/Pictures/Wallpapers` with the `<theme>_` prefix the wallpaper cycler already expects, and set the wallpaper on theme switch. Closes the single most visible gap in "the whole desktop changes".
 - [ ] **Theme scope: more apps**: Omarchy themes carry tmux, lazygit, and vscode definitions; the upstream repo also themes alacritty/kitty. Add tmux + lazygit conversion to `theme` (both are in the daily toolkit; alacritty/kitty only if asked).
 - [x] **Menu depth** (DONE 2026-09-03: v4 nested tree, see CHANGELOG): Omarchy's menu has apps / capture / toggle / system / theme / background submenus. The Hammerspoon menu covers system + theme + apps; add a Toggle submenu (bar on/off, borders on/off, gaps on/off, nightlight) and a Capture submenu that fronts macOS's own tools (⌘⇧5, color picker via Digital Color Meter).
