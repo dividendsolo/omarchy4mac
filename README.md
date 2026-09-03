@@ -147,36 +147,57 @@ easy, or because a Mac needed them.
 
 ## How close is this to real Omarchy?
 
-Honest answer, measured against **Omarchy v4.0.2 (Quattro)**: roughly **half**
-of what a v4 user touches in a day is here, and the ceiling on macOS is about
-three quarters. The keybinding vocabulary, the workspace model, the menu tree,
-the bar layout, and the theme pipeline are ported. The v4 shell (panels,
-notifications, lock screen, OSD) is one Quickshell process on Wayland
-layer-shell and has no macOS equivalent. Neither do Hyprland groups,
-scratchpad, pin, or per-window opacity. The full checklist, item by item, is
-in [`docs/parity-v4.md`](docs/parity-v4.md); what changed and when is in
-[`CHANGELOG.md`](CHANGELOG.md).
+**67%** of Omarchy v4.0.2 (Quattro), scored feature by feature below: a
+match counts 1, a partial or OS substitute counts half, a gap counts 0, and
+items with no macOS meaning are left out. That is 19 matched, 9
+partial, 7 not portable, out of 35 scored.
 
-| Area | Status |
-|---|---|
-| Tiling WM + workspaces | ✅ AeroSpace stands in for Hyprland |
-| Top bar, v4 layout (indicators, weather, updates, agents) | ✅ SketchyBar stands in for Waybar |
-| Window borders | ✅ JankyBorders |
-| Themes, rendered from Omarchy's own v4 templates | ✅ Synced live from the Omarchy repo, all of them; reaches Ghostty, Neovim, btop, Claude Code, Obsidian |
-| Auto light/dark theme switching | ✅ Instant, via a native listener (not in Omarchy itself) |
-| Wallpaper cycling per theme | ✅ |
-| Menu tree (Apps / Learn / Trigger / Style / Setup / Install / Update / System) | ✅ Hammerspoon, nested search |
-| Keybinding overlay | ✅ every binding listed |
-| Web apps as app windows | ✅ Brave app windows on the v4 keys |
-| Screensaver | ✅ ttfx ASCII art after 150 s idle |
-| Shell defaults (eza, bat, fzf, zoxide, aliases) | ✅ `zsh/omarchy.zsh` |
-| Utility keys (emoji, clipboard, caffeinate, lock, agent) | ✅ |
-| Weather / battery / time notices | ✅ |
-| App launcher | ⚠️ Use Raycast or Spotlight; no walker port |
-| Night light, bar toggle, gap toggle | ❌ No macOS or AeroSpace hook |
-| Panels, OSD, lock screen, groups, scratchpad, pin, opacity | ❌ Not portable |
-| Screenshots / screen recording / OCR capture | ❌ macOS has its own (⌘⇧5) |
-| Installer, updates, migrations, hardware, Plymouth | ❌ Not applicable on macOS |
+The short version: the keybinding vocabulary, the workspace model, the menu
+tree, the bar, the theme pipeline, the screensaver, and the shell are here.
+What is not here is Omarchy's Quickshell layer (panels, themed lock screen,
+OSD) and the Hyprland dispatchers AeroSpace lacks (groups, scratchpad, pin,
+opacity, gap toggle). Those have no macOS equivalent and are not coming.
+The item-by-item checklist is in [`docs/parity-v4.md`](docs/parity-v4.md);
+what changed and when is in [`CHANGELOG.md`](CHANGELOG.md).
+
+| Omarchy 4 has | Here | Match | Why not, and the plan |
+|---|---|---|---|
+| Tiling WM: focus, move, swap, resize, fullscreen, 5 workspaces, monitors | AeroSpace | ✅ |  |
+| Top bar: logo opens menu, workspaces, indicators, clock, weather, updates badge, agents spend, bluetooth, wifi, audio, battery | SketchyBar, v4 layout | ✅ |  |
+| Active-window borders | JankyBorders | ✅ |  |
+| All 22 v4 themes, generated from Omarchy's own templates | `theme --sync`, renders Ghostty, Neovim, btop from the v4 `.tpl` files | ✅ |  |
+| Theme chooser (Super+Ctrl+Shift+Space) | Hammerspoon chooser on ⌘⌃⇧Space | ✅ |  |
+| Menu tree: Apps, Learn, Trigger, Style, Setup, Install, Update, System, nested search | Hammerspoon on ⌘⌥Space, ⌘Esc to System | ✅ |  |
+| Keybinding overlay (Super+K) | ⌥K, every binding listed | ✅ |  |
+| Web apps as app windows (Super+Shift+letter) | Brave `--app=` windows on the same keys | ✅ |  |
+| Screensaver: ttfx ASCII art per monitor after 150 s | Hammerspoon idle timer, Ghostty + ttfx per display | ✅ |  |
+| Shell defaults: eza, bat, fzf, zoxide, git and tool aliases | `zsh/omarchy.zsh` | ✅ |  |
+| Wallpaper per theme, cycle key | `omarchy-cycle-wallpaper` on ⌘⌃P | ✅ |  |
+| Emoji picker key | Raycast emoji on ⌘⌃E | ✅ |  |
+| Clipboard history key | Raycast clipboard on ⌘⌃V | ✅ |  |
+| Idle inhibit (keep awake) with bar indicator | caffeinate on ⌘⌃I, bar indicator | ✅ |  |
+| Coding agent in a fresh terminal (Super+Shift+Ctrl+A) | ⌘⇧⌃A, Ghostty + claude | ✅ |  |
+| Lock key | macOS lock on ⌘⌃L | ✅ |  |
+| Time / weather / battery notices | `omarchy-notice` on ⌘⌃⌥ T/W/B | ✅ |  |
+| Screenshots, screen recording | macOS ⌘⇧5 | ✅ | Matched by the OS, not by this repo. |
+| Notifications (mako) | macOS Notification Center | ✅ | Matched by the OS. |
+| Volume / brightness OSD | macOS HUD | ⚠️ | Works, not themed. No hook to restyle the system HUD. |
+| App launcher (walker) | Raycast or Spotlight on ⌘Space | ⚠️ | No walker port; Raycast is the blessed stand-in. Not planned. |
+| Theme backgrounds downloaded with the theme | Bring your own to `~/Pictures/Wallpapers` | ⚠️ | Planned: `theme --sync` pulls each theme's `backgrounds/` (webp) with the `<theme>_` prefix the cycler expects. |
+| Theme reaches tmux, lazygit, VS Code | Terminal, editor, btop, Claude Code, Obsidian | ⚠️ | Planned when tmux is daily: render v4's tmux template and reload live sessions. lazygit and VS Code only if asked. |
+| Night light toggle | None | ⚠️ | Planned: Night Shift via osascript on ⌘⌃N and a menu item. Small. |
+| OCR capture-text (Super+Ctrl+Print) | macOS Live Text, by hand | ⚠️ | Planned: region screenshot, Vision text extraction, clipboard, one script. |
+| Bar hide/show key | None | ⚠️ | Planned: `sketchybar --bar hidden=toggle` on ⌘⇧Space. One line. |
+| Install in one command, update in one command | Clone, brew, symlinks by hand | ⚠️ | Planned: `install.sh` (Brewfile, symlinks, first `theme --sync`) and `omarchy-mac update` (pull, relink, resync, restart services). |
+| Voice typing (voxtype) | macOS dictation | ⚠️ | OS substitute. No port planned. |
+| Control panels: audio, bluetooth, network, display, power, calendar (Quickshell) | System Settings deep links | ❌ | Quickshell is one process on Wayland layer-shell. macOS has no way to draw an equivalent panel. Not portable. |
+| Themed lock screen | macOS lock screen | ❌ | Not portable. The macOS lock screen cannot be restyled. |
+| Window groups, pin, per-window opacity | None | ❌ | Hyprland dispatchers with no AeroSpace equivalent. Not portable. |
+| Scratchpad (Super+S) | None | ❌ | AeroSpace has no special workspace. Could emulate with a dedicated workspace and a toggle key; not planned unless adopters ask. |
+| Gap toggle, window width save/restore | None | ❌ | AeroSpace has no runtime gap or size dispatchers. Not portable. |
+| Chromium live theming | Brave, unthemed | ❌ | Needs Omarchy's Chromium micro-fork. Brave takes no theme colour from the command line. Not portable. |
+| Plugin system (QML) | None | ❌ | Quickshell-specific. Not portable. |
+| Installer ISO, pacman updates, Snapper snapshots, dual boot, factory reset, Plymouth, hardware and migration layer | n/a | — | No macOS meaning. Excluded from the score. |
 
 If a gap bothers you, open an issue.
 
