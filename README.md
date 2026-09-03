@@ -181,8 +181,8 @@ what changed and when is in [`CHANGELOG.md`](CHANGELOG.md).
 | Time / weather / battery notices | `omarchy-notice` on ⌘⌃⌥ T/W/B | ✅ |  |
 | Screenshots, screen recording | macOS ⌘⇧5 | ✅ | Matched by the OS, not by this repo. |
 | Notifications (mako) | macOS Notification Center | ✅ | Matched by the OS. |
-| Volume / brightness overlay (OSD) | macOS HUD | ⚠️ | Works, not themed. No hook to restyle the system HUD. |
 | App launcher (walker) | Raycast (free plan) on ⌘Space | ✅ | Works the same for launching. No walker port needed. |
+| Volume / brightness overlay (OSD) | macOS HUD | ⚠️ | Works, not themed. No hook to restyle the system HUD. |
 | Theme backgrounds downloaded with the theme | Bring your own to `~/Pictures/Wallpapers` | ⚠️ | Planned: `theme --sync` pulls each theme's `backgrounds/` (webp) with the `<theme>_` prefix the cycler expects. |
 | Theme reaches tmux, lazygit, VS Code | Terminal, editor, btop, Claude Code, Obsidian | ⚠️ | Planned when tmux is daily: render v4's tmux template and reload live sessions. lazygit and VS Code only if asked. |
 | Night light toggle | None | ⚠️ | Planned: Night Shift via osascript on ⌘⌃N and a menu item. Small. |
