@@ -56,6 +56,9 @@ alt-w = '''exec-and-forget osascript -e 'tell application "System Events" to key
 ctrl-alt-backspace = 'close-all-windows-but-current'
 
 alt-s = 'layout floating tiling'
+# Shuffle theme within the current light/dark mode. Was a Raycast script
+# command on James's machine only, so adopters never got the key (2026-09-03).
+alt-t = 'exec-and-forget $HOME/.local/bin/theme random'
 alt-j = 'layout tiles horizontal vertical'
 # Accordion: every window full width, inactive ones collapse to edge strips.
 # Toggle it per workspace; cycle windows with the normal focus keys.
@@ -242,7 +245,7 @@ run = 'layout floating'
 # It also centers them and sizes them 875x600; AeroSpace can't do either for a
 # floating window, so a float dragged to the top of the screen can still end up
 # behind SketchyBar. Low risk in practice (nobody maximizes Calculator), and
-# alt-t tiles the focused window if one ever does get stranded.
+# alt-s tiles the focused window if one ever does get stranded.
 
 # Omarchy: `float on, match:class org.gnome.Calculator`
 [[on-window-detected]]

@@ -101,7 +101,7 @@ local bindings = {
   { "SUPER + ALT + SPACE",      "Omarchy control menu" },
   { "SUPER + SHIFT + SPACE",    "Apps launcher (curated)" },
   { "SUPER + CTRL + SHIFT + SPACE", "Theme chooser" },
-  { "OPT + T (Raycast)",        "Random theme (matches system light/dark)" },
+  { "OPT + T",                  "Random theme (matches system light/dark)" },
 
   -- Service mode
   { "SUPER + SHIFT + ;",        "Enter service mode (R=flatten, F=float, esc=exit)" },

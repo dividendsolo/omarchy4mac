@@ -4,6 +4,11 @@ Newest first. Each entry is a sync from the private dotfiles it is exported
 from, so a date here is the day the change went public, not the day it was
 built.
 
+## 2026-09-03: ⌥T shuffles the theme
+
+- `alt-t` is bound in AeroSpace to `theme random`, so the shuffle key ships
+  with the repo. It used to be a Raycast script command on one machine.
+
 ## 2026-09-03: Omarchy 4 (Quattro) parity pass
 
 Everything below was built against Omarchy v4.0.2, branch `quattro`, repo

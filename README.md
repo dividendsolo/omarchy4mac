@@ -121,6 +121,7 @@ Press **⌥K** for the searchable overlay. Highlights:
 - **⌘⌃I** — keep awake (caffeinate) with a bar indicator
 - **⌘⌃G** — gaming mode
 - **⌘⌃⌥ T/W/B** — time / weather / battery notice
+- **⌥T** — shuffle theme (random theme in the current light/dark mode)
 - **⌥S** — float / tile the focused window
 
 ## How close is this to real Omarchy?
