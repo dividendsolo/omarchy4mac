@@ -78,6 +78,7 @@ local bindings = {
   { "SUPER + CTRL + S",         "Share (LocalSend)" },
   { "SUPER + CTRL + E",         "Emoji picker" },
   { "SUPER + CTRL + Q",         "Calculator" },
+  { "SUPER + CTRL + SHIFT + Q", "Quit every Dock app (keeps Finder)" },
   { "SUPER + CTRL + R",         "Set a reminder (20m message)" },
   { "SUPER + CTRL + Z",         "Zoom (macOS accessibility)" },
   { "SUPER + SHIFT + CTRL + A", "Coding agent (Ghostty + claude in ~/code)" },
@@ -169,6 +170,10 @@ hs.hotkey.bind({"cmd", "ctrl", "alt"}, "w", function() notifyFromScript("~/.loca
 hs.hotkey.bind({"cmd", "ctrl", "alt"}, "b", function() notifyFromScript("~/.local/bin/omarchy-notice battery") end)
 hs.hotkey.bind({"cmd", "ctrl"},        "p", function() notifyFromScript("~/.local/bin/omarchy-cycle-wallpaper") end)
 hs.hotkey.bind({"cmd", "ctrl"},        "g", function() notifyFromScript("~/.local/bin/gaming-mode") end)
+hs.hotkey.bind({"cmd", "ctrl", "shift"}, "q", function()
+  hs.alert.show("Quitting all apps")
+  hs.task.new("/bin/bash", nil, { "-lc", "~/.local/bin/quit-all" }):start()
+end)
 
 -- Reminder (v4: Super+Ctrl+R): "20m stand up", "1h30 call back", "45s tea".
 -- A notification fires when the time is up. Timers live for this session.
@@ -295,6 +300,7 @@ local MENU = {
       { text = "Notifications", sub = "Do Not Disturb", action = sh([[shortcuts run "Toggle Do Not Disturb"]]) },
       { text = "Menu Bar", sub = "Hide or show SketchyBar", action = sh("/opt/homebrew/bin/sketchybar --bar hidden=toggle") },
       { text = "Gaming Mode", sub = "Quit apps, Tailscale down, Steam", action = toast("gaming-mode") },
+      { text = "Quit All", sub = "Quit every Dock app, keep Finder", action = sh("~/.local/bin/quit-all") },
       { text = "Screensaver", sub = "Enable or disable the idle screensaver", action = toast("omarchy-toggle-screensaver") },
     }},
     { text = "Transcode", sub = "HandBrake", action = app("HandBrake") },

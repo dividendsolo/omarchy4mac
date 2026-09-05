@@ -4,6 +4,12 @@ Newest first. Each entry is a sync from the private dotfiles it is exported
 from, so a date here is the day the change went public, not the day it was
 built.
 
+## 2026-09-05
+
+- New: `bin/quit-all` quits every Dock app except Finder. Bound to ⌘⌃⇧Q in
+  Hammerspoon and listed in the control menu under Toggle. Symlink it into
+  `~/.local/bin` and reload Hammerspoon once after updating.
+
 ## 2026-09-03 (workspaces)
 
 - Change: apps no longer jump to a fixed workspace on open. Omarchy 4 sends

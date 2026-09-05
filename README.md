@@ -122,6 +122,9 @@ easy, or because a Mac needed them.
   agent above relaunches it on a crash and respects a clean quit.
 - **Gaming mode (⌘⌃G).** Quits every Dock app, drops Tailscale if it is
   installed, and launches Steam. The reverse is a normal quit.
+- **Quit all (⌘⌃⇧Q).** Quits every Dock app except Finder. Apps with unsaved
+  work show their own save dialog; nothing is force-killed. Also in the
+  control menu under Toggle.
 
 ## How close is this to real Omarchy?
 
