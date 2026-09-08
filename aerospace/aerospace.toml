@@ -135,6 +135,7 @@ cmd-shift-backtick = 'focus --boundaries-action wrap-around-the-workspace dfs-pr
 # tab. `-n` is required: a running Brave drops --args otherwise.
 alt-enter = 'exec-and-forget open -na Ghostty'
 cmd-alt-enter = 'exec-and-forget open -na Ghostty --args -e tmux'
+cmd-ctrl-enter = 'exec-and-forget open -na Ghostty --args -e herdr'
 cmd-shift-enter = 'exec-and-forget open -a "Brave Browser"'
 cmd-shift-alt-b = 'exec-and-forget open -na "Brave Browser" --args --incognito'
 cmd-alt-c = 'exec-and-forget open -a "Google Chrome"'

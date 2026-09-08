@@ -13,6 +13,7 @@ local bindings = {
   { "SUPER + SPACE",            "Raycast" },
   { "ALT + RETURN",             "Ghostty (terminal)" },
   { "SUPER + ALT + RETURN",     "Ghostty + tmux" },
+  { "SUPER + CTRL + RETURN",    "Ghostty + herdr" },
   { "SUPER + SHIFT + RETURN",   "Brave" },
   { "SUPER + SHIFT + ALT + B",  "Brave (incognito)" },
   { "SUPER + ALT + C",          "Chrome" },
@@ -283,6 +284,7 @@ local MENU = {
     { text = "AeroSpace guide", sub = "Window manager docs", action = url("https://nikitabobko.github.io/AeroSpace/guide") },
     { text = "Neovim", sub = "LazyVim keymaps", action = url("https://www.lazyvim.org/keymaps") },
     { text = "Tmux", sub = "Cheat sheet", action = url("https://tmuxcheatsheet.com") },
+    { text = "Herdr", sub = "Keybindings", action = url("https://herdr.dev/docs/") },
   }},
   { text = "Trigger", sub = "Do a thing now", children = {
     { text = "Emoji", sub = "Raycast emoji picker", action = url("raycast://extensions/raycast/emoji-symbols/search-emoji-symbols") },

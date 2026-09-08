@@ -63,6 +63,15 @@ how much of the daily feel each item buys. Tick items as they land.
   selected in `appearance.json`.
 - [ ] **11. Theme reaches tmux.** v4 pushes the palette into running tmux
   sessions. Half an hour. Only if tmux becomes daily.
+- [x] **12. Herdr.** DONE 2026-09-08. v4 ships herdr (agent multiplexer)
+  beside tmux: `Super+Ctrl+Return`, `h` alias, `hdl`/`hds`/`hdlm`/`hsl`
+  layouts, `config/herdr/config.toml`. Was wrongly filed as Linux-only on
+  2026-09-02; herdr 0.9 is in Homebrew for macOS. Port: config verbatim
+  (`theme.name = "terminal"`, so the Ghostty palette is the theme),
+  `cmd-ctrl-enter` in AeroSpace, cheat-sheet row, functions in zshrc with
+  `emulate -L ksh`. On a one-week trial as the tmux replacement; the VPS
+  as a saved machine (`herdr machine add dev`) comes after, and needs the
+  pickup scripts to launch Hermes in herdr panes.
 
 ## Not portable (do not attempt)
 

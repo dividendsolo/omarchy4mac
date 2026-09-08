@@ -4,6 +4,17 @@ Newest first. Each entry is a sync from the private dotfiles it is exported
 from, so a date here is the day the change went public, not the day it was
 built.
 
+## 2026-09-08
+
+- New: Herdr, Omarchy 4's agent multiplexer, is ported. `brew install herdr jq`,
+  symlink `herdr/config.toml` to `~/.config/herdr/config.toml` (Omarchy's
+  config, verbatim; the theme is the terminal palette, so `theme` reaches it
+  with no template). ⌘⌃↩ opens Ghostty with herdr, `h` is the alias, and the
+  `hdl`, `hds`, `hdlm`, `hsl` layout functions are in `zsh/omarchy.zsh` with
+  `emulate -L ksh` so Omarchy's bash bodies run unchanged in zsh. The parity
+  doc had filed herdr as Linux-only; it is not. Run `aerospace reload-config`
+  and reload Hammerspoon once after updating.
+
 ## 2026-09-05
 
 - New: `bin/quit-all` quits every Dock app except Finder. Bound to ⌘⌃⇧Q in

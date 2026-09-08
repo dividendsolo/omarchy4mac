@@ -159,6 +159,7 @@ what changed and when is in [`CHANGELOG.md`](CHANGELOG.md).
 | Clipboard history key | Raycast clipboard on ⌘⌃V | ✅ |  |
 | Idle inhibit (keep awake) with bar indicator | caffeinate on ⌘⌃I, bar indicator | ✅ |  |
 | Coding agent in a fresh terminal (Super+Shift+Ctrl+A) | ⌘⇧⌃A, Ghostty + claude | ✅ |  |
+| Herdr agent multiplexer (Super+Ctrl+Return, `h`, `hdl`/`hds`/`hdlm`/`hsl`) | ⌘⌃↩ opens Ghostty + herdr; Omarchy's `config.toml` verbatim in `herdr/`; layouts in `zsh/omarchy.zsh` | ✅ | `brew install herdr jq`, symlink `herdr/config.toml` to `~/.config/herdr/config.toml`. Theme follows the terminal palette. |
 | Lock key | macOS lock on ⌘⌃L | ✅ |  |
 | Time / weather / battery notices | `omarchy-notice` on ⌘⌃⌥ T/W/B | ✅ |  |
 | Screenshots, screen recording | macOS ⌘⇧5 | ✅ | Matched by the OS, not by this repo. |
