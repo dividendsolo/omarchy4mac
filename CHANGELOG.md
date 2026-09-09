@@ -10,7 +10,8 @@ built.
   and ignores the terminal palette, so its default gold skin was unreadable
   on a light Ghostty. `theme <name>` now runs `hermes skin use daylight` for a
   light theme and `hermes skin use default` for a dark one (skipped when
-  hermes is not installed). New Hermes sessions pick it up.
+  hermes is not installed), on the default profile and every named profile.
+  Restart Hermes to see it.
 - Fix: `herdr/config.toml` carries `onboarding = false` so herdr skips its
   first-run screen.
 

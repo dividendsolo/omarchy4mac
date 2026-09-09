@@ -490,7 +490,12 @@ apply_hermes() {
   local skin=default
   [[ "$(theme_appearance "$1")" == light ]] && skin=daylight
   hermes skin use "$skin" >/dev/null 2>&1 || return 0
-  echo "  ${c_dim}hermes${c_rst}   → $skin ${c_dim}(new sessions)${c_rst}"
+  # Every profile keeps its own config, so each gets the skin too.
+  local pf
+  for pf in "$HOME/.hermes/profiles"/*/; do
+    [[ -d "$pf" ]] && hermes -p "$(basename "$pf")" skin use "$skin" >/dev/null 2>&1
+  done
+  echo "  ${c_dim}hermes${c_rst}   → $skin ${c_dim}(restart Hermes)${c_rst}"
 }
 
 # Claude Code: ~/.claude/themes/omarchy.json + settings theme "custom:omarchy"
