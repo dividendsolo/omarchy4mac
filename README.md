@@ -115,8 +115,9 @@ easy, or because a Mac needed them.
   system appearance to follow.
 - **⌥T shuffles within the bucket.** Random theme, never the current one,
   never a dark theme on a light system.
-- **Theme reaches Claude Code and Obsidian.** Omarchy stops at the terminal
-  and editor. Here a switch recolors the Claude Code terminal theme and the
+- **Theme reaches Claude Code, Hermes, and Obsidian.** Omarchy stops at the
+  terminal and editor. Here a switch recolors the Claude Code terminal theme,
+  picks the matching Hermes skin (daylight or default), and swaps the
   Obsidian vault theme too.
 - **Crash watchdog.** AeroSpace can self-terminate on macOS 26. The launchd
   agent above relaunches it on a crash and respects a clean quit.

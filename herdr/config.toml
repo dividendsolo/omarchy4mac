@@ -1,3 +1,4 @@
+onboarding = false
 # Herdr config, ported verbatim from Omarchy 4 (config/herdr/config.toml, quattro,
 # fetched 2026-09-08). theme.name = "terminal" means herdr draws with Ghostty's
 # palette, so `theme <name>` reaches it with no template. Symlinked to

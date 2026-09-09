@@ -482,6 +482,17 @@ reload_sketchybar() {
   fi
 }
 
+# Hermes (the CLI agent): its skin paints its own colors and ignores the
+# terminal palette, so a dark-built skin is unreadable on a light Ghostty.
+# Light theme -> the `daylight` skin, dark -> `default`. New sessions pick it up.
+apply_hermes() {
+  command -v hermes >/dev/null 2>&1 || return 0
+  local skin=default
+  [[ "$(theme_appearance "$1")" == light ]] && skin=daylight
+  hermes skin use "$skin" >/dev/null 2>&1 || return 0
+  echo "  ${c_dim}hermes${c_rst}   → $skin ${c_dim}(new sessions)${c_rst}"
+}
+
 # Claude Code: ~/.claude/themes/omarchy.json + settings theme "custom:omarchy"
 # (what omarchy-theme-set-claude --activate does). New sessions pick it up.
 apply_claude() {
@@ -604,6 +615,7 @@ apply_nvim "$name"
 apply_btop "$name"
 apply_sketchybar "$name"
 apply_claude "$name"
+apply_hermes "$name"
 apply_obsidian "$name"
 apply_wallpaper "$name"
 mkdir -p "$(dirname "$STATE")"; echo "$name" > "$STATE"

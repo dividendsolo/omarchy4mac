@@ -4,6 +4,16 @@ Newest first. Each entry is a sync from the private dotfiles it is exported
 from, so a date here is the day the change went public, not the day it was
 built.
 
+## 2026-09-09
+
+- New: the theme switch reaches Hermes. The Hermes CLI paints its own skin
+  and ignores the terminal palette, so its default gold skin was unreadable
+  on a light Ghostty. `theme <name>` now runs `hermes skin use daylight` for a
+  light theme and `hermes skin use default` for a dark one (skipped when
+  hermes is not installed). New Hermes sessions pick it up.
+- Fix: `herdr/config.toml` carries `onboarding = false` so herdr skips its
+  first-run screen.
+
 ## 2026-09-08
 
 - New: Herdr, Omarchy 4's agent multiplexer, is ported. `brew install herdr jq`,
