@@ -69,6 +69,13 @@ ghostty_theme_dirs() {
 c_bold=$'\033[1m'; c_dim=$'\033[2m'; c_grn=$'\033[32m'; c_red=$'\033[31m'; c_yel=$'\033[33m'; c_rst=$'\033[0m'
 die() { echo "${c_red}error:${c_rst} $*" >&2; exit 1; }
 
+# Toast for callers with no terminal (AeroSpace exec-and-forget, launchd).
+# Without this, alt-t shows nothing at all — failures were invisible.
+notify() {
+  [[ -t 1 ]] && return 0
+  osascript -e "display notification \"$1\" with title \"Theme\"" >/dev/null 2>&1 || true
+}
+
 # Render an Omarchy template ({{ key }}, {{ key_strip }}, {{ key_rgb }},
 # {{ mix a b amount }}) against a colors.toml. Mirrors
 # bin/omarchy-theme-set-templates: selection_background = selection,
@@ -338,6 +345,7 @@ EOF
     *)
       echo "  ${c_yel}ghostty${c_rst}  use ${c_bold}Ghostty → Reload Configuration${c_rst} (or ${c_bold}⌘⇧,${c_rst}) to reload this window"
       echo "          ${c_dim}(grant Ghostty Accessibility perm to auto-reload: System Settings → Privacy & Security → Accessibility)${c_rst}"
+      notify "Ghostty did not reload — press ⌘⇧, in Ghostty"
       ;;
   esac
 }
@@ -614,6 +622,26 @@ if [[ ! -d "$CACHE/$name" ]]; then
   echo "${c_red}unknown theme:${c_rst} $name" >&2; echo >&2; list_themes >&2; exit 1
 fi
 
+# Single-instance lock. alt-t fires one process per keypress (and key repeat),
+# and a full apply takes seconds. Overlapping runs both read the stale state
+# file, pick different themes, and the desktop flashes through both — that was
+# the "went through two themes / same theme, new wallpaper" bug. mkdir is
+# atomic; a lock whose owner died is reclaimed.
+LOCK="$HOME/.config/theme-switcher/lock"
+lock_taken=0
+for _ in 1 2; do
+  if mkdir "$LOCK" 2>/dev/null; then echo $$ > "$LOCK/pid"; lock_taken=1; break; fi
+  owner="$(cat "$LOCK/pid" 2>/dev/null || true)"
+  # ps sees every user's processes; kill -0 lies (EPERM) for other users' pids
+  if [[ -n "$owner" ]] && ! ps -p "$owner" -o pid= >/dev/null 2>&1; then rm -rf "$LOCK"; continue; fi
+  break
+done
+if [[ "$lock_taken" -eq 0 ]]; then
+  echo "${c_dim}theme: switch already in progress — ignoring${c_rst}" >&2
+  exit 0
+fi
+trap 'rm -rf "$LOCK"' EXIT
+
 echo "${c_bold}Switching to ${c_grn}$name${c_rst}${c_bold}:${c_rst}"
 apply_ghostty "$name"
 apply_nvim "$name"
@@ -632,3 +660,4 @@ if [[ "$do_reload" -eq 1 ]]; then
   reload_sketchybar
 fi
 echo "${c_grn}done.${c_rst} ${c_dim}New Ghostty windows + nvim sessions + btop launches use $name immediately.${c_rst}"
+notify "Switched to $name"
