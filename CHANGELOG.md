@@ -2,7 +2,13 @@
 
 Newest first. Each entry is a sync from the private dotfiles it is exported
 from, so a date here is the day the change went public, not the day it was
-built.
+built. Entries that are not a dotfiles sync say so.
+
+## 2026-09-15
+
+- New: the README's first paragraph links the port's story post,
+  [Make macOS look and feel like Omarchy](https://dividendsolo.com/blog/omarchy-4-on-the-mac).
+  Edited directly in the public repo; not part of the dotfiles export.
 
 ## 2026-09-09
 
