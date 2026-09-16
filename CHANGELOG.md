@@ -4,6 +4,12 @@ Newest first. Each entry is a sync from the private dotfiles it is exported
 from, so a date here is the day the change went public, not the day it was
 built.
 
+## 2026-09-16
+
+- New: a Sponsor button on the repo (`.github/FUNDING.yml`, GitHub Sponsors
+  for `dividendsolo`). The port stays free; this is how to tip it if it
+  earned a place on your Mac.
+
 ## 2026-09-09
 
 - New: the theme switch reaches Hermes. The Hermes CLI paints its own skin
