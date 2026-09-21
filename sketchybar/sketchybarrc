@@ -163,6 +163,19 @@ sketchybar --add item theme_name center \
                  label.color="$FG" \
                  click_script="$HOME/.local/bin/theme random"
 
+# Stand-up / sit-down state, centre copy: shows on the external displays next to
+# the centred theme name. Added straight after theme_name so it lands beside it.
+# The right-cluster copy (standup) covers the built-in panel. One plugin drives
+# both; it pins each copy to the right display set like clock.sh does.
+sketchybar --add item standup_center center \
+           --set standup_center \
+                 drawing=off \
+                 update_freq=20 \
+                 icon.color="$FG" \
+                 label.drawing=off \
+                 background.drawing=off \
+                 script="$PLUGIN_DIR/standup.sh"
+
 # v4 bar order, left to right: agents · bluetooth · network · audio · power.
 # Right items lay out right-to-left in add order, so battery goes first.
 sketchybar --add item battery right \
@@ -189,6 +202,19 @@ sketchybar --add item theme_name_right right \
                  icon.color="$YELLOW" \
                  label.color="$FG" \
                  click_script="$HOME/.local/bin/theme random"
+
+# Stand-up / sit-down state of the interval timer (~/.hermes/standup_timer.sh).
+# Added straight after theme_name_right so it draws immediately to the LEFT of the
+# theme name (right items lay out right-to-left in add order). Icon only: a chair
+# while seated, a standing person while standing. Hidden when no timer runs.
+sketchybar --add item standup right \
+           --set standup \
+                 drawing=off \
+                 update_freq=20 \
+                 icon.color="$FG" \
+                 label.drawing=off \
+                 background.drawing=off \
+                 script="$PLUGIN_DIR/standup.sh"
 
 sketchybar --add item clock_right right \
            --set clock_right \
@@ -242,3 +268,7 @@ NAME=front_app SENDER=front_app_switched INFO="$FRONT_APP" bash "$PLUGIN_DIR/fro
 
 # Prime Spotify marquee on startup
 NAME=spotify bash "$PLUGIN_DIR/spotify.sh"
+
+# Prime the stand-up / sit-down icons on startup (they have no event to subscribe to)
+NAME=standup bash "$PLUGIN_DIR/standup.sh"
+NAME=standup_center bash "$PLUGIN_DIR/standup.sh"

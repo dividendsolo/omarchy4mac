@@ -4,6 +4,18 @@ Newest first. Each entry is a sync from the private dotfiles it is exported
 from, so a date here is the day the change went public, not the day it was
 built.
 
+## 2026-09-21
+
+- Fix: a theme switch triggered by the macOS light/dark flip skipped the
+  Hermes skin step in silence, so every Hermes session kept the old skin
+  (light text on a dark terminal, or the reverse). The appearance watcher
+  now puts `~/.local/bin` on its PATH, and `theme` resolves `hermes` by
+  path and says so when it cannot. Running sessions pick the skin up live;
+  no restart needed.
+- New: a stand-up / sit-down indicator in the bar (`sketchybar/plugins/standup.sh`).
+  It reads a 30-minute interval timer at `~/.hermes/standup_timer.sh` and
+  stays hidden when no timer runs, so it is inert unless you have one.
+
 ## 2026-09-16
 
 - New: a Sponsor button on the repo (`.github/FUNDING.yml`, GitHub Sponsors

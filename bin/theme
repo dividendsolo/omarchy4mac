@@ -494,16 +494,24 @@ reload_sketchybar() {
 # terminal palette, so a dark-built skin is unreadable on a light Ghostty.
 # Light theme -> the `daylight` skin, dark -> `default`. New sessions pick it up.
 apply_hermes() {
-  command -v hermes >/dev/null 2>&1 || return 0
+  # Resolve hermes by path too: launchd and app-launched shells often lack
+  # ~/.local/bin on PATH, and a silent skip here leaves every session stale.
+  local hermes
+  hermes="$(command -v hermes 2>/dev/null || true)"
+  [[ -z "$hermes" && -x "$HOME/.local/bin/hermes" ]] && hermes="$HOME/.local/bin/hermes"
+  [[ -n "$hermes" ]] || { echo "  ${c_dim}hermes${c_rst}   skipped (hermes not found)"; return 0; }
   local skin=default
   [[ "$(theme_appearance "$1")" == light ]] && skin=daylight
-  hermes skin use "$skin" >/dev/null 2>&1 || return 0
+  if ! "$hermes" skin use "$skin" >/dev/null 2>&1; then
+    echo "  ${c_dim}hermes${c_rst}   skin use failed"; return 0
+  fi
   # Every profile keeps its own config, so each gets the skin too.
   local pf
   for pf in "$HOME/.hermes/profiles"/*/; do
-    [[ -d "$pf" ]] && hermes -p "$(basename "$pf")" skin use "$skin" >/dev/null 2>&1
+    [[ -d "$pf" ]] && "$hermes" -p "$(basename "$pf")" skin use "$skin" >/dev/null 2>&1
   done
-  echo "  ${c_dim}hermes${c_rst}   → $skin ${c_dim}(restart Hermes)${c_rst}"
+  # Running sessions pick the skin up live (Hermes watches the config).
+  echo "  ${c_dim}hermes${c_rst}   → $skin"
 }
 
 # Claude Code: ~/.claude/themes/omarchy.json + settings theme "custom:omarchy"

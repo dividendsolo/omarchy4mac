@@ -14,7 +14,9 @@
 
 # launchd's default PATH lacks /opt/homebrew/bin, so `theme`'s `env bash`
 # shebang would resolve to the system bash 3.2 and break on empty arrays
-export PATH="/opt/homebrew/bin:/usr/bin:/bin"
+# ~/.local/bin holds `hermes`; without it the theme script skips the Hermes
+# skin step in silence and every Hermes session keeps the old skin.
+export PATH="$HOME/.local/bin:/opt/homebrew/bin:/usr/bin:/bin"
 
 THEME="$HOME/.local/bin/theme"
 STATE="$HOME/.config/theme-switcher/current"
