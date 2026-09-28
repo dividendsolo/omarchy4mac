@@ -320,6 +320,12 @@ reload_ghostty() {
   # synthesising the ⌘⇧, keybind (a shifted-comma keystroke frequently doesn't
   # register as the bind). Keystroke is kept as a fallback. Both need
   # Accessibility permission; if neither works we tell the user to do it by hand.
+  # Ghostty 1.2+ reloads its config on SIGUSR2 (ghostty-org/ghostty#7747).
+  # No Accessibility permission needed, so the launchd listener can do it too.
+  if pkill -USR2 -x ghostty 2>/dev/null; then
+    echo "  ghostty  ↻ reloaded (SIGUSR2)"
+    return 0
+  fi
   local out
   out="$(osascript 2>&1 <<'EOF' || true
 tell application "System Events"
@@ -444,7 +450,15 @@ reload_nvim() {
     nvim --server "$sock" --remote-send \
       "<C-\\><C-N>:lua local w='$cs' if not pcall(vim.cmd.colorscheme,w) then pcall(vim.cmd.colorscheme,(w:gsub('%-%a+\$',''))) end<CR>" 2>/dev/null \
       && count=$((count+1)) || true
-  done < <(find "${TMPDIR:-/tmp}" /tmp -maxdepth 5 -path '*nvim*' -type s \( -name '0' -o -name 'nvim.*.0' \) 2>/dev/null)
+  done < <(
+    # Glob the known socket spots; a recursive find over the temp dirs took 10s+.
+    shopt -s nullglob
+    local t
+    for t in "${TMPDIR:-/tmp}" "$(getconf DARWIN_USER_TEMP_DIR 2>/dev/null)" /tmp; do
+      t="${t%/}"; [[ -n "$t" ]] || continue
+      printf '%s\n' "$t"/nvim."$USER"/*/nvim.*.0 "$t"/nvim*/0
+    done | sort -u
+  )
   [[ "$count" -gt 0 ]] && echo "  ${c_dim}neovim${c_rst}   ↻ reloaded $count running instance(s)"
   return 0
 }
@@ -506,10 +520,12 @@ apply_hermes() {
     echo "  ${c_dim}hermes${c_rst}   skin use failed"; return 0
   fi
   # Every profile keeps its own config, so each gets the skin too.
+  # Profiles run in parallel: each call starts Python (~1s), and serial took 7s+.
   local pf
   for pf in "$HOME/.hermes/profiles"/*/; do
-    [[ -d "$pf" ]] && "$hermes" -p "$(basename "$pf")" skin use "$skin" >/dev/null 2>&1
+    [[ -d "$pf" ]] && "$hermes" -p "$(basename "$pf")" skin use "$skin" >/dev/null 2>&1 &
   done
+  wait
   # Running sessions pick the skin up live (Hermes watches the config).
   echo "  ${c_dim}hermes${c_rst}   → $skin"
 }
