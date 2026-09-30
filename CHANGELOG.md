@@ -4,6 +4,13 @@ Newest first. Each entry is a sync from the private dotfiles it is exported
 from, so a date here is the day the change went public, not the day it was
 built.
 
+## 2026-09-30
+
+- Fix: a fresh install failed at `brew bundle` with "No Cask with this name
+  exists" for `aerospace`. AeroSpace is not in homebrew/cask; it ships from
+  its author's tap. The Brewfile now taps `nikitabobko/tap` and installs
+  `nikitabobko/tap/aerospace`. Thanks to @pedenys for the report (#2).
+
 ## 2026-09-21
 
 - Fix: a theme switch triggered by the macOS light/dark flip skipped the

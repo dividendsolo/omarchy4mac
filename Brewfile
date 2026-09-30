@@ -1,9 +1,10 @@
 # omarchy4mac dependencies. `install.sh` runs `brew bundle` on this file.
 
 tap "FelixKratz/formulae"   # sketchybar and borders live here, not in core
+tap "nikitabobko/tap"       # aerospace is not in homebrew/cask (issue #2)
 
 # Window manager, bar, borders, terminal, prompt, editor, monitor
-cask "aerospace"
+cask "nikitabobko/tap/aerospace"
 cask "ghostty"
 cask "hammerspoon"
 brew "sketchybar"
