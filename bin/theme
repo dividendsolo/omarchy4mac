@@ -14,7 +14,7 @@
 #   theme --appearance    print the light/dark appearance of the current theme
 #                         (or of [name], if given)
 #   theme -s | --sync     download / refresh all themes from the Omarchy repo
-#   theme --no-reload <n> switch without trying to live-reload Ghostty
+#   theme --no-reload <n> switch without reloading nvim, btop, sketchybar
 #
 # `--sync` pulls every theme from github.com/omacom/omarchy (quattro), renders
 # Ghostty, btop, and neovim from Omarchy's own templates, and fetches each
@@ -315,45 +315,12 @@ apply_ghostty() {
 }
 
 reload_ghostty() {
-  # Ghostty has no reload CLI/signal. We drive its "Reload Configuration" menu
-  # item via AppleScript — clicking the menu item is far more reliable than
-  # synthesising the ⌘⇧, keybind (a shifted-comma keystroke frequently doesn't
-  # register as the bind). Keystroke is kept as a fallback. Both need
-  # Accessibility permission; if neither works we tell the user to do it by hand.
-  # Ghostty 1.2+ reloads its config on SIGUSR2 (ghostty-org/ghostty#7747).
-  # No Accessibility permission needed, so the launchd listener can do it too.
-  if pkill -USR2 -x ghostty 2>/dev/null; then
-    echo "  ghostty  ↻ reloaded (SIGUSR2)"
-    return 0
-  fi
-  local out
-  out="$(osascript 2>&1 <<'EOF' || true
-tell application "System Events"
-  if not (exists process "ghostty") then return "noproc"
-  tell process "ghostty"
-    set frontmost to true
-    delay 0.2
-    -- preferred: click the actual menu item
-    try
-      click menu item "Reload Configuration" of menu 1 of menu bar item "Ghostty" of menu bar 1
-      return "menu"
-    end try
-    -- fallback: fire the reload_config keybind
-    keystroke "," using {command down, shift down}
-    return "key"
-  end tell
-end tell
-EOF
-)"
-  case "$out" in
-    menu) echo "  ${c_dim}ghostty${c_rst}  ↻ reloaded (menu)" ;;
-    key)  echo "  ${c_dim}ghostty${c_rst}  ↻ reloaded (keybind)" ;;
-    *)
-      echo "  ${c_yel}ghostty${c_rst}  use ${c_bold}Ghostty → Reload Configuration${c_rst} (or ${c_bold}⌘⇧,${c_rst}) to reload this window"
-      echo "          ${c_dim}(grant Ghostty Accessibility perm to auto-reload: System Settings → Privacy & Security → Accessibility)${c_rst}"
-      notify "Ghostty did not reload — press ⌘⇧, in Ghostty"
-      ;;
-  esac
+  # No live reload. Live reload hung Ghostty with sessions open: SIGUSR2
+  # (Ghostty 1.3.1) triggered "libxev_kqueue: invalid state in submission
+  # queue" and a main-thread hang that needed a force quit, every time the
+  # appearance watcher switched themes. The config file is already rewritten,
+  # so new windows get the theme; press Cmd-Shift-, to reload open windows.
+  echo "  ${c_dim}ghostty${c_rst}  new windows only (press ${c_bold}⌘⇧,${c_rst} to reload open windows)"
 }
 
 apply_nvim() {

@@ -4,6 +4,14 @@ Newest first. Each entry is a sync from the private dotfiles it is exported
 from, so a date here is the day the change went public, not the day it was
 built.
 
+## 2026-10-01
+
+- Fix: Ghostty hung (force quit needed) after a theme switch. The reload
+  signal (SIGUSR2) hangs Ghostty 1.3.1 when sessions are open, and the
+  light/dark watcher sent it on every appearance change. `theme` no longer
+  live-reloads Ghostty. New windows get the new theme; press Cmd-Shift-, to
+  reload open windows.
+
 ## 2026-09-30
 
 - Fix: a fresh install failed at `brew bundle` with "No Cask with this name
