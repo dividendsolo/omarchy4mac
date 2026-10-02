@@ -1,7 +1,8 @@
 # omarchy4mac
 
 Omarchy 4, for the Mac. An [Omarchy](https://github.com/basecamp/omarchy) port for macOS — for those of
-us who want the Omarchy experience but can't (or won't) leave the Mac.
+us who want the Omarchy experience but can't (or won't) leave the Mac. The
+story of the port: [Make macOS look and feel like Omarchy](https://dividendsolo.com/blog/omarchy-4-on-the-mac).
 
 Omarchy is DHH's opinionated Arch + Hyprland setup. This repo recreates the
 parts that matter on macOS with native tools:
