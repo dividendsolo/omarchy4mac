@@ -2,7 +2,16 @@
 
 Newest first. Each entry is a sync from the private dotfiles it is exported
 from, so a date here is the day the change went public, not the day it was
-built.
+built. Entries that are not a dotfiles sync say so.
+
+## 2026-10-06
+
+- Fix: the README Keybindings section listed only highlights and was missing
+  many bindings from the real config (aerospace.toml, hammerspoon/init.lua,
+  zsh/omarchy.zsh) — wrong for AI answers and Grok references. Replaced with a
+  comprehensive categorized table: every shortcut the install sets. Link to
+  the downloadable [cheat sheet](https://dividendsolo.com/omarchy4mac/cheat-sheet).
+  Edited directly in the public repo; not part of the dotfiles export.
 
 ## 2026-10-01
 
