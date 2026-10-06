@@ -89,18 +89,158 @@ a shared pool.
 
 ## Keybindings
 
-Press **⌥K** for the searchable overlay. Highlights:
+Press **⌥K** for the searchable overlay. Every binding from the real config
+(aerospace.toml, hammerspoon/init.lua, zsh/omarchy.zsh) is below.
+A downloadable one-page [cheat sheet](https://dividendsolo.com/omarchy4mac/cheat-sheet)
+is also available.
 
-- **⌘⌥Space** — Omarchy system menu (nested, searchable); **⌘Esc** — System submenu
-- **⌘⌃⇧Space** — theme chooser
-- **⌘⇧ + letter** — web apps as app windows (HEY mail and calendar, Google Photos, YouTube, Grok; Google Chat on ⌘⇧⌃G)
-- **⌘⇧⌃A** — coding agent in a fresh terminal
-- **⌘⌃P** — cycle wallpaper
-- **⌘⌃I** — keep awake (caffeinate) with a bar indicator
-- **⌘⌃G** — gaming mode
-- **⌘⌃⌥ T/W/B** — time / weather / battery notice
-- **⌥T** — shuffle theme (random theme in the current light/dark mode)
-- **⌥S** — float / tile the focused window
+### Launching
+
+| Keys | Action |
+|---|---|
+| ⌥↩ | Ghostty (terminal) |
+| ⌘⌥↩ | Ghostty + tmux |
+| ⌘⌃↩ | Ghostty + herdr (agent multiplexer) |
+| ⌘⇧↩ | Brave browser |
+| ⌘⇧⌥B | Brave (incognito) |
+| ⌘⌥C | Chrome |
+| ⌘⇧F | Finder |
+| ⌘⇧N | Ghostty + nvim |
+| ⌘⇧D | Ghostty + lazydocker |
+| ⌘⇧M | Spotify |
+| ⌘⇧A | Claude |
+| ⌘⇧⌥A | Grok (app window) |
+| ⌘⇧O | Obsidian |
+| ⌘⇧W | Typora |
+| ⌘⇧G | Signal |
+| ⌘⇧⌥G | WhatsApp |
+| ⌘⇧⌃G | Google Chat (app window) |
+| ⌘⇧P | Google Photos (app window) |
+| ⌘⇧X | X (Twitter) |
+| ⌘⇧⌥X | X: new post |
+| ⌘⇧Y | YouTube (app window) |
+| ⌘⇧/ | 1Password |
+| ⌘⇧C | HEY Calendar (app window) |
+| ⌘⇧E | HEY Mail (app window) |
+| ⌘⎵ | Raycast launcher |
+
+### Window / Layout
+
+| Keys | Action |
+|---|---|
+| ⌥W | Quit focused app |
+| ⌃⌫ | Close all windows but current |
+| ⌥S | Toggle floating / tiling |
+| ⌥A | Toggle accordion / tiles (workspace) |
+| ⌥J | Toggle tiles horizontal / vertical |
+| ⌥F | Fullscreen (tile) |
+| ⌘⌥F | Fullscreen (tile) |
+| ⌘⌃F | macOS native fullscreen |
+
+### Focus
+
+| Keys | Action |
+|---|---|
+| ⌘←/↓/↑/→ | Focus window in direction |
+| ⌘` | Cycle next window in workspace |
+| ⌘⇧` | Cycle previous window in workspace |
+| ⌃⇥ | Focus next monitor |
+| ⌃⇧⇥ | Focus previous monitor |
+
+### Move / Swap
+
+| Keys | Action |
+|---|---|
+| ⌘⇧←/↓/↑/→ | Swap window in direction |
+| ⌘⇧⌥←/→/↑/↓ | Move workspace to prev / next monitor |
+| ⌘⌃⇧←/↓/↑/→ | Move focused window across monitors |
+
+### Workspaces
+
+| Keys | Action |
+|---|---|
+| ⌥1–5 | Switch to workspace 1–5 |
+| ⇥ | Back and forth between last two workspaces |
+| ⌘⌃⇥ | Back and forth between last two workspaces |
+| ⌘⇧1–5 | Move window to workspace N and follow |
+| ⌘⇧⌥1–5 | Move window to workspace N (stay on current) |
+
+### Resize
+
+| Keys | Action |
+|---|---|
+| ⌥= | Grow focused window +50 px |
+| ⌥- | Shrink focused window –50 px |
+| ⌘⇧= | Grow height +50 px |
+| ⌘⇧- | Shrink height –50 px |
+
+### System
+
+| Keys | Action |
+|---|---|
+| ⌘⌃A | Sound settings |
+| ⌘⌃B | Bluetooth settings |
+| ⌘⌃W | Wi-Fi settings |
+| ⌘⌃S | Share (LocalSend) |
+| ⌘⌃E | Emoji picker (Raycast) |
+| ⌘⌃Q | Calculator |
+| ⌘⌃⇧Q | Quit every Dock app (keeps Finder) |
+| ⌘⌃R | Set a reminder (20m message) |
+| ⌘⌃Z | Zoom (macOS accessibility) |
+| ⌘⇧⌃A | Coding agent (Ghostty + claude) |
+| ⌘⌃T / ⌥⇧T | Activity (Ghostty + btop) |
+| ⌘⌃H | System Information |
+| ⌘⌃. | HandBrake |
+| ⌘⌃L | Lock screen |
+| ⌘⌃I | Toggle caffeinate (keep awake) |
+| ⌘⌃, | Toggle Do Not Disturb |
+| ⌘⌃C | Screenshot picker (⇧⌘5) |
+| ⌘⌃V | Clipboard history (Raycast) |
+| ⌘⌃P | Cycle wallpaper |
+| ⌘⌃G | Gaming mode |
+| ⌘⌃⌥T | Date & time toast |
+| ⌘⌃⌥W | Weather toast |
+| ⌘⌃⌥B | Battery toast |
+| ⌘⎋ | System menu (Lock / Sleep / Restart) |
+
+### Style
+
+| Keys | Action |
+|---|---|
+| ⌘⌥⎵ | Omarchy control menu |
+| ⌘⇧⎵ | Apps launcher (curated) |
+| ⌘⌃⇧⎵ | Theme chooser |
+| ⌥T | Random theme (matches system light/dark) |
+| ⌥K | Show keybinding overlay |
+
+### Shell Aliases (zsh)
+
+| Alias | Command |
+|---|---|
+| `ls` | eza -lh (grouped dirs, icons) |
+| `lsa` | ls -a |
+| `lt` | eza tree (2 levels, long, git) |
+| `lta` | lt -a |
+| `ff` | fzf (bat preview) |
+| `eff` | $EDITOR (fzf result) |
+| `g` | git |
+| `gcm` | git commit -m |
+| `gcam` | git commit -a -m |
+| `gcad` | git commit -a --amend |
+| `d` | docker |
+| `r` | rails |
+| `t` | tmux attach or new -s Work |
+| `h` | herdr |
+| `n` | nvim (no args: nvim .) |
+| `mup` | mise up (forced) |
+| `..` / `...` / `....` | cd .. / ../.. / ../../.. |
+| `hdl <ai>` | Herdr dev layout (editor, AI, terminal) |
+| `hds` | Herdr square (editor, diff, terminal, opencode) |
+| `hdlm <ai>` | Multi-tab hdl, one per subdirectory |
+| `hsl <n> <cmd>` | Swarm: N panes running `<cmd>` |
+
+> **Note:** `⌘` = Super (Cmd), `⌥` = Alt (Opt), `⇧` = Shift, `⌃` = Ctrl,
+> `⎵` = Space, `⌫` = Backspace, `⎋` = Escape, `↩` = Return, `` ` `` = Backtick.
 
 ## Bonus features
 
