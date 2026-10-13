@@ -6,6 +6,14 @@ built. Entries that are not a dotfiles sync say so.
 
 ## 2026-10-13
 
+- New: `uninstall.sh` reverses `install.sh` and puts back the settings
+  `theme` changed in other apps. `--dry-run` shows what it would do; `--purge`
+  and `--remove-packages` go further. Thanks to @rcastley (#3).
+- New: the first install snapshots your Ghostty, btop, Neovim, Claude Code,
+  Obsidian, desktop picture, and `~/.zshrc` settings, and backs up `~/.zshrc`
+  before adding the shell hook. `install.sh --dry-run` now reports what a real
+  run would change, and works before you have a clone (#3).
+  Edited directly in the public repo; not part of the dotfiles export.
 - New: the README's first paragraph links the port's story post,
   [How to make macOS look and feel like Omarchy](https://dividendsolo.com/blog/how-to-make-macos-look-and-feel-like-omarchy).
   Edited directly in the public repo; not part of the dotfiles export.

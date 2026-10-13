@@ -36,8 +36,29 @@ Grant Accessibility to Hammerspoon and AeroSpace when macOS asks. Then ⌥K for
 the keybindings, ⌘⌥Space for the menu.
 
 **Update:** run the same script again. It pulls, relinks, resyncs themes, and
-restarts the services. `~/code/omarchy4mac/install.sh --dry-run` prints what
-it would do without touching anything.
+restarts the services. `~/code/omarchy4mac/install.sh --dry-run` reports what
+the real run would do (packages, links, `~/.zshrc` lines, alias clashes, the
+settings the first theme would change) without touching anything. It works
+before you have a clone:
+`curl -fsSL https://raw.githubusercontent.com/dividendsolo/omarchy4mac/main/install.sh | bash -s -- --dry-run`.
+
+The first install saves the settings `theme` rewrites in other apps (Ghostty,
+btop, Neovim, Claude Code, Obsidian, the desktop picture) and `~/.zshrc` to
+`~/.local/state/omarchy4mac/originals`, so you can go back.
+
+**Uninstall:**
+
+```sh
+~/code/omarchy4mac/uninstall.sh --dry-run   # see what it would do first
+~/code/omarchy4mac/uninstall.sh
+```
+
+It stops the services, unloads the launchd agents, removes the config links
+(restoring the newest `*.bak-<date>`), takes the shell hook out of `~/.zshrc`,
+and puts your saved app settings back. `--purge` also deletes the clone,
+theme cache, wallpapers, logs, and the snapshot. `--remove-packages` also
+uninstalls AeroSpace, Hammerspoon, SketchyBar, and borders. Flags combine.
+Shared tools from the Brewfile (Ghostty, Neovim, fzf…) are listed, not removed.
 
 **Options:** `SKIP_APPS=1` skips Brave, Raycast, and FluidVoice. Not in the
 Brewfile, install what you use: Steam (gaming mode), Claude Code and Obsidian
@@ -308,7 +329,7 @@ what changed and when is in [`CHANGELOG.md`](CHANGELOG.md).
 | Notifications (mako) | macOS Notification Center | ✅ | Matched by the OS. |
 | App launcher (walker) | Raycast (free plan) on ⌘Space | ✅ | Works the same for launching. No walker port needed. |
 | Voice typing (voxtype) | [FluidVoice](https://fluidvoice.app) | ✅ | Free, open source, Whisper on-device. Not bundled; install it yourself. |
-| Install in one command, update in one command | `install.sh`, rerun to update | ✅ |  |
+| Install in one command, update in one command | `install.sh`, rerun to update; `uninstall.sh` to back out | ✅ |  |
 | Theme backgrounds downloaded with the theme | `theme --sync` pulls each theme's `backgrounds/` into `~/Pictures/Wallpapers` | ✅ |  |
 | Theme reaches tmux, lazygit, VS Code | Terminal, editor, btop, Claude Code, Obsidian | ⚠️ | Planned when tmux is daily: render v4's tmux template and reload live sessions. lazygit and VS Code only if asked. |
 | Night light toggle | None | ⚠️ | Planned: Night Shift via osascript on ⌘⌃N and a menu item. Small. |
