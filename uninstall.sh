@@ -172,7 +172,7 @@ ORIG="$HOME/.local/state/omarchy4mac/originals"
 if [ -f "$ORIG/values.json" ]; then
   say "Restoring your pre-omarchy settings from $ORIG"
   DRY="$DRY" ORIG="$ORIG" CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}" python3 - <<'PY'
-import json, os, re, shutil
+import json, os, re, shutil, subprocess
 dry = os.environ["DRY"] == "1"; orig = os.environ["ORIG"]
 v = json.load(open(os.path.join(orig, "values.json")))
 H = os.path.expanduser("~")
@@ -182,6 +182,8 @@ def short(p): return p.replace(H, "~", 1)
 for cfg, val in v.get("ghostty", {}).items():
     if not val or val.startswith("omarchy-") or not os.path.isfile(cfg): continue
     text = open(cfg).read()
+    if dry:  # the omarchy line was not really dropped above; preview as if it were
+        text = re.sub(r"^[ \t]*theme[ \t]*=[ \t]*omarchy-.*\n?", "", text, flags=re.M)
     if re.search(r"^\s*theme\s*=", text, re.M): continue
     say(f"ghostty: theme = {val} ({short(cfg)})")
     if not dry: open(cfg, "a").write(("" if text.endswith("\n") else "\n") + f"theme = {val}\n")
@@ -217,7 +219,9 @@ w = v.get("wallpaper")
 if w and os.path.isfile(w) and "/Pictures/Wallpapers/" not in w:
     say(f"wallpaper: {short(w)}")
     if not dry:
-        os.system(f"osascript -e 'tell application \"System Events\" to set picture of every desktop to \"{w}\"' >/dev/null 2>&1")
+        subprocess.run(["osascript", "-e", "on run argv", "-e",
+                        'tell application "System Events" to set picture of every desktop to (item 1 of argv)',
+                        "-e", "end run", w], capture_output=True)
 PY
   note "full pre-install copies stay in $ORIG/files if you need anything else"
 fi

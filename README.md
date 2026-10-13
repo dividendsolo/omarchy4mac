@@ -39,7 +39,7 @@ the keybindings, ⌘⌥Space for the menu.
 restarts the services. `~/code/omarchy4mac/install.sh --dry-run` reports what
 the real run would do (packages, links, `~/.zshrc` lines, alias clashes, the
 settings the first theme would change) without touching anything. It works
-before you have a clone: 
+before you have a clone:
 `curl -fsSL https://raw.githubusercontent.com/dividendsolo/omarchy4mac/main/install.sh | bash -s -- --dry-run`.
 
 The first install saves the settings `theme` rewrites in other apps (Ghostty,
