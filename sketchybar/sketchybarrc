@@ -109,6 +109,17 @@ sketchybar --add item spotify_next left \
                  background.drawing=off \
                  click_script="osascript -e 'tell application \"Spotify\" to next track'"
 
+# Star (shown/hidden with the marquee by spotify.sh): ★ gold = in Your Library, ☆ = not yet; click to flip it.
+# Needs a one-time `tyler spotify login` (tyler-os coach/spotify_library.py); until then it shows a dim ☆.
+sketchybar --add item spotify_star left \
+           --set spotify_star \
+                 drawing=off \
+                 icon="☆" \
+                 icon.color="$COMMENT" \
+                 label.drawing=off \
+                 background.drawing=off \
+                 click_script="$PLUGIN_DIR/spotify_star.sh"
+
 # ---------- Center: indicators · clock · weather · updates · theme ----------
 # Indicators show only while their state is on (v4 bar). Pinned to the
 # external displays by clock.sh, like the clock: the notch eats the centre.
