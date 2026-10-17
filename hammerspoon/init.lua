@@ -594,3 +594,54 @@ for _, dir in ipairs(ghosttyConfigs) do
     end
   end):start()
 end
+
+----------------------------------------------------------------------
+-- Reveal the macOS menu bar under SketchyBar.
+-- Pointer at the top edge (y <= 2) hides SketchyBar so the auto-hiding
+-- menu bar can drop. Pointer staying below the menu-bar band (y > 40)
+-- for ~300ms shows SketchyBar again. Same in fullscreen.
+----------------------------------------------------------------------
+local SKETCHY = "/opt/homebrew/bin/sketchybar"
+local TOP_EDGE, SHOW_BELOW, SHOW_HOLD = 2, 40, 0.3
+
+local barHidden = false
+local showTimer = nil
+local barTask = nil
+
+local function setBarHidden(hide)
+  if hide == barHidden then return end
+  barHidden = hide
+  barTask = hs.task.new(SKETCHY, function() end, {
+    "--bar", hide and "hidden=on" or "hidden=off",
+  })
+  barTask:start()
+end
+
+local function mouseLocalY()
+  local screen = hs.mouse.getCurrentScreen()
+  if not screen then return nil end
+  return hs.mouse.absolutePosition().y - screen:fullFrame().y
+end
+
+local function cancelShow()
+  if showTimer then showTimer:stop(); showTimer = nil end
+end
+
+MenubarRevealTimer = hs.timer.doEvery(0.1, function()
+  local y = mouseLocalY()
+  if y == nil then return end
+  if y <= TOP_EDGE then
+    cancelShow()
+    setBarHidden(true)
+  elseif y > SHOW_BELOW then
+    if barHidden and not showTimer then
+      showTimer = hs.timer.doAfter(SHOW_HOLD, function()
+        showTimer = nil
+        local y2 = mouseLocalY()
+        if y2 and y2 > SHOW_BELOW then setBarHidden(false) end
+      end)
+    end
+  else
+    cancelShow()
+  end
+end)
