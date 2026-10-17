@@ -64,9 +64,14 @@ alt-j = 'layout tiles horizontal vertical'
 # Toggle it per workspace; cycle windows with the normal focus keys.
 alt-a = 'layout accordion tiles'
 
+# AeroSpace fullscreen keeps outer.top (40 = SketchyBar 32 + 8) so the bar stays
+# visible. Native macOS fullscreen (own Space) puts the window at y=0 under the
+# bar; Ctrl+Cmd+F is remapped to AeroSpace fullscreen. Default fullscreen
+# respects outer gaps; do not pass --no-outer-gaps here.
+# Exception: the green traffic-light button still triggers native fullscreen.
 alt-f = 'fullscreen'
 cmd-alt-f = 'fullscreen'
-cmd-ctrl-f = 'macos-native-fullscreen'
+cmd-ctrl-f = 'fullscreen'
 
 # ---------- Workspaces ----------
 alt-1 = 'workspace 1'

@@ -17,7 +17,9 @@ sketchybar --bar \
   margin=0 \
   notch_width=200 \
   display=all \
-  topmost=window
+  topmost=on \
+  sticky=on \
+  show_in_fullscreen=on
 
 # ---------- Defaults ----------
 default=(
@@ -53,7 +55,7 @@ sketchybar --add item logo left \
 # ---------- AeroSpace workspaces ----------
 for sid in 1 2 3 4 5; do
   sketchybar --add item space."$sid" left \
-             --subscribe space."$sid" aerospace_workspace_change \
+             --subscribe space."$sid" aerospace_workspace_change space_change \
              --set space."$sid" \
                    icon="$sid" \
                    label.drawing=off \
