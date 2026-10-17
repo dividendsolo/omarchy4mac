@@ -58,7 +58,8 @@ ctrl-alt-backspace = 'close-all-windows-but-current'
 alt-s = 'layout floating tiling'
 # Shuffle theme within the current light/dark mode. Was a Raycast script
 # command on one machine only, so adopters never got the key (2026-09-03).
-alt-t = 'exec-and-forget $HOME/.local/bin/theme random'
+# Moved off alt-t so Option+T reaches Ghostty / Claude Code (2026-10-17).
+ctrl-alt-shift-t = 'exec-and-forget $HOME/.local/bin/theme random'
 alt-j = 'layout tiles horizontal vertical'
 # Accordion: every window full width, inactive ones collapse to edge strips.
 # Toggle it per workspace; cycle windows with the normal focus keys.
