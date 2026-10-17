@@ -160,7 +160,6 @@ cmd-shift-e = 'exec-and-forget open -na "Brave Browser" --args --app=https://app
 cmd-shift-a = 'exec-and-forget open -a Claude'
 cmd-shift-alt-a = 'exec-and-forget open -na "Brave Browser" --args --app=https://grok.com'
 
-cmd-shift-g = 'exec-and-forget open -a Signal'
 cmd-shift-alt-g = 'exec-and-forget open -a WhatsApp'
 cmd-shift-ctrl-g = 'exec-and-forget open -na "Brave Browser" --args --app=https://chat.google.com'
 
