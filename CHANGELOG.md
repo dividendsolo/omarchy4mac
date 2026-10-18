@@ -4,6 +4,15 @@ Newest first. Each entry is a sync from the private dotfiles it is exported
 from, so a date here is the day the change went public, not the day it was
 built. Entries that are not a dotfiles sync say so.
 
+## 2026-10-18
+
+- Fix: `theme` finishes the switch when a theme has no wallpaper files. Under
+  the macOS system bash (3.2) the switch used to stop halfway, before the state
+  file and the live reloads. The previous wallpaper now stays, and a hotkey
+  switch shows one on-screen message saying so. A normal switch shows nothing.
+  On-screen messages use a Hammerspoon alert, with the macOS notification as
+  the fallback. Thanks to @tylerkessler (#6).
+
 ## 2026-10-13
 
 - New: `uninstall.sh` reverses `install.sh` and puts back the settings
