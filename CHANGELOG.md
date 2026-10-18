@@ -28,6 +28,10 @@ built. Entries that are not a dotfiles sync say so.
 - New: `tests/aerospace-test.sh` checks the fullscreen keys and the layout of
   every workspace, in the file and in the running AeroSpace.
 - New: `GLOSSARY.md` names fullscreen, native fullscreen, tiles, and accordion.
+- Changed: the bar's music title shows 23 characters (about 180 px), the
+  width of Omarchy 4's media widget; longer titles scroll. Was 18.
+- New: `tests/sketchybar-test.sh` checks that width in the file and measures
+  it in the running bar.
 
 ## 2026-10-13
 
