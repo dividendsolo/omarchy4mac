@@ -157,7 +157,7 @@ is also available.
 | ⌥J | Toggle tiles horizontal / vertical |
 | ⌥F | Fullscreen (tile) |
 | ⌘⌥F | Fullscreen (tile) |
-| ⌘⌃F | macOS native fullscreen |
+| ⌘⌃F | Fullscreen (tile), same as ⌥F |
 
 ### Focus
 

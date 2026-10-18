@@ -19,6 +19,15 @@ built. Entries that are not a dotfiles sync say so.
   to end. Run it after any change to `bin/theme`.
 - The terminal line for Ghostty now says open windows reload through
   Hammerspoon, which they do.
+- Changed: Ctrl+Cmd+F now gives fullscreen below SketchyBar, the same as
+  Alt+F. No key covers the bar any more; only the green window button still
+  gives macOS native fullscreen. Thanks to @tylerkessler (#6).
+- Changed: workspaces start in tiles, like Omarchy 4's default. Alt+A still
+  switches a workspace to accordion. Restart AeroSpace once after updating:
+  a config reload does not change workspaces that already exist.
+- New: `tests/aerospace-test.sh` checks the fullscreen keys and the layout of
+  every workspace, in the file and in the running AeroSpace.
+- New: `GLOSSARY.md` names fullscreen, native fullscreen, tiles, and accordion.
 
 ## 2026-10-13
 

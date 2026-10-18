@@ -8,9 +8,10 @@ start-at-login = false
 enable-normalization-flatten-containers = true
 enable-normalization-opposite-orientation-for-nested-containers = true
 
-# Accordion: focused window full width, other windows collapse to edge strips.
-# Cycle with cmd-backtick. alt-a toggles a workspace back to tiles.
-default-root-container-layout = 'accordion'
+# Tiles, like Omarchy 4's default (dwindle): new windows open side by side.
+# alt-a toggles a workspace to accordion (focused window full width, others
+# collapse to edge strips). Cycle windows with cmd-backtick.
+default-root-container-layout = 'tiles'
 default-root-container-orientation = 'auto'
 
 on-focused-monitor-changed = [
@@ -64,9 +65,12 @@ alt-j = 'layout tiles horizontal vertical'
 # Toggle it per workspace; cycle windows with the normal focus keys.
 alt-a = 'layout accordion tiles'
 
+# Fullscreen never covers SketchyBar: AeroSpace fullscreen keeps outer.top.
+# Ctrl+Cmd+F (the macOS fullscreen key) does the same as Alt+F; only the green
+# window button still gives native fullscreen (thanks @tylerkessler, #6).
 alt-f = 'fullscreen'
 cmd-alt-f = 'fullscreen'
-cmd-ctrl-f = 'macos-native-fullscreen'
+cmd-ctrl-f = 'fullscreen'
 
 # ---------- Workspaces ----------
 alt-1 = 'workspace 1'
