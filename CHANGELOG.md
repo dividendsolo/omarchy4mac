@@ -32,6 +32,12 @@ built. Entries that are not a dotfiles sync say so.
   width of Omarchy 4's media widget; longer titles scroll. Was 18.
 - New: `tests/sketchybar-test.sh` checks that width in the file and measures
   it in the running bar.
+- Changed: the Starship prompt is now Omarchy 4's own `starship.toml`, copied
+  verbatim. It uses the theme's terminal colors, so it follows every theme
+  switch; it adds a blank line before each prompt and drops the command
+  duration, as Omarchy does.
+- New: `tests/starship-test.sh` renders the prompt in a throwaway git repo and
+  checks the colors and symbols.
 
 ## 2026-10-13
 

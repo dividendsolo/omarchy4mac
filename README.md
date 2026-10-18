@@ -14,7 +14,7 @@ parts that matter on macOS with native tools:
 | Window borders | [JankyBorders](https://github.com/FelixKratz/JankyBorders) | `borders/` |
 | Keybindings / menus | [Hammerspoon](https://www.hammerspoon.org) | `hammerspoon/` |
 | Omarchy themes | `theme` script (syncs from basecamp/omarchy) | `bin/theme` |
-| Prompt | [Starship](https://starship.rs) | `starship/` |
+| Prompt | [Starship](https://starship.rs), Omarchy 4's own config | `starship/` |
 
 The `theme` script is the centerpiece: `theme --sync` pulls every theme
 straight from the Omarchy repo and converts it for Ghostty, Neovim (LazyVim),
