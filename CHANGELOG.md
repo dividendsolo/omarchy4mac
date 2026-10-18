@@ -6,6 +6,13 @@ built. Entries that are not a dotfiles sync say so.
 
 ## 2026-10-18
 
+- New: the bar's music item shows whatever plays, not only Spotify: YouTube
+  Music in Brave, Pear, or any player, from macOS Now Playing (`media-control`,
+  now in the Brewfile). It looks like Omarchy 4's media widget: a pause icon
+  while playing, a play icon while paused, "Title  ·  Artist", and a next
+  button. A click plays or pauses whatever plays (#7).
+- New: `tests/media-test.sh` checks the music item with a stubbed player and
+  in the running bar.
 - Fix: `theme` finishes the switch when a theme has no wallpaper files. Under
   the macOS system bash (3.2) the switch used to stop halfway, before the state
   file and the live reloads. The previous wallpaper now stays, and a hotkey

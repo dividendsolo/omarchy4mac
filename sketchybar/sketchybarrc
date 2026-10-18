@@ -81,35 +81,40 @@ sketchybar --add item front_app left \
                  script="$PLUGIN_DIR/front_app.sh" \
            --subscribe front_app front_app_switched
 
-# ---------- Spotify (now-playing marquee) ----------
-# Instant updates via Spotify's distributed notification; update_freq is a fallback.
+# ---------- Music (now playing, any player) ----------
+# Whatever plays (Spotify, YouTube Music in Brave, any player), from macOS
+# Now Playing via media-control, like Omarchy 4's media widget (MPRIS).
+# Spotify's notification refreshes it at once; update_freq covers the rest.
 # Title: 23 characters (about 180 px in Hack Nerd Font 13), the width of
 # Omarchy 4's media widget (maxLabelWidth: 180). Longer titles scroll.
 sketchybar --add event spotify_change "com.spotify.client.PlaybackStateChanged"
-sketchybar --add item spotify left \
-           --set spotify \
+sketchybar --add event media_refresh
+# Full path: click scripts do not get Homebrew on PATH.
+MEDIA_CONTROL="$(command -v media-control || echo /opt/homebrew/bin/media-control)"
+sketchybar --add item media left \
+           --set media \
                  drawing=off \
-                 icon="" \
-                 icon.color="$GREEN" \
+                 icon="󰐊" \
+                 icon.color="$FG" \
                  label.color="$FG" \
                  label.max_chars=23 \
                  scroll_texts=on \
                  label.scroll_duration=200 \
                  background.drawing=off \
-                 update_freq=5 \
-                 script="$PLUGIN_DIR/spotify.sh" \
-                 click_script="osascript -e 'tell application \"Spotify\" to playpause'" \
-           --subscribe spotify spotify_change
+                 update_freq=2 \
+                 script="$PLUGIN_DIR/media.sh" \
+                 click_script="$MEDIA_CONTROL toggle-play-pause; sleep 0.3; sketchybar --trigger media_refresh" \
+           --subscribe media spotify_change media_refresh
 
-# Next-track button (shown/hidden together with the marquee by spotify.sh)
-sketchybar --add item spotify_next left \
-           --set spotify_next \
+# Next-track button (shown/hidden together with the title by media.sh)
+sketchybar --add item media_next left \
+           --set media_next \
                  drawing=off \
-                 icon="" \
+                 icon="󰒭" \
                  icon.color="$FG" \
                  label.drawing=off \
                  background.drawing=off \
-                 click_script="osascript -e 'tell application \"Spotify\" to next track'"
+                 click_script="$MEDIA_CONTROL next-track; sleep 0.3; sketchybar --trigger media_refresh"
 
 # ---------- Center: indicators · clock · weather · updates · theme ----------
 # Indicators show only while their state is on (v4 bar). Pinned to the
@@ -268,8 +273,8 @@ NAME=volume bash "$PLUGIN_DIR/volume.sh"
 FRONT_APP="$(osascript -e 'tell application "System Events" to get name of first application process whose frontmost is true' 2>/dev/null)"
 NAME=front_app SENDER=front_app_switched INFO="$FRONT_APP" bash "$PLUGIN_DIR/front_app.sh"
 
-# Prime Spotify marquee on startup
-NAME=spotify bash "$PLUGIN_DIR/spotify.sh"
+# Prime the music item on startup
+NAME=media bash "$PLUGIN_DIR/media.sh"
 
 # Prime the stand-up / sit-down icons on startup (they have no event to subscribe to)
 NAME=standup bash "$PLUGIN_DIR/standup.sh"
