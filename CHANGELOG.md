@@ -18,7 +18,7 @@ built. Entries that are not a dotfiles sync say so.
   file and the live reloads. The previous wallpaper now stays, and a hotkey
   switch shows one on-screen message saying so. A normal switch shows nothing.
   On-screen messages use a Hammerspoon alert, with the macOS notification as
-  the fallback. Thanks to @tylerkessler (#6).
+  the fallback. Thanks to **[@tylerkessler](https://github.com/tylerkessler)** (#6).
 - Fix: under the macOS system bash (3.2), `theme` never set the wallpaper,
   even for themes that have wallpapers.
 - New: `tests/theme-test.sh` runs `theme` the way a hotkey does (no terminal,
@@ -28,7 +28,7 @@ built. Entries that are not a dotfiles sync say so.
   Hammerspoon, which they do.
 - Changed: Ctrl+Cmd+F now gives fullscreen below SketchyBar, the same as
   Alt+F. No key covers the bar any more; only the green window button still
-  gives macOS native fullscreen. Thanks to @tylerkessler (#6).
+  gives macOS native fullscreen. Thanks to **[@tylerkessler](https://github.com/tylerkessler)** (#6).
 - Changed: workspaces start in tiles, like Omarchy 4's default. Alt+A still
   switches a workspace to accordion. Restart AeroSpace once after updating:
   a config reload does not change workspaces that already exist.
@@ -50,7 +50,7 @@ built. Entries that are not a dotfiles sync say so.
 
 - New: `uninstall.sh` reverses `install.sh` and puts back the settings
   `theme` changed in other apps. `--dry-run` shows what it would do; `--purge`
-  and `--remove-packages` go further. Thanks to @rcastley (#3).
+  and `--remove-packages` go further. Thanks to **[@rcastley](https://github.com/rcastley)** (#3).
 - New: the first install snapshots your Ghostty, btop, Neovim, Claude Code,
   Obsidian, desktop picture, and `~/.zshrc` settings, and backs up `~/.zshrc`
   before adding the shell hook. `install.sh --dry-run` now reports what a real
@@ -82,7 +82,7 @@ built. Entries that are not a dotfiles sync say so.
 - Fix: a fresh install failed at `brew bundle` with "No Cask with this name
   exists" for `aerospace`. AeroSpace is not in homebrew/cask; it ships from
   its author's tap. The Brewfile now taps `nikitabobko/tap` and installs
-  `nikitabobko/tap/aerospace`. Thanks to @pedenys for the report (#2).
+  `nikitabobko/tap/aerospace`. Thanks to **[@pedenys](https://github.com/pedenys)** for the report (#2).
 
 ## 2026-09-21
 
