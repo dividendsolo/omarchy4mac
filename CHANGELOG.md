@@ -6,6 +6,9 @@ built. Entries that are not a dotfiles sync say so.
 
 ## 2026-10-18
 
+- Faster theme switch: the bar and the terminals reload first, and the
+  slow per-profile Hermes skin step runs after them. The bar changes 0.25 s
+  into a switch instead of after 4 s or more.
 - New: the bar's music item shows whatever plays, not only Spotify: YouTube
   Music in Brave, Pear, or any player, from macOS Now Playing (`media-control`,
   now in the Brewfile). It looks like Omarchy 4's media widget: a pause icon

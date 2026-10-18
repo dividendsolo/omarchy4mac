@@ -653,18 +653,20 @@ apply_ghostty "$name"
 apply_nvim "$name"
 apply_btop "$name"
 apply_sketchybar "$name"
-apply_claude "$name"
-apply_hermes "$name"
-apply_obsidian "$name"
 apply_wallpaper "$name"
 mkdir -p "$(dirname "$STATE")"; echo "$name" > "$STATE"
 
+# What the eye sees reloads first. Hermes starts one Python per profile and
+# took 4s+ (more under lane load), which held the bar on the old theme.
 if [[ "$do_reload" -eq 1 ]]; then
+  reload_sketchybar
   reload_ghostty
   reload_nvim "$(colorscheme_of "$CACHE/$name/neovim.lua")"
   reload_btop
-  reload_sketchybar
 fi
+apply_claude "$name"
+apply_obsidian "$name"
+apply_hermes "$name"
 echo "${c_grn}done.${c_rst} ${c_dim}New Ghostty windows + nvim sessions + btop launches use $name immediately.${c_rst}"
 # A normal switch shows itself; only a missing wallpaper needs words.
 [[ -n "${WALLPAPER_NOTE:-}" ]] && notify "Switched to $name.$WALLPAPER_NOTE"
