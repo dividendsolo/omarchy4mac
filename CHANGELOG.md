@@ -12,6 +12,13 @@ built. Entries that are not a dotfiles sync say so.
   switch shows one on-screen message saying so. A normal switch shows nothing.
   On-screen messages use a Hammerspoon alert, with the macOS notification as
   the fallback. Thanks to @tylerkessler (#6).
+- Fix: under the macOS system bash (3.2), `theme` never set the wallpaper,
+  even for themes that have wallpapers.
+- New: `tests/theme-test.sh` runs `theme` the way a hotkey does (no terminal,
+  bash 3.2, a throwaway HOME, stubbed desktop tools) and checks the switch end
+  to end. Run it after any change to `bin/theme`.
+- The terminal line for Ghostty now says open windows reload through
+  Hammerspoon, which they do.
 
 ## 2026-10-13
 

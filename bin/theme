@@ -75,7 +75,7 @@ die() { echo "${c_red}error:${c_rst} $*" >&2; exit 1; }
 # Editor, which macOS shows only after that app gets notification permission.
 notify() {
   [[ -t 1 ]] && return 0
-  local hs=/opt/homebrew/bin/hs
+  local hs; hs="$(command -v hs 2>/dev/null || echo /opt/homebrew/bin/hs)"
   if [[ -x "$hs" ]] && pgrep -xq Hammerspoon; then
     "$hs" -c "hs.alert.show([[$1]], 5)" >/dev/null 2>&1 &
     return 0
@@ -558,7 +558,8 @@ apply_wallpaper() {
   local name="$1" dir="$HOME/Pictures/Wallpapers"
   [[ -d "$dir" ]] || return 0
   shopt -s nullglob nocaseglob
-  local files=( "$dir/${name}_"*.{jpg,jpeg,png,heic,webp} )
+  # Declare, then assign: bash 3.2 drops `local files=( <glob> )` entirely.
+  local files; files=( "$dir/${name}_"*.{jpg,jpeg,png,heic,webp} )
   shopt -u nocaseglob
   # bash 3.2 + set -u: ${#files[@]} on an empty array is "unbound", so test the join.
   # Thanks to @tylerkessler (omarchy4mac#6).
