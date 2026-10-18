@@ -646,11 +646,11 @@ MenubarRevealTimer = hs.timer.doEvery(0.1, function()
   end
 end)
 
--- hammerspoon://tab?n=1 brings tmux window N of session main forward in Ghostty,
+-- hammerspoon://tab?n=1 brings tmux window N of session TKOS forward in Ghostty,
 -- so links in Claude Code's band (⌘1 TKOS Live) are clickable.
 hs.urlevent.bind("tab", function(_, params)
   local n = tonumber(params and params.n or "")
   if not n then return end
-  hs.execute(string.format("/opt/homebrew/bin/tmux select-window -t main:%d", n))
+  hs.execute(string.format("/opt/homebrew/bin/tmux select-window -t TKOS:%d", n))
   hs.application.launchOrFocus("Ghostty")
 end)
