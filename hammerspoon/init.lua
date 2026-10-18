@@ -45,7 +45,7 @@ local bindings = {
   { "ALT + J",                  "Toggle tiles horizontal / vertical" },
   { "ALT + F",                  "Fullscreen (tile)" },
   { "SUPER + ALT + F",          "Fullscreen (tile)" },
-  { "SUPER + CTRL + F",         "macOS native fullscreen" },
+  { "SUPER + CTRL + F",         "Fullscreen (tile)" },
 
   -- Focus
   { "SUPER + LEFT / DOWN / UP / RIGHT",  "Focus window in direction" },

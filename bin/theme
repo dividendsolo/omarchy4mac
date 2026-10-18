@@ -71,8 +71,15 @@ die() { echo "${c_red}error:${c_rst} $*" >&2; exit 1; }
 
 # Toast for callers with no terminal (AeroSpace exec-and-forget, launchd).
 # Without this, alt-t shows nothing at all — failures were invisible.
+# Hammerspoon's on-screen alert first: osascript notifications post as Script
+# Editor, which macOS shows only after that app gets notification permission.
 notify() {
   [[ -t 1 ]] && return 0
+  local hs; hs="$(command -v hs 2>/dev/null || echo /opt/homebrew/bin/hs)"
+  if [[ -x "$hs" ]] && pgrep -xq Hammerspoon; then
+    "$hs" -c "hs.alert.show([[$1]], 5)" >/dev/null 2>&1 &
+    return 0
+  fi
   osascript -e "display notification \"$1\" with title \"Theme\"" >/dev/null 2>&1 || true
 }
 
@@ -318,9 +325,10 @@ reload_ghostty() {
   # No live reload. Live reload hung Ghostty with sessions open: SIGUSR2
   # (Ghostty 1.3.1) triggered "libxev_kqueue: invalid state in submission
   # queue" and a main-thread hang that needed a force quit, every time the
-  # appearance watcher switched themes. The config file is already rewritten,
-  # so new windows get the theme; press Cmd-Shift-, to reload open windows.
-  echo "  ${c_dim}ghostty${c_rst}  new windows only (press ${c_bold}⌘⇧,${c_rst} to reload open windows)"
+  # appearance watcher switched themes. The config file is already rewritten;
+  # the Hammerspoon watcher on the Ghostty configs (hammerspoon/init.lua)
+  # reloads open windows through Ghostty's own menu item.
+  echo "  ${c_dim}ghostty${c_rst}  open windows reload through Hammerspoon"
 }
 
 apply_nvim() {
@@ -550,9 +558,16 @@ apply_wallpaper() {
   local name="$1" dir="$HOME/Pictures/Wallpapers"
   [[ -d "$dir" ]] || return 0
   shopt -s nullglob nocaseglob
-  local files=( "$dir/${name}_"*.{jpg,jpeg,png,heic,webp} )
+  # Declare, then assign: bash 3.2 drops `local files=( <glob> )` entirely.
+  local files; files=( "$dir/${name}_"*.{jpg,jpeg,png,heic,webp} )
   shopt -u nocaseglob
-  [[ ${#files[@]} -eq 0 ]] && { echo "  ${c_yel}wallpaper${c_rst} ! none found for '$name' in $dir — skipped"; return 0; }
+  # bash 3.2 + set -u: ${#files[@]} on an empty array is "unbound", so test the join.
+  # Thanks to @tylerkessler (omarchy4mac#6).
+  if [[ -z "${files[*]-}" ]]; then
+    echo "  ${c_yel}wallpaper${c_rst} ! none found for '$name' in $dir — skipped"
+    WALLPAPER_NOTE=" No wallpaper for this theme in ~/Pictures/Wallpapers, so the previous wallpaper stays."
+    return 0
+  fi
 
   # If current desktop picture is already from this theme, keep it
   local current; current="$(osascript -e 'tell application "System Events" to tell current desktop to get picture' 2>/dev/null)"
@@ -651,4 +666,6 @@ if [[ "$do_reload" -eq 1 ]]; then
   reload_sketchybar
 fi
 echo "${c_grn}done.${c_rst} ${c_dim}New Ghostty windows + nvim sessions + btop launches use $name immediately.${c_rst}"
-notify "Switched to $name"
+# A normal switch shows itself; only a missing wallpaper needs words.
+[[ -n "${WALLPAPER_NOTE:-}" ]] && notify "Switched to $name.$WALLPAPER_NOTE"
+exit 0

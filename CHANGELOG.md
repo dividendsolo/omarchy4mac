@@ -4,6 +4,41 @@ Newest first. Each entry is a sync from the private dotfiles it is exported
 from, so a date here is the day the change went public, not the day it was
 built. Entries that are not a dotfiles sync say so.
 
+## 2026-10-18
+
+- Fix: `theme` finishes the switch when a theme has no wallpaper files. Under
+  the macOS system bash (3.2) the switch used to stop halfway, before the state
+  file and the live reloads. The previous wallpaper now stays, and a hotkey
+  switch shows one on-screen message saying so. A normal switch shows nothing.
+  On-screen messages use a Hammerspoon alert, with the macOS notification as
+  the fallback. Thanks to @tylerkessler (#6).
+- Fix: under the macOS system bash (3.2), `theme` never set the wallpaper,
+  even for themes that have wallpapers.
+- New: `tests/theme-test.sh` runs `theme` the way a hotkey does (no terminal,
+  bash 3.2, a throwaway HOME, stubbed desktop tools) and checks the switch end
+  to end. Run it after any change to `bin/theme`.
+- The terminal line for Ghostty now says open windows reload through
+  Hammerspoon, which they do.
+- Changed: Ctrl+Cmd+F now gives fullscreen below SketchyBar, the same as
+  Alt+F. No key covers the bar any more; only the green window button still
+  gives macOS native fullscreen. Thanks to @tylerkessler (#6).
+- Changed: workspaces start in tiles, like Omarchy 4's default. Alt+A still
+  switches a workspace to accordion. Restart AeroSpace once after updating:
+  a config reload does not change workspaces that already exist.
+- New: `tests/aerospace-test.sh` checks the fullscreen keys and the layout of
+  every workspace, in the file and in the running AeroSpace.
+- New: `GLOSSARY.md` names fullscreen, native fullscreen, tiles, and accordion.
+- Changed: the bar's music title shows 23 characters (about 180 px), the
+  width of Omarchy 4's media widget; longer titles scroll. Was 18.
+- New: `tests/sketchybar-test.sh` checks that width in the file and measures
+  it in the running bar.
+- Changed: the Starship prompt is now Omarchy 4's own `starship.toml`, copied
+  verbatim. It uses the theme's terminal colors, so it follows every theme
+  switch; it adds a blank line before each prompt and drops the command
+  duration, as Omarchy does.
+- New: `tests/starship-test.sh` renders the prompt in a throwaway git repo and
+  checks the colors and symbols.
+
 ## 2026-10-13
 
 - New: `uninstall.sh` reverses `install.sh` and puts back the settings

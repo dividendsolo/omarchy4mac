@@ -83,6 +83,8 @@ sketchybar --add item front_app left \
 
 # ---------- Spotify (now-playing marquee) ----------
 # Instant updates via Spotify's distributed notification; update_freq is a fallback.
+# Title: 23 characters (about 180 px in Hack Nerd Font 13), the width of
+# Omarchy 4's media widget (maxLabelWidth: 180). Longer titles scroll.
 sketchybar --add event spotify_change "com.spotify.client.PlaybackStateChanged"
 sketchybar --add item spotify left \
            --set spotify \
@@ -90,7 +92,7 @@ sketchybar --add item spotify left \
                  icon="" \
                  icon.color="$GREEN" \
                  label.color="$FG" \
-                 label.max_chars=18 \
+                 label.max_chars=23 \
                  scroll_texts=on \
                  label.scroll_duration=200 \
                  background.drawing=off \
