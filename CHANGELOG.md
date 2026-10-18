@@ -6,6 +6,9 @@ built. Entries that are not a dotfiles sync say so.
 
 ## 2026-10-18
 
+- Gaming mode hides the bar, and the bar comes back when Steam quits.
+- `ls`, `lsa`, `lt` and `lta` no longer alias eza: eza hangs when its output
+  goes to a pipe.
 - Faster theme switch: the bar and the terminals reload first, and the
   slow per-profile Hermes skin step runs after them. The bar changes 0.25 s
   into a switch instead of after 4 s or more.

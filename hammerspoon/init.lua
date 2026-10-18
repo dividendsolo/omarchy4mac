@@ -589,3 +589,10 @@ for _, dir in ipairs(ghosttyConfigs) do
     end
   end):start()
 end
+
+-- Gaming mode hides SketchyBar; show it again when Steam quits.
+SteamWatcher = hs.application.watcher.new(function(name, event, app)
+  if event == hs.application.watcher.terminated and name == "Steam" then
+    hs.execute("/opt/homebrew/bin/sketchybar --bar hidden=off")
+  end
+end):start()

@@ -1,5 +1,5 @@
 #!/bin/bash
-# gaming-mode — quit every Dock app except Finder (and Steam), take Tailscale down, then bring up Steam.
+# gaming-mode — quit every Dock app except Finder (and Steam), take Tailscale down, hide SketchyBar, then bring up Steam.
 # Bound to SUPER+CTRL+G in ~/.hammerspoon/init.lua; also runnable from a terminal.
 
 osascript <<'EOF'
@@ -20,7 +20,10 @@ EOF
 # Drop the VPN for lower game latency, only if Tailscale is installed.
 command -v tailscale >/dev/null 2>&1 && tailscale down
 
+# Hide SketchyBar while gaming; Hammerspoon brings it back when Steam quits.
+/opt/homebrew/bin/sketchybar --bar hidden=on
+
 open -a Steam
 
 # TITLE|||BODY format consumed by Hammerspoon's notifyFromScript
-echo "Gaming mode|||All apps quit, Tailscale down — Steam is up."
+echo "Gaming mode|||All apps quit, Tailscale down, bar hidden — Steam is up."
