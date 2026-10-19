@@ -279,3 +279,7 @@ NAME=media bash "$PLUGIN_DIR/media.sh"
 # Prime the stand-up / sit-down icons on startup (they have no event to subscribe to)
 NAME=standup bash "$PLUGIN_DIR/standup.sh"
 NAME=standup_center bash "$PLUGIN_DIR/standup.sh"
+
+# Run every item script once now: after a reload, an item is blank until its first
+# update_freq tick (weather 30 min, updates 6 h), which hid the clock after a theme switch.
+sketchybar --update

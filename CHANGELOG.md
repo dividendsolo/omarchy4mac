@@ -6,6 +6,8 @@ built. Entries that are not a dotfiles sync say so.
 
 ## 2026-10-18
 
+- The bar fills every item as soon as it starts or reloads, so the clock and
+  the weather no longer stay blank after a theme switch.
 - Gaming mode hides the bar, and the bar comes back when Steam quits.
 - `ls`, `lsa`, `lt` and `lta` no longer alias eza: eza hangs when its output
   goes to a pipe.

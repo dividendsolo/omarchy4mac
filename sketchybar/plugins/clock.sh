@@ -7,6 +7,13 @@ THEME="$(cat "$HOME/.config/theme-switcher/current" 2>/dev/null || echo "?")"
 
 source "$CONFIG_DIR/plugins/displays.sh"
 
+# A failed display lookup (it happens under heavy load) must not hide the clock:
+# keep where it is drawn and only refresh the time.
+if [ "$DISPLAYS_OK" = 0 ]; then
+  sketchybar --set clock label="$LABEL" --set clock_right label="$LABEL"
+  exit 0
+fi
+
 if [ "$BUILTIN" != "-" ]; then
   sketchybar --set clock_right drawing=on associated_display="$BUILTIN" \
                    icon="$ICON" icon.color="$MAGENTA" label="$LABEL" label.color="$FG" \

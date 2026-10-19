@@ -30,7 +30,11 @@ print(",".join(builtin) or "-", ",".join(others) or "-")
 ' 2>/dev/null
 )"
 # If anything above failed, fall back to the plain centered layout everywhere.
-[ -n "$BUILTIN" ] || { BUILTIN="-"; OTHERS="0"; }
+DISPLAYS_OK=1
+if [ -z "$BUILTIN" ]; then
+  DISPLAYS_OK=0; BUILTIN="-"; OTHERS="0"
+  echo "$(date '+%F %T') displays.sh: detection failed (${NAME:-?})" >> "$HOME/.cache/sketchybar-displays.log"
+fi
 
 # Show a centre item on the externals only; the notch eats the centre on the
 # built-in. Usage: center_item <name> [--set args...]
