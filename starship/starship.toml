@@ -1,4 +1,4 @@
-# Starship: Omarchy 4's prompt, copied verbatim from basecamp/omarchy
+# Starship: Omarchy 4's prompt, copied verbatim from omacom/omarchy
 # config/starship.toml (quattro @ a6dcc31). Its colors are terminal colors (cyan),
 # so the prompt follows every theme switch. Update by copying it again.
 

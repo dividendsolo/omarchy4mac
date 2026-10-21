@@ -1,6 +1,6 @@
 # omarchy4mac
 
-Omarchy 4, for the Mac. An [Omarchy](https://github.com/basecamp/omarchy) port for macOS — for those of
+Omarchy 4, for the Mac. An [Omarchy](https://github.com/omacom/omarchy) port for macOS — for those of
 us who want the Omarchy experience but can't (or won't) leave the Mac. The
 story of the port: [How to make macOS look and feel like Omarchy](https://dividendsolo.com/blog/how-to-make-macos-look-and-feel-like-omarchy).
 
@@ -13,7 +13,7 @@ parts that matter on macOS with native tools:
 | Waybar | [SketchyBar](https://github.com/FelixKratz/SketchyBar) | `sketchybar/` |
 | Window borders | [JankyBorders](https://github.com/FelixKratz/JankyBorders) | `borders/` |
 | Keybindings / menus | [Hammerspoon](https://www.hammerspoon.org) | `hammerspoon/` |
-| Omarchy themes | `theme` script (syncs from basecamp/omarchy) | `bin/theme` |
+| Omarchy themes | `theme` script (syncs from omacom/omarchy) | `bin/theme` |
 | Prompt | [Starship](https://starship.rs), Omarchy 4's own config | `starship/` |
 
 The `theme` script is the centerpiece: `theme --sync` pulls every theme
@@ -349,7 +349,7 @@ If a gap bothers you, open an issue.
 
 ## Credits
 
-- [basecamp/omarchy](https://github.com/basecamp/omarchy) — the original, and
+- [omacom/omarchy](https://github.com/omacom/omarchy) — the original, and
   the live source of every theme this port uses.
 - AeroSpace, SketchyBar, JankyBorders, Hammerspoon, Starship — the projects
   doing the actual work.

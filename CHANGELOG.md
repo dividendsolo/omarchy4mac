@@ -4,6 +4,11 @@ Newest first. Each entry is a sync from the private dotfiles it is exported
 from, so a date here is the day the change went public, not the day it was
 built. Entries that are not a dotfiles sync say so.
 
+## 2026-10-21
+
+- Links to Omarchy point to its new home, omacom/omarchy (Omarchy 4.0.5 moved
+  them there). The prompt's source line says so too.
+
 ## 2026-10-18
 
 - The bar fills every item as soon as it starts or reloads, so the clock and
