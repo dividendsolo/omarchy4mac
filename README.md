@@ -151,7 +151,7 @@ is also available.
 | Keys | Action |
 |---|---|
 | ⌥W | Quit focused app |
-| ⌃⌫ | Close all windows but current |
+| ⌃⌥⌫ | Close all windows but current |
 | ⌥S | Toggle floating / tiling |
 | ⌥A | Toggle accordion / tiles (workspace) |
 | ⌥J | Toggle tiles horizontal / vertical |
@@ -166,8 +166,8 @@ is also available.
 | ⌘←/↓/↑/→ | Focus window in direction |
 | ⌘` | Cycle next window in workspace |
 | ⌘⇧` | Cycle previous window in workspace |
-| ⌃⇥ | Focus next monitor |
-| ⌃⇧⇥ | Focus previous monitor |
+| ⌃⌥⇥ | Focus next monitor |
+| ⌃⌥⇧⇥ | Focus previous monitor |
 
 ### Move / Swap
 
@@ -182,7 +182,7 @@ is also available.
 | Keys | Action |
 |---|---|
 | ⌥1–5 | Switch to workspace 1–5 |
-| ⇥ | Back and forth between last two workspaces |
+| ⌥⇥ | Back and forth between last two workspaces |
 | ⌘⌃⇥ | Back and forth between last two workspaces |
 | ⌘⇧1–5 | Move window to workspace N and follow |
 | ⌘⇧⌥1–5 | Move window to workspace N (stay on current) |
@@ -239,10 +239,7 @@ is also available.
 
 | Alias | Command |
 |---|---|
-| `ls` | eza -lh (grouped dirs, icons) |
-| `lsa` | ls -a |
-| `lt` | eza tree (2 levels, long, git) |
-| `lta` | lt -a |
+| `cd` | zd (zoxide jump; real paths still `cd`) |
 | `ff` | fzf (bat preview) |
 | `eff` | $EDITOR (fzf result) |
 | `g` | git |
