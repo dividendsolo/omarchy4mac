@@ -6,6 +6,17 @@ built. Entries that are not a dotfiles sync say so.
 
 ## 2026-10-21
 
+- Fix: the Keybindings table names the chords the config binds again. Ctrl+Alt+Backspace
+  closes every window but the current one, Ctrl+Alt+Tab and Ctrl+Alt+Shift+Tab
+  focus the next and previous monitor, and Alt+Tab goes back and forth between
+  the last two workspaces. Those four rows had lost their option key, so the
+  table taught a key that does nothing (#13).
+- The shell alias table matches `zsh/omarchy.zsh` again: `ls`, `lsa`, `lt` and
+  `lta` are gone (the eza aliases were dropped on 2026-10-18) and `cd`, the
+  zoxide jump, is listed (#13).
+- New: `tests/readme-test.sh` checks the README's keybinding rows against
+  `aerospace/aerospace.toml` and `hammerspoon/init.lua`, and its alias table
+  against `zsh/omarchy.zsh`, so the tables cannot drift again.
 - Links to Omarchy point to its new home, omacom/omarchy (Omarchy 4.0.5 moved
   them there). The prompt's source line says so too.
 
