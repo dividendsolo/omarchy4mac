@@ -121,10 +121,10 @@ is also available.
 | Keys | Action |
 |---|---|
 | ⌥↩ | Ghostty (terminal) |
-| ⌘⌥↩ | Ghostty + tmux |
+| ⌘⌥↩ | Ghostty + tmux (attaches to the session "Work", or makes it) |
 | ⌘⌃↩ | Ghostty + herdr (agent multiplexer) |
-| ⌘⇧↩ | Brave browser |
-| ⌘⇧⌥B | Brave (incognito) |
+| ⌘⇧↩ | Browser (macOS default) |
+| ⌘⇧⌥B | Browser (private window) |
 | ⌘⌥C | Chrome |
 | ⌘⇧F | Finder |
 | ⌘⇧N | Ghostty + nvim |
@@ -209,7 +209,7 @@ is also available.
 | ⌘⌃⇧Q | Quit every Dock app (keeps Finder) |
 | ⌘⌃R | Set a reminder (20m message) |
 | ⌘⌃Z | Zoom (macOS accessibility) |
-| ⌘⇧⌃A | Coding agent (Ghostty + claude) |
+| ⌘⇧⌃A | Coding agent (the pick in Setup > Defaults > Agent, Claude Code by default) |
 | ⌘⌃T / ⌥⇧T | Activity (Ghostty + btop) |
 | ⌘⌃H | System Information |
 | ⌘⌃. | HandBrake |
@@ -305,20 +305,20 @@ what changed and when is in [`CHANGELOG.md`](CHANGELOG.md).
 | Omarchy Quattro has | omarchy4mac uses | Match | Why not, and the plan |
 |---|---|---|---|
 | Tiling WM: focus, move, swap, resize, fullscreen, 5 workspaces, monitors | AeroSpace | ✅ |  |
-| Top bar: logo opens menu, workspaces, indicators, clock, weather, updates badge, agents spend, bluetooth, wifi, audio, battery | SketchyBar, v4 layout | ✅ |  |
+| Top bar: logo opens menu, workspaces, indicators, clock, weather, updates badge, agents limits (Claude Code 5-hour and weekly), bluetooth, wifi, audio, battery | SketchyBar, v4 layout | ✅ |  |
 | Active-window borders | JankyBorders | ✅ |  |
 | All 22 v4 themes, generated from Omarchy's own templates | `theme --sync`, renders Ghostty, Neovim, btop from the v4 `.tpl` files | ✅ |  |
 | Theme chooser (Super+Ctrl+Shift+Space) | Hammerspoon chooser on ⌘⌃⇧Space | ✅ |  |
 | Menu tree: Apps, Learn, Trigger, Style, Setup, Install, Update, System, nested search | Hammerspoon on ⌘⌥Space, ⌘Esc to System | ✅ |  |
 | Keybinding overlay (Super+K) | ⌥K, every binding listed | ✅ |  |
-| Web apps as app windows (Super+Shift+letter) | Brave `--app=` windows on the same keys (HEY, Photos, YouTube, Grok, Google Chat) | ✅ |  |
+| Web apps as app windows (Super+Shift+letter) | `--app=` windows of the default browser on the same keys (HEY, Photos, YouTube, Grok, Google Chat) | ✅ |  |
 | Screensaver: ttfx ASCII art per monitor after 150 s | Hammerspoon idle timer, Ghostty + ttfx per display | ✅ |  |
 | Shell defaults: eza, bat, fzf, zoxide, git and tool aliases | `zsh/omarchy.zsh` | ✅ |  |
 | Wallpaper per theme, cycle key | `omarchy-cycle-wallpaper` on ⌘⌃P | ✅ |  |
 | Emoji picker key | Raycast emoji on ⌘⌃E | ✅ |  |
 | Clipboard history key | Raycast clipboard on ⌘⌃V | ✅ |  |
 | Idle inhibit (keep awake) with bar indicator | caffeinate on ⌘⌃I, bar indicator | ✅ |  |
-| Coding agent in a fresh terminal (Super+Shift+Ctrl+A) | ⌘⇧⌃A, Ghostty + claude | ✅ |  |
+| Coding agent in a fresh terminal (Super+Shift+Ctrl+A) | ⌘⇧⌃A, Ghostty + the default agent | ✅ |  |
 | Herdr agent multiplexer (Super+Ctrl+Return, `h`, `hdl`/`hds`/`hdlm`/`hsl`) | ⌘⌃↩ opens Ghostty + herdr; Omarchy's `config.toml` verbatim in `herdr/`; layouts in `zsh/omarchy.zsh` | ✅ | `brew install herdr jq`, symlink `herdr/config.toml` to `~/.config/herdr/config.toml`. Theme follows the terminal palette. |
 | Lock key | macOS lock on ⌘⌃L | ✅ |  |
 | Time / weather / battery notices | `omarchy-notice` on ⌘⌃⌥ T/W/B | ✅ |  |

@@ -4,6 +4,22 @@ Newest first. Each entry is a sync from the private dotfiles it is exported
 from, so a date here is the day the change went public, not the day it was
 built. Entries that are not a dotfiles sync say so.
 
+## 2026-10-22
+
+- Cmd+Alt+Enter attaches to one tmux session named "Work", or makes it the
+  first time, like Omarchy 4. Before, it started a new session every time.
+- Pick the default coding agent (Claude Code, Codex, Grok, Hermes, OpenClaw)
+  under Setup > Defaults > Agent in the Omarchy menu, like Omarchy 4.
+  Super+Shift+Ctrl+A starts the pick. Claude Code stays the default.
+- The browser key, the private window and every web app open in the macOS
+  default browser, like Omarchy 4.0.5. Brave is no longer named anywhere.
+- A new window goes to the workspace for its kind of app: 1 browsers,
+  2 terminals, 3 AI apps and code editors, 4 messaging, 5 media. Omarchy has
+  no such rule; edit the list at the end of aerospace.toml to change it.
+- The agents item in the bar shows the Claude Code 5-hour and weekly limits
+  with their reset times, like Omarchy 4.0.5. It reads the Claude Code login
+  from the macOS Keychain, and shows today's spend when the limits are unknown.
+
 ## 2026-10-21
 
 - Fix: the Keybindings table names the chords the config binds again. Ctrl+Alt+Backspace

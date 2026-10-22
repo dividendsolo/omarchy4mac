@@ -1,0 +1,32 @@
+#!/bin/zsh
+# Default coding agent (v4: Setup > Defaults > Agent, `omarchy default agent`).
+# No argument: print the pick (Claude Code when none is made yet). With a name:
+# store it where v4 does, ~/.config/omarchy/defaults/agent. The output line is
+# "title|||body" so the Hammerspoon menu can show it as a notification.
+export PATH="$HOME/.local/bin:$HOME/.bun/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
+agent_file="$HOME/.config/omarchy/defaults/agent"
+
+if (( $# == 0 )); then
+  [[ -f $agent_file ]] && read -r agent <"$agent_file"
+  echo "${agent:-claude}"
+  exit 0
+fi
+
+case "$1" in
+  claude|claude-code) agent=claude;   name="Claude Code" ;;
+  codex)              agent=codex;    name="Codex" ;;
+  grok)               agent=grok;     name="Grok" ;;
+  hermes)             agent=hermes;   name="Hermes" ;;
+  openclaw)           agent=openclaw; name="OpenClaw" ;;
+  *) echo "Usage: omarchy-default-agent [claude|codex|grok|hermes|openclaw]" >&2; exit 1 ;;
+esac
+
+# nvm installs (codex) live outside the fixed PATH above, so ask a login shell.
+if ! command -v "$agent" >/dev/null && ! zsh -lic "command -v $agent" >/dev/null 2>&1; then
+  echo "Agent|||$name is not installed"
+  exit 1
+fi
+
+mkdir -p "${agent_file:h}"
+print -r -- "$agent" >"$agent_file"
+echo "Agent|||$name is the default agent"

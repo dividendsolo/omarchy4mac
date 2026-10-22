@@ -134,14 +134,14 @@ cmd-backtick = 'focus --boundaries-action wrap-around-the-workspace dfs-next'
 cmd-shift-backtick = 'focus --boundaries-action wrap-around-the-workspace dfs-prev'
 
 # ---------- Launching apps ----------
-# Web apps open as Brave app windows (`--app=<url>`), the way Omarchy launches
-# them (bin/omarchy-launch-webapp): a window of their own that tiles, not a
-# tab. `-n` is required: a running Brave drops --args otherwise.
+# The browser and web apps follow the macOS default browser (v4.0.5), through
+# bin/omarchy-launch-browser. Web apps are app windows (`--app=<url>`) in a
+# Chromium browser: a window of their own that tiles, not a tab.
 alt-enter = 'exec-and-forget open -na Ghostty'
-cmd-alt-enter = 'exec-and-forget open -na Ghostty --args -e tmux'
+cmd-alt-enter = 'exec-and-forget open -na Ghostty --args -e /bin/zsh -lc "tmux attach -t Work || tmux new -s Work"'
 cmd-ctrl-enter = 'exec-and-forget open -na Ghostty --args -e herdr'
-cmd-shift-enter = 'exec-and-forget open -a "Brave Browser"'
-cmd-shift-alt-b = 'exec-and-forget open -na "Brave Browser" --args --incognito'
+cmd-shift-enter = 'exec-and-forget $HOME/.local/bin/omarchy-launch-browser'
+cmd-shift-alt-b = 'exec-and-forget $HOME/.local/bin/omarchy-launch-browser --private'
 cmd-alt-c = 'exec-and-forget open -a "Google Chrome"'
 
 cmd-shift-f = 'exec-and-forget open -a Finder'
@@ -151,24 +151,24 @@ cmd-shift-m = 'exec-and-forget open -a Spotify'
 cmd-shift-slash = 'exec-and-forget open -a 1Password'
 cmd-shift-n = 'exec-and-forget open -na Ghostty --args -e nvim'
 
-cmd-shift-c = 'exec-and-forget open -na "Brave Browser" --args --app=https://app.hey.com/calendar'
-cmd-shift-e = 'exec-and-forget open -na "Brave Browser" --args --app=https://app.hey.com'
+cmd-shift-c = 'exec-and-forget $HOME/.local/bin/omarchy-launch-browser --app=https://app.hey.com/calendar --workspace=4'
+cmd-shift-e = 'exec-and-forget $HOME/.local/bin/omarchy-launch-browser --app=https://app.hey.com --workspace=4'
 
 cmd-shift-a = 'exec-and-forget open -a Claude'
-cmd-shift-alt-a = 'exec-and-forget open -na "Brave Browser" --args --app=https://grok.com'
+cmd-shift-alt-a = 'exec-and-forget $HOME/.local/bin/omarchy-launch-browser --app=https://grok.com --workspace=3'
 
 cmd-shift-g = 'exec-and-forget open -a Signal'
 cmd-shift-alt-g = 'exec-and-forget open -a WhatsApp'
-cmd-shift-ctrl-g = 'exec-and-forget open -na "Brave Browser" --args --app=https://chat.google.com'
+cmd-shift-ctrl-g = 'exec-and-forget $HOME/.local/bin/omarchy-launch-browser --app=https://chat.google.com --workspace=4'
 
-cmd-shift-p = 'exec-and-forget open -na "Brave Browser" --args --app=https://photos.google.com'
+cmd-shift-p = 'exec-and-forget $HOME/.local/bin/omarchy-launch-browser --app=https://photos.google.com --workspace=5'
 cmd-shift-d = 'exec-and-forget open -na Ghostty --args -e lazydocker'
 cmd-shift-o = 'exec-and-forget open -a Obsidian'
 cmd-shift-w = 'exec-and-forget open -a Typora'
 
 cmd-shift-x = 'exec-and-forget open https://x.com'   # Finicky → X PWA window
 cmd-shift-alt-x = 'exec-and-forget open https://x.com/compose/post'   # Finicky → X PWA window
-cmd-shift-y = 'exec-and-forget open -na "Brave Browser" --args --app=https://youtube.com'
+cmd-shift-y = 'exec-and-forget $HOME/.local/bin/omarchy-launch-browser --app=https://youtube.com --workspace=5'
 
 # ---------- Style: theme switcher ----------
 # cmd-ctrl-shift-space → handled by Hammerspoon (shows theme chooser UI)
@@ -265,7 +265,7 @@ run = 'layout floating'
 
 [[on-window-detected]]
 if.app-id = 'org.videolan.vlc'
-run = 'layout floating'
+run = ['layout floating', 'move-node-to-workspace 5']
 
 # Omarchy: `float on, match:class steam`
 [[on-window-detected]]
@@ -283,10 +283,14 @@ run = 'layout floating'
 if.window-title-regex-substring = 'Picture.in.Picture'
 run = 'layout floating'
 
-# ---------- No workspace auto-assignment (Omarchy 4 / Quattro) ----------
-# Omarchy sends no app to a fixed workspace: a window opens on the workspace
-# you are on. The only exceptions are the rules above (floats) and the ones
-# below (browsers stay tiled, the screensaver floats).
+# ---------- Workspace per kind of app (not in Omarchy 4) ----------
+# Omarchy sends no app to a fixed workspace. Here a new window goes to the
+# workspace for its kind: 1 browsers, 2 terminals, 3 AI apps and code editors,
+# 4 messaging, 5 media. An app not listed opens where you are. The first rule
+# that matches a window wins, so the screensaver rule further down must stay
+# above the Ghostty rule, and VLC's float rule above moves it as well.
+# Web apps opened with `--app=` are Brave windows, so their keys pass
+# --workspace to omarchy-launch-browser instead.
 
 # Browsers are pinned to tiling, mirroring Omarchy's own rule
 # (default/hypr/apps/browser.lua: `o.window({ tag = "chromium-based-browser" },
@@ -295,13 +299,132 @@ run = 'layout floating'
 # strip and window controls stranded behind SketchyBar.
 [[on-window-detected]]
 if.app-id = 'com.brave.Browser'
-run = 'layout tiling'
+run = ['layout tiling', 'move-node-to-workspace 1']
 
 [[on-window-detected]]
 if.app-id = 'com.google.Chrome'
-run = 'layout tiling'
+run = ['layout tiling', 'move-node-to-workspace 1']
+
+[[on-window-detected]]
+if.app-id = 'org.mozilla.firefox'
+run = 'move-node-to-workspace 1'
+
+[[on-window-detected]]
+if.app-id = 'com.apple.Safari'
+run = 'move-node-to-workspace 1'
+
+[[on-window-detected]]
+if.app-id = 'app.zen-browser.zen'
+run = 'move-node-to-workspace 1'
+
+[[on-window-detected]]
+if.app-id = 'com.duckduckgo.macos.browser'
+run = 'move-node-to-workspace 1'
 
 [[on-window-detected]]
 if.app-id = 'com.mitchellh.ghostty'
 if.window-title-regex-substring = 'org.omarchy.screensaver'
 run = 'layout floating'
+
+# Workspace per kind of app, continued (see the browsers above). After the
+# screensaver rule, so its Ghostty window floats where it is.
+
+# 2: terminals
+
+[[on-window-detected]]
+if.app-id = 'com.mitchellh.ghostty'
+run = 'move-node-to-workspace 2'
+
+[[on-window-detected]]
+if.app-id = 'com.termius-dmg.mac'
+run = 'move-node-to-workspace 2'
+
+# 3: AI apps and code editors (Claude desktop and its Brave web app)
+
+[[on-window-detected]]
+if.app-id = 'com.anthropic.claudefordesktop'
+run = 'move-node-to-workspace 3'
+
+[[on-window-detected]]
+if.app-id = 'com.brave.Browser.app.fmpnliohjhemenmnlpbfagaolkdacoja'
+run = 'move-node-to-workspace 3'
+
+[[on-window-detected]]
+if.app-id = 'ai.opencode.desktop'
+run = 'move-node-to-workspace 3'
+
+[[on-window-detected]]
+if.app-id = 'com.google.antigravity'
+run = 'move-node-to-workspace 3'
+
+[[on-window-detected]]
+if.app-id = 'com.todesktop.230313mzl4w4u92'
+run = 'move-node-to-workspace 3'
+
+[[on-window-detected]]
+if.app-id = 'com.microsoft.VSCode'
+run = 'move-node-to-workspace 3'
+
+[[on-window-detected]]
+if.app-id = 'com.stablyai.orca'
+run = 'move-node-to-workspace 3'
+
+[[on-window-detected]]
+if.app-id = 'ai.elementlabs.lmstudio'
+run = 'move-node-to-workspace 3'
+
+# 4: messaging (Google Messages is a Brave web app)
+
+[[on-window-detected]]
+if.app-id = 'org.whispersystems.signal-desktop'
+run = 'move-node-to-workspace 4'
+
+[[on-window-detected]]
+if.app-id = 'net.whatsapp.WhatsApp'
+run = 'move-node-to-workspace 4'
+
+[[on-window-detected]]
+if.app-id = 'com.tdesktop.Telegram'
+run = 'move-node-to-workspace 4'
+
+[[on-window-detected]]
+if.app-id = 'com.hnc.Discord'
+run = 'move-node-to-workspace 4'
+
+[[on-window-detected]]
+if.app-id = 'com.brave.Browser.app.hpfldicfbfomlpcikngkocigghgafkph'
+run = 'move-node-to-workspace 4'
+
+[[on-window-detected]]
+if.app-id = 'ch.protonmail.desktop'
+run = 'move-node-to-workspace 4'
+
+[[on-window-detected]]
+if.app-id = 'ch.protonmeet.desktop'
+run = 'move-node-to-workspace 4'
+
+# 5: media (X, YouTube, YouTube Music, YouTube TV and Spotify are Brave web apps)
+
+[[on-window-detected]]
+if.app-id = 'com.brave.Browser.app.lodlkdfmihgonocnmddehnfgiljnadcf'
+run = 'move-node-to-workspace 5'
+
+[[on-window-detected]]
+if.app-id = 'com.brave.Browser.app.agimnkijcaahngcdmfeangaknmldooml'
+run = 'move-node-to-workspace 5'
+
+[[on-window-detected]]
+if.app-id = 'com.brave.Browser.app.cinhimbnkkaeohfgghhklpknlkffjgod'
+run = 'move-node-to-workspace 5'
+
+[[on-window-detected]]
+if.app-id = 'com.brave.Browser.app.nlmaamaoahjiilibgbafebhafkeccjac'
+run = 'move-node-to-workspace 5'
+
+[[on-window-detected]]
+if.app-id = 'com.brave.Browser.app.pjibgclleladliembfgfagdaldikeohf'
+run = 'move-node-to-workspace 5'
+
+[[on-window-detected]]
+if.app-id = 'com.spotify.client'
+run = 'move-node-to-workspace 5'

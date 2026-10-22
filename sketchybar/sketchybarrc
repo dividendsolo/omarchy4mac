@@ -253,11 +253,14 @@ sketchybar --add item bluetooth right \
                  script="$PLUGIN_DIR/bluetooth.sh" \
                  click_script='open "x-apple.systempreferences:com.apple.BluetoothSettings"'
 
-# Coding-agent usage: today's Claude Code spend, hidden at zero (v4 bar).
+# Coding-agent usage: Claude Code 5-hour and weekly limits (v4.0.5 agents
+# widget), or today's spend when the limits are unknown. The script checks
+# every 5 minutes, so an ended window drops to 0% soon; Anthropic is asked at
+# most every 15 minutes (omarchy-agent-usage-claude caches the answer).
 sketchybar --add item agents right \
            --set agents \
                  drawing=off \
-                 update_freq=900 \
+                 update_freq=300 \
                  script="$PLUGIN_DIR/agents.sh" \
                  click_script="open -na Ghostty --args -e $HOME/.local/bin/omarchy-tui bunx ccusage daily"
 

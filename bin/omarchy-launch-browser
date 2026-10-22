@@ -1,0 +1,65 @@
+#!/bin/zsh
+# Browser and web apps in the macOS default browser (v4.0.5: omarchy-launch-browser
+# and omarchy-launch-webapp follow the user's default instead of a fixed browser).
+#   omarchy-launch-browser               new window
+#   omarchy-launch-browser --private     incognito / private window
+#   omarchy-launch-browser --app=<url>   web app window (Chromium); a tab elsewhere
+#     --workspace=<n>                    move that web app window to workspace n
+#                                        (it is a browser window, so the browser
+#                                        rule in aerospace.toml sends it to 1)
+# A Finicky install is the https handler, not a browser, so its defaultBrowser
+# from ~/.finicky.js stands in for it.
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+
+handler() {
+  plutil -convert json -o - "$HOME/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist" 2>/dev/null |
+    perl -MJSON::PP -0e 'for (@{decode_json(<STDIN>)->{LSHandlers}}) {
+      if (($_->{LSHandlerURLScheme} // "") eq "https") { print $_->{LSHandlerRoleAll}; last } }'
+}
+
+bundle=$(handler)
+if [[ -z $bundle || $bundle == com.apple.safari ]]; then
+  bundle=com.apple.Safari
+elif [[ $bundle == se.johnste.finicky ]]; then
+  name=$(perl -ne 'print $1 and exit if /defaultBrowser:\s*["'\'']([^"'\'']+)/' "$HOME/.finicky.js" 2>/dev/null)
+  bundle=$(osascript -e "id of app \"${name:-Safari}\"" 2>/dev/null || echo com.apple.Safari)
+fi
+
+private=false app="" workspace=""
+for arg in "$@"; do
+  case $arg in
+    --private) private=true ;;
+    --app=*) app=${arg#--app=} ;;
+    --workspace=*) workspace=${arg#--workspace=} ;;
+  esac
+done
+
+case ${bundle:l} in
+  com.brave.browser*|com.google.chrome*|org.chromium.chromium|com.microsoft.edgemac*|com.vivaldi.vivaldi|net.imput.helium|company.thebrowser.browser)
+    # -n: a running Chromium browser drops --args otherwise.
+    if [[ -n $app && -n $workspace ]]; then
+      windows() { aerospace list-windows --monitor all --app-bundle-id "$bundle" --format "%{window-id}" 2>/dev/null; }
+      before=(${(f)"$(windows)"})
+      open -nb "$bundle" --args --app="$app"
+      # Wait up to 5 s for the new window, then move it and follow it.
+      for _ in {1..50}; do
+        for id in ${(f)"$(windows)"}; do
+          if (( ! ${before[(Ie)$id]} )); then
+            aerospace move-node-to-workspace --window-id "$id" "$workspace"
+            exec aerospace workspace "$workspace"
+          fi
+        done
+        sleep 0.1
+      done
+      exit 0
+    elif [[ -n $app ]]; then exec open -nb "$bundle" --args --app="$app"
+    elif $private; then exec open -nb "$bundle" --args --incognito
+    else exec open -b "$bundle"; fi ;;
+  org.mozilla.firefox*)
+    if [[ -n $app ]]; then exec open -b "$bundle" "$app"
+    elif $private; then exec open -nb "$bundle" --args --private-window
+    else exec open -b "$bundle"; fi ;;
+  *)
+    # Safari and the rest: no app windows and no private flag, so a plain tab.
+    if [[ -n $app ]]; then exec open -b "$bundle" "$app"; else exec open -b "$bundle"; fi ;;
+esac

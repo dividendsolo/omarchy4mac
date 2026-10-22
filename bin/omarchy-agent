@@ -1,6 +1,9 @@
 #!/bin/zsh
-# Coding agent in a fresh terminal (v4: Super+Shift+Ctrl+A). One argument-free
+# Default coding agent in a fresh terminal (v4: Super+Shift+Ctrl+A). The pick
+# comes from omarchy-default-agent (Setup > Defaults > Agent). One argument-free
 # entry point: Ghostty drops `-e` arguments when other flags precede them.
 export PATH="$HOME/.local/bin:$HOME/.bun/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
 cd "$HOME/code" || exit 1
-exec claude
+agent=$(omarchy-default-agent)
+# A login shell finds agents installed outside the PATH above (nvm, for codex).
+exec zsh -lic "exec $agent"

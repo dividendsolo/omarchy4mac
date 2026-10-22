@@ -1,0 +1,93 @@
+#!/usr/bin/python3
+"""Claude Code rate limits for the bar (v4.0.5: bin/omarchy-agent-usage-claude).
+
+Prints one line for the SketchyBar agents item, for example
+"5h 42% 3:10pm · 7d 18% Thu", or nothing when the limits are unknown.
+The numbers come from Anthropic's OAuth usage endpoint, with the login Claude
+Code keeps in the macOS Keychain ("Claude Code-credentials"; v4 reads
+~/.claude/.credentials.json, which macOS does not have). The token goes
+nowhere but the Authorization header and is never printed or cached.
+
+The answer is cached for 15 minutes, because Anthropic rate-limits the
+endpoint. A window whose reset time has passed shows 0% until the next check,
+the way v4 resets the panel when a window ends.
+"""
+
+import datetime as dt
+import json
+import subprocess
+import sys
+import time
+import urllib.request
+from pathlib import Path
+
+ENDPOINT = "https://api.anthropic.com/api/oauth/usage"
+CACHE = Path.home() / ".cache" / "omarchy" / "agent-usage" / "claude-limits.json"
+MAX_AGE = 900
+
+
+def access_token():
+  raw = subprocess.run(
+    ["security", "find-generic-password", "-s", "Claude Code-credentials", "-w"],
+    capture_output=True, text=True, timeout=10,
+  ).stdout
+  return json.loads(raw)["claudeAiOauth"]["accessToken"]
+
+
+def probe():
+  request = urllib.request.Request(ENDPOINT, headers={
+    "Authorization": "Bearer " + access_token(),
+    "anthropic-beta": "oauth-2025-04-20",
+    "Accept": "application/json",
+  })
+  with urllib.request.urlopen(request, timeout=10) as response:
+    payload = json.loads(response.read())
+  limits = []
+  for label, keys in (("5h", ["five_hour"]), ("7d", ["seven_day_oauth_apps", "seven_day"])):
+    bucket = next((payload[k] for k in keys if isinstance(payload.get(k), dict)), None)
+    if bucket and bucket.get("utilization") is not None:
+      limits.append({"label": label, "percent": float(bucket["utilization"]), "resetsAt": bucket.get("resets_at")})
+  return limits
+
+
+def limits():
+  force = "--force" in sys.argv
+  try:
+    cached = json.loads(CACHE.read_text())
+    if not force and time.time() - cached["checkedAt"] < MAX_AGE:
+      return cached["limits"]
+  except Exception:
+    cached = None
+  try:
+    fresh = probe()
+  except Exception:
+    # Rate limited, logged out, offline: the last answer still describes the account.
+    return cached["limits"] if cached else []
+  CACHE.parent.mkdir(parents=True, exist_ok=True)
+  CACHE.write_text(json.dumps({"checkedAt": time.time(), "limits": fresh}))
+  return fresh
+
+
+def reset_text(resets_at, now):
+  when = dt.datetime.fromisoformat(resets_at.replace("Z", "+00:00")).astimezone()
+  if when.date() == now.date():
+    return when.strftime("%-I:%M%p").lower()
+  return when.strftime("%a")
+
+
+def main():
+  now = dt.datetime.now().astimezone()
+  parts = []
+  for limit in limits():
+    percent, resets_at = limit["percent"], limit.get("resetsAt")
+    if resets_at and dt.datetime.fromisoformat(resets_at.replace("Z", "+00:00")) <= now:
+      percent, resets_at = 0, None
+    text = f"{limit['label']} {round(percent)}%"
+    if resets_at:
+      text += " " + reset_text(resets_at, now)
+    parts.append(text)
+  if parts:
+    print(" · ".join(parts))
+
+
+main()

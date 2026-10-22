@@ -12,10 +12,10 @@ local bindings = {
   -- Launching
   { "SUPER + SPACE",            "Raycast" },
   { "ALT + RETURN",             "Ghostty (terminal)" },
-  { "SUPER + ALT + RETURN",     "Ghostty + tmux" },
+  { "SUPER + ALT + RETURN",     "Ghostty + tmux (Work)" },
   { "SUPER + CTRL + RETURN",    "Ghostty + herdr" },
-  { "SUPER + SHIFT + RETURN",   "Brave" },
-  { "SUPER + SHIFT + ALT + B",  "Brave (incognito)" },
+  { "SUPER + SHIFT + RETURN",   "Browser (macOS default)" },
+  { "SUPER + SHIFT + ALT + B",  "Browser (private window)" },
   { "SUPER + ALT + C",          "Chrome" },
   { "SUPER + SHIFT + F",        "Finder" },
   { "SUPER + SHIFT + ALT + F",  "Finder" },
@@ -82,7 +82,7 @@ local bindings = {
   { "SUPER + CTRL + SHIFT + Q", "Quit every Dock app (keeps Finder)" },
   { "SUPER + CTRL + R",         "Set a reminder (20m message)" },
   { "SUPER + CTRL + Z",         "Zoom (macOS accessibility)" },
-  { "SUPER + SHIFT + CTRL + A", "Coding agent (Ghostty + claude in ~/code)" },
+  { "SUPER + SHIFT + CTRL + A", "Coding agent (default: Setup > Defaults > Agent)" },
   { "SUPER + CTRL + T",         "Activity (Ghostty + btop)" },
   { "ALT + SHIFT + T",          "Activity (Ghostty + btop)" },
   { "SUPER + CTRL + H",         "System Information" },
@@ -323,6 +323,15 @@ local MENU = {
     { text = "Appearance", sub = "macOS light / dark", action = settings("com.apple.Appearance-Settings.extension") },
   }},
   { text = "Setup", sub = "Configure the desktop", children = {
+    { text = "Defaults", sub = "Default apps", children = {
+      { text = "Agent", sub = "Default coding agent (Super+Shift+Ctrl+A)", children = {
+        { text = "Claude Code", sub = "claude", action = toast("omarchy-default-agent claude") },
+        { text = "Codex", sub = "codex", action = toast("omarchy-default-agent codex") },
+        { text = "Grok", sub = "grok", action = toast("omarchy-default-agent grok") },
+        { text = "Hermes", sub = "hermes", action = toast("omarchy-default-agent hermes") },
+        { text = "OpenClaw", sub = "openclaw", action = toast("omarchy-default-agent openclaw") },
+      }},
+    }},
     { text = "Monitors", sub = "Displays", action = settings("com.apple.Displays-Settings.extension") },
     { text = "Keybindings", sub = "Edit aerospace.toml", action = nvimEdit(D .. "/aerospace/aerospace.toml") },
     { text = "Input", sub = "Keyboard", action = settings("com.apple.Keyboard-Settings.extension") },
