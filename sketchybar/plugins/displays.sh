@@ -11,6 +11,9 @@
 # sketchybar's associated_display takes arrangement ids, so map the built-in's
 # DirectDisplayID (per CoreGraphics, the authority on which panel is built-in)
 # through `sketchybar --query displays` to get its arrangement id.
+# The query fails now and then under load (many items run at once on wake), so
+# try it three times before giving up.
+for _ in 1 2 3; do
 read -r BUILTIN OTHERS <<<"$(
   sketchybar --query displays 2>/dev/null | python3 -c '
 import ctypes, ctypes.util, json, sys
@@ -29,6 +32,9 @@ for d in json.load(sys.stdin):
 print(",".join(builtin) or "-", ",".join(others) or "-")
 ' 2>/dev/null
 )"
+[ -n "$BUILTIN" ] && break
+sleep 0.3
+done
 # If anything above failed, fall back to the plain centered layout everywhere.
 DISPLAYS_OK=1
 if [ -z "$BUILTIN" ]; then
@@ -40,7 +46,10 @@ fi
 # built-in. Usage: center_item <name> [--set args...]
 center_item() {
   local item="$1"; shift
-  if [ "$OTHERS" != "-" ]; then
+  # A failed lookup must not hide the item: keep where it is drawn, refresh the rest.
+  if [ "$DISPLAYS_OK" = 0 ]; then
+    sketchybar --set "$item" "$@"
+  elif [ "$OTHERS" != "-" ]; then
     sketchybar --set "$item" drawing=on associated_display="$OTHERS" "$@"
   else
     sketchybar --set "$item" drawing=off

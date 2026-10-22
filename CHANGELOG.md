@@ -6,6 +6,9 @@ built. Entries that are not a dotfiles sync say so.
 
 ## 2026-10-22
 
+- The Homebrew updates badge, weather and indicators no longer vanish after a
+  wake. A failed display lookup now retries, then keeps each item where it
+  was, and a failed `brew outdated` keeps the last count.
 - Cmd+Alt+Enter attaches to one tmux session named "Work", or makes it the
   first time, like Omarchy 4. Before, it started a new session every time.
 - Pick the default coding agent (Claude Code, Codex, Grok, Hermes, OpenClaw)

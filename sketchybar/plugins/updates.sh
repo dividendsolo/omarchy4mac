@@ -3,7 +3,9 @@
 source "$CONFIG_DIR/colors.sh"
 source "$CONFIG_DIR/plugins/displays.sh"
 
-COUNT="$(/opt/homebrew/bin/brew outdated --quiet 2>/dev/null | wc -l | tr -d ' ')"
+# A failed brew run (lock held, offline) keeps the last count instead of hiding it.
+OUTDATED="$(/opt/homebrew/bin/brew outdated --quiet 2>/dev/null)" || exit 0
+COUNT="$(printf '%s' "$OUTDATED" | grep -c .)"
 if [ "${COUNT:-0}" -gt 0 ]; then
   center_item "$NAME" icon="󰚰" icon.color="$ORANGE" label="$COUNT" label.color="$FG"
 else
