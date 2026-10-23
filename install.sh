@@ -216,6 +216,11 @@ for a in cask.get("artifacts", []):
     grep -E '^(brew|cask|tap) ' "$SRC/Brewfile" | sed 's/[[:space:]]*#.*//; s/^/      /'
   fi
 else
+  # Homebrew refuses formulae from a tap nobody trusted, so trust the Brewfile's own taps first.
+  for t in $(awk '/^tap /{gsub(/"/, "", $2); print $2}' "$DIR/Brewfile"); do
+    brew tap "$t"
+    brew trust "$t" 2>/dev/null || true
+  done
   brew bundle --file="$DIR/Brewfile"
 fi
 
