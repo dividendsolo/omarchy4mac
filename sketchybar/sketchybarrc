@@ -152,13 +152,15 @@ sketchybar --add item weather center \
            --subscribe weather system_woke display_change
 
 # Update badge: outdated Homebrew packages, hidden at zero (v4 bar).
+# The click runs the upgrade, then fires brew_upgraded so the badge recounts at once.
+sketchybar --add event brew_upgraded
 sketchybar --add item updates center \
            --set updates \
                  drawing=off \
                  update_freq=21600 \
                  script="$PLUGIN_DIR/updates.sh" \
-                 click_script="open -na Ghostty --args -e $HOME/.local/bin/omarchy-tui sh -c 'brew update && brew upgrade'" \
-           --subscribe updates system_woke display_change
+                 click_script="open -na Ghostty --args -e $HOME/.local/bin/omarchy-tui sh -c 'brew update && brew upgrade; /opt/homebrew/bin/sketchybar --trigger brew_upgraded'" \
+           --subscribe updates system_woke display_change brew_upgraded
 
 # Current theme name — label re-reads on every `sketchybar --reload`, which the
 # `theme` script fires after each switch. Click = shuffle (theme random).

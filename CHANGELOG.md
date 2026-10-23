@@ -4,6 +4,11 @@ Newest first. Each entry is a sync from the private dotfiles it is exported
 from, so a date here is the day the change went public, not the day it was
 built. Entries that are not a dotfiles sync say so.
 
+## 2026-10-23
+
+- The Homebrew updates badge recounts as soon as the upgrade you start from
+  it finishes. Before, it kept the old count for up to six hours.
+
 ## 2026-10-22
 
 - The parity score is now measured against Omarchy 4.0.5: 72% (24 matched, 4
