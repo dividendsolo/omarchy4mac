@@ -6,6 +6,10 @@ built. Entries that are not a dotfiles sync say so.
 
 ## 2026-10-23
 
+- `aerospace.toml` moves to `config-version = 2`, so AeroSpace 0.21 no longer
+  warns on every reload. Version 2 stops guessing persistent workspaces from
+  the key bindings, so the five workspaces are now listed in
+  `persistent-workspaces` (#19).
 - The Homebrew updates badge recounts as soon as the upgrade you start from
   it finishes. Before, it kept the old count for up to six hours.
 

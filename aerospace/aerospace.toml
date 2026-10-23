@@ -5,6 +5,11 @@
 # ~/Library/LaunchAgents/com.omarchy-mac.aerospace-keepalive.plist
 start-at-login = false
 
+# config-version 2 stops guessing persistent workspaces from the key bindings,
+# so the five bound workspaces are listed here (omarchy4mac#19).
+config-version = 2
+persistent-workspaces = ['1', '2', '3', '4', '5']
+
 enable-normalization-flatten-containers = true
 enable-normalization-opposite-orientation-for-nested-containers = true
 
