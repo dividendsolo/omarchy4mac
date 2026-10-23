@@ -6,6 +6,11 @@ built. Entries that are not a dotfiles sync say so.
 
 ## 2026-10-23
 
+- The install hides the Dock, the menu bar and the desktop widgets, since
+  SketchyBar takes the menu bar's place. The uninstall shows them again.
+- The Brewfile installs `font-sketchybar-app-font`. Without it, a fresh Mac's
+  bar printed `:finder:` instead of the app icon. Edited directly in the public
+  repo.
 - `install.sh` trusts the Brewfile's own taps before `brew bundle`. Homebrew 7
   refuses formulae from an untrusted tap, so a fresh install stopped at
   sketchybar. Edited directly in the public repo.

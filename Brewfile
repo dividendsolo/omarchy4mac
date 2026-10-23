@@ -24,6 +24,7 @@ brew "zoxide"
 
 # Fonts the bar and terminal expect
 cask "font-hack-nerd-font"
+cask "font-sketchybar-app-font"   # the app icons in the bar; without it the bar prints :finder:
 
 # Apps the keybindings count on. None are bundled with the config; these are
 # the stand-ins the parity table scores. Skip with SKIP_APPS=1.

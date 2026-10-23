@@ -226,6 +226,18 @@ PY
   note "full pre-install copies stay in $ORIG/files if you need anything else"
 fi
 
+# ---- 4c. Show the Dock, the menu bar and the desktop widgets again ---------
+say "Showing the Dock, the menu bar and the desktop widgets"
+run defaults delete com.apple.dock autohide 2>/dev/null || true
+run defaults delete NSGlobalDomain _HIHideMenuBar 2>/dev/null || true
+run defaults delete com.apple.controlcenter AutoHideMenuBarOption 2>/dev/null || true
+run defaults delete com.apple.WindowManager StandardHideWidgets 2>/dev/null || true
+run defaults delete com.apple.WindowManager StageManagerHideWidgets 2>/dev/null || true
+if [ "$DRY" != 1 ]; then
+  killall Dock WindowManager 2>/dev/null || true
+  osascript -e 'tell application "System Events" to set autohide menu bar of dock preferences to false' >/dev/null 2>&1 || true
+fi
+
 # ---- 5. State files -------------------------------------------------------
 say "Removing state"
 run rm -rf "$HOME/.local/state/omarchy"

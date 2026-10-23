@@ -335,6 +335,19 @@ else
   [ "$DRY" = 1 ] && echo "    current theme $(cat "$HOME/.config/theme-switcher/current") stays"
 fi
 
+# ---- 7b. Desktop: SketchyBar replaces the menu bar, so hide it, the Dock and the widgets
+say "Hiding the Dock, the menu bar and the desktop widgets"
+run defaults write com.apple.dock autohide -bool true
+run defaults write NSGlobalDomain _HIHideMenuBar -bool true
+run defaults write com.apple.controlcenter AutoHideMenuBarOption -int 0
+run defaults write com.apple.WindowManager StandardHideWidgets -bool true
+run defaults write com.apple.WindowManager StageManagerHideWidgets -bool true
+if [ "$DRY" != 1 ]; then
+  killall Dock WindowManager 2>/dev/null || true
+  # The defaults key alone waits for a logout; System Events hides the menu bar now.
+  osascript -e 'tell application "System Events" to set autohide menu bar of dock preferences to true' >/dev/null 2>&1 || true
+fi
+
 # ---- 8. Services ----------------------------------------------------------
 say "Starting services"
 run brew services restart sketchybar

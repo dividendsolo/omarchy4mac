@@ -26,7 +26,8 @@ listener re-themes everything the instant the system flips appearance.
 One command. It installs Homebrew if needed, runs the `Brewfile`, links every
 config into place (anything already there is moved to `*.bak-<date>`), compiles
 the light/dark listener, loads the launchd agents, adds the shell file to
-`~/.zshrc`, pulls the Omarchy themes, and starts the services:
+`~/.zshrc`, pulls the Omarchy themes, hides the Dock, the menu bar and the
+desktop widgets (SketchyBar takes the menu bar's place), and starts the services:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/dividendsolo/omarchy4mac/main/install.sh | bash
