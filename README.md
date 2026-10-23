@@ -288,11 +288,11 @@ easy, or because a Mac needed them.
 
 ## How close is this to real Omarchy?
 
-**71%** of Omarchy v4.0.2 (Quattro), scored feature by feature below: ✅ we
+**72%** of Omarchy v4.0.5 (Quattro), scored feature by feature below: ✅ we
 have it, or the Mac stand-in does the same job (1 point). ⚠️ partly there,
 with a plan (half). ❌ missing, nothing planned, whatever the reason (0).
-Items with no macOS meaning are left out. That is 23 matched, 4 partial, 8
-not portable, out of 35 scored.
+Items with no macOS meaning are left out. That is 24 matched, 4 partial, 8
+not portable, out of 36 scored.
 
 The short version: the keybinding vocabulary, the workspace model, the menu
 tree, the bar, the theme pipeline, the screensaver, and the shell are here.

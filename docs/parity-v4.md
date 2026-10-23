@@ -1,7 +1,7 @@
 # Omarchy v4 (Quattro) parity on this Mac
 
-Written 2026-09-02 from the `quattro` branch of `omacom/omarchy` (v4.0.2, the
-current release) and the dotfiles as they stand. One flat list, ordered by
+Written 2026-09-02 from the `quattro` branch of `omacom/omarchy` (v4.0.2, then
+the current release; re-scored 2026-10-22 against v4.0.5) and the dotfiles as they stand. One flat list, ordered by
 how much of the daily feel each item buys. Tick items as they land.
 
 ## Where we stand

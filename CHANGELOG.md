@@ -6,6 +6,8 @@ built. Entries that are not a dotfiles sync say so.
 
 ## 2026-10-22
 
+- The parity score is now measured against Omarchy 4.0.5: 72% (24 matched, 4
+  partial, 8 not portable, out of 36), up from 71% of 4.0.2.
 - The Homebrew updates badge, weather and indicators no longer vanish after a
   wake. A failed display lookup now retries, then keeps each item where it
   was, and a failed `brew outdated` keeps the last count.
