@@ -26,6 +26,10 @@
 # Env: SKIP_APPS=1 skips Brave, Raycast, FluidVoice. OMARCHY4MAC_DIR overrides
 # the clone location (default ~/code/omarchy4mac).
 set -euo pipefail
+
+# Braces make bash read the whole script before it runs a line. Under `curl | bash`,
+# a command that reads stdin (brew bundle) would otherwise eat the rest of the script.
+{
 TILDE="~"   # for ${path/#$HOME/$TILDE}; a bare ~ there expands back to $HOME in bash 5.2
 
 DIR="${OMARCHY4MAC_DIR:-$HOME/code/omarchy4mac}"
@@ -354,3 +358,4 @@ fi
 say "Done. Grant Accessibility to Hammerspoon and AeroSpace when macOS asks."
 say "⌥K shows every keybinding. ⌘⌥Space opens the menu. Rerun this script to update."
 say "Your previous Ghostty/btop/Neovim/Claude/Obsidian settings are saved in $ORIG."
+}
