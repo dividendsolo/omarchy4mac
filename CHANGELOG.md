@@ -6,6 +6,14 @@ built. Entries that are not a dotfiles sync say so.
 
 ## 2026-10-23
 
+- The install opens System Settings on Accessibility, waits until AeroSpace
+  and Hammerspoon are switched on, then restarts both. Before, macOS often
+  quit them on the grant and the keys did nothing.
+- Ghostty gets Omarchy's look on a fresh Mac: JetBrainsMono Nerd Font, size
+  16, and a see-through window (opacity 0.75). Only keys you have not set are
+  added.
+- The Brewfile installs `tmux`, which ⌘⌥Return needs for the Work session.
+  Edited directly in the public repo.
 - The install hides the Dock, the menu bar and the desktop widgets, since
   SketchyBar takes the menu bar's place. The uninstall shows them again.
 - The Brewfile installs `font-sketchybar-app-font`. Without it, a fresh Mac's

@@ -33,8 +33,9 @@ desktop widgets (SketchyBar takes the menu bar's place), and starts the services
 curl -fsSL https://raw.githubusercontent.com/dividendsolo/omarchy4mac/main/install.sh | bash
 ```
 
-Grant Accessibility to Hammerspoon and AeroSpace when macOS asks. Then ⌥K for
-the keybindings, ⌘⌥Space for the menu.
+Near the end, the script opens System Settings on Accessibility and waits.
+Turn on AeroSpace and Hammerspoon, press Return, and it restarts both. Then ⌥K
+for the keybindings, ⌘⌥Space for the menu.
 
 **Update:** run the same script again. It pulls, relinks, resyncs themes, and
 restarts the services. `~/code/omarchy4mac/install.sh --dry-run` reports what

@@ -15,6 +15,7 @@ brew "neovim"
 brew "fastfetch"   # menu > About
 brew "bun"         # bar agents widget runs `bunx ccusage`; hidden when there is no usage
 brew "media-control"  # bar music item reads macOS Now Playing (any player)
+brew "tmux"          # ⌘⌥Return opens Ghostty in the tmux session "Work"
 
 # Shell defaults from Omarchy (zsh/omarchy.zsh)
 brew "eza"

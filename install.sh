@@ -297,6 +297,21 @@ elif ! command -v ttfx >/dev/null 2>&1; then
   say "cargo not found; screensaver skipped (install rustup, rerun)"
 fi
 
+# ---- 6b. Ghostty look: Omarchy's font and a see-through window --------------
+# Only keys the config does not set yet; the file was snapshotted above, and uninstall puts it back.
+GCFG="$HOME/Library/Application Support/com.mitchellh.ghostty/config"
+# Not in the Brewfile: many Macs already have this font by hand, and brew bundle stops on that.
+if ! compgen -G "$HOME/Library/Fonts/JetBrainsMonoNerdFont*" >/dev/null && ! compgen -G "/Library/Fonts/JetBrainsMonoNerdFont*" >/dev/null; then
+  run brew install --cask font-jetbrains-mono-nerd-font </dev/null
+fi
+for kv in "font-family = JetBrainsMono Nerd Font Mono" "font-size = 16" "background-opacity = 0.75"; do
+  key="${kv%% =*}"
+  grep -qE "^[[:space:]]*$key[[:space:]]*=" "$GCFG" 2>/dev/null && continue
+  if [ "$DRY" = 1 ]; then echo "    would add to Ghostty config: $kv"; continue; fi
+  mkdir -p "$(dirname "$GCFG")"
+  printf '%s\n' "$kv" >> "$GCFG"
+done
+
 # ---- 7. Themes ------------------------------------------------------------
 say "Syncing Omarchy themes"
 export PATH="$HOME/.local/bin:/opt/homebrew/bin:$PATH"
@@ -368,7 +383,27 @@ if [ "$DRY" = 1 ]; then
   exit 0
 fi
 
-say "Done. Grant Accessibility to Hammerspoon and AeroSpace when macOS asks."
+# ---- 9. Accessibility --------------------------------------------------------
+# AeroSpace and Hammerspoon do nothing until they have Accessibility, and macOS
+# often quits an app the moment it gets it. So open the pane, wait, then restart both.
+say "One manual step: Accessibility for AeroSpace and Hammerspoon"
+echo "    System Settings opens on Privacy & Security > Accessibility."
+echo "    Turn on AeroSpace and Hammerspoon there (close any other permission dialogs)."
+open "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility" || true
+if [ -r /dev/tty ]; then
+  printf '    Press Return here when both switches are on... '
+  read -r _ </dev/tty || true
+  say "Restarting AeroSpace and Hammerspoon with their new permission"
+  osascript -e 'quit app "AeroSpace"' -e 'quit app "Hammerspoon"' >/dev/null 2>&1 || true
+  sleep 2
+  open -a AeroSpace
+  open -a Hammerspoon
+  osascript -e 'quit app "System Settings"' >/dev/null 2>&1 || true
+else
+  echo "    No terminal to wait on: after you switch them on, open AeroSpace and Hammerspoon again."
+fi
+
+say "Done. ⌥Return opens Ghostty. ⌥T switches to a random theme."
 say "⌥K shows every keybinding. ⌘⌥Space opens the menu. Rerun this script to update."
 say "Your previous Ghostty/btop/Neovim/Claude/Obsidian settings are saved in $ORIG."
 }
