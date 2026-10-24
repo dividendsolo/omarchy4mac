@@ -4,6 +4,13 @@ Newest first. Each entry is a sync from the private dotfiles it is exported
 from, so a date here is the day the change went public, not the day it was
 built. Entries that are not a dotfiles sync say so.
 
+## 2026-10-23
+
+- SketchyBar chrome is now TKOS Live Midnight Tokyo / Miami Vice: midnight navy
+  bar, cyan workspace + app pill, mint Spotify pill, hot-pink status pill and
+  bar edge. Palette lives in `sketchybar/live_vibe.sh` and survives a `theme`
+  shuffle. Light themes (White, Latte, Flexoki Light) skip the overlay.
+
 ## 2026-10-06
 
 - Fix: the README Keybindings section listed only highlights and was missing

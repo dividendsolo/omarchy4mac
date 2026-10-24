@@ -1,25 +1,29 @@
 #!/usr/bin/env bash
-# SketchyBar — Tokyo Night, AeroSpace-aware
+# SketchyBar — TKOS Live, Midnight Tokyo / Miami Vice
 # Reload: brew services restart sketchybar  (or: sketchybar --reload)
 
 PLUGIN_DIR="$CONFIG_DIR/plugins"
 source "$CONFIG_DIR/colors.sh"
+source "$CONFIG_DIR/live_vibe.sh"
 
 # ---------- Bar ----------
+# Midnight navy tube, pink neon edge. Window borders stay cyan (Vice split).
 sketchybar --bar \
   position=top \
-  height=32 \
-  blur_radius=30 \
+  height=42 \
+  blur_radius=48 \
   color="$BG_TRANS" \
-  border_width=0 \
-  padding_left=8 \
-  padding_right=8 \
+  border_color="$PINK" \
+  border_width=1 \
+  padding_left=10 \
+  padding_right=10 \
   margin=0 \
   notch_width=200 \
   display=all \
   topmost=on \
   sticky=on \
-  show_in_fullscreen=on
+  show_in_fullscreen=on \
+  shadow=on
 
 # ---------- Defaults ----------
 default=(
@@ -33,8 +37,11 @@ default=(
   icon.padding_right=6
   label.padding_left=4
   label.padding_right=6
-  background.corner_radius=6
-  background.height=22
+  icon.shadow.drawing=on
+  icon.shadow.distance=2
+  icon.shadow.color="$GLOW"
+  background.corner_radius=10
+  background.height=28
 )
 sketchybar --default "${default[@]}"
 
@@ -48,9 +55,19 @@ sketchybar --add item logo left \
                  icon.color="$ACCENT" \
                  icon.padding_left=8 \
                  icon.padding_right=8 \
+                 icon.shadow.drawing=on \
+                 icon.shadow.distance=5 \
+                 icon.shadow.color="$GLOW" \
                  label.drawing=off \
                  background.drawing=off \
                  click_script="/opt/homebrew/bin/hs -c 'omarchyMenu()'"
+
+# ---------- Claudia: her face, status, menu and voice chat (tyler-os coach/claudia_bar.py, issue #913) ----------
+# Left click = talk (then type), right click = her menu. The item, badge and popup are built by `claudia_bar.py setup`.
+python3 "${TKOS_CLAUDIA_BAR:-$HOME/Scripts/tyler-os-live/coach/claudia_bar.py}" setup
+
+# ---------- Computer-use banner: red while an agent drives the Mac, green with totals when hands come off (tyler cu) ----------
+python3 "${TKOS_CU_BAR:-$HOME/Scripts/tyler-os-live/coach/cu_bar.py}" setup
 
 # ---------- AeroSpace workspaces ----------
 for sid in 1 2 3 4 5; do
@@ -58,8 +75,11 @@ for sid in 1 2 3 4 5; do
              --subscribe space."$sid" aerospace_workspace_change space_change \
              --set space."$sid" \
                    icon="$sid" \
+                   icon.color="$SOFT" \
                    label.drawing=off \
-                   background.color="$SURFACE" \
+                   background.color="$ACCENT" \
+                   background.corner_radius=8 \
+                   background.height=22 \
                    background.drawing=off \
                    click_script="/opt/homebrew/bin/aerospace workspace $sid" \
                    script="$PLUGIN_DIR/aerospace.sh"
@@ -68,17 +88,21 @@ done
 # Separator between workspaces and front_app
 sketchybar --add item space_sep left \
            --set space_sep \
-                 icon="" \
-                 icon.color="$COMMENT" \
+                 icon="│" \
+                 icon.color="$PINK" \
                  icon.padding_left=8 \
                  icon.padding_right=8 \
+                 icon.shadow.drawing=on \
+                 icon.shadow.distance=3 \
+                 icon.shadow.color="$GLOW_PINK" \
                  label.drawing=off \
                  background.drawing=off
 
 # ---------- Front app (focused window) ----------
 sketchybar --add item front_app left \
            --set front_app \
-                 label.color="$BLUE" \
+                 label.color="$ACCENT" \
+                 icon.color="$ACCENT" \
                  icon.padding_right=4 \
                  script="$PLUGIN_DIR/front_app.sh" \
            --subscribe front_app front_app_switched
@@ -141,8 +165,11 @@ sketchybar --add item clock center \
            --set clock \
                  update_freq=10 \
                  icon="" \
-                 icon.color="$MAGENTA" \
+                 icon.color="$PINK" \
                  label.color="$FG" \
+                 icon.shadow.drawing=on \
+                 icon.shadow.distance=4 \
+                 icon.shadow.color="$GLOW_PINK" \
                  script="$PLUGIN_DIR/clock.sh" \
                  click_script='open "x-apple.systempreferences:com.apple.Date-Time-Settings.extension"' \
            --subscribe clock display_change
@@ -222,8 +249,11 @@ sketchybar --add item clock_right right \
            --set clock_right \
                  drawing=off \
                  icon="󰥔" \
-                 icon.color="$MAGENTA" \
+                 icon.color="$PINK" \
                  label.color="$FG" \
+                 icon.shadow.drawing=on \
+                 icon.shadow.distance=4 \
+                 icon.shadow.color="$GLOW_PINK" \
                  click_script='open "x-apple.systempreferences:com.apple.Date-Time-Settings.extension"'
 
 
@@ -234,6 +264,39 @@ sketchybar --add item agents right \
                  update_freq=900 \
                  script="$PLUGIN_DIR/agents.sh" \
                  click_script="open -na Ghostty --args -e $HOME/.local/bin/omarchy-tui bunx ccusage daily"
+
+# ---------- Vice pills: cyan left, mint music, pink right ----------
+sketchybar --add bracket vibe_left space.1 space.2 space.3 space.4 space.5 space_sep front_app \
+           --set vibe_left \
+                 background.color="$BG_PILL" \
+                 background.corner_radius=12 \
+                 background.height=30 \
+                 background.border_width=1 \
+                 background.border_color="$ACCENT"
+
+sketchybar --add bracket vibe_music spotify spotify_next spotify_star \
+           --set vibe_music \
+                 background.color="$BG_PILL" \
+                 background.corner_radius=12 \
+                 background.height=30 \
+                 background.border_width=1 \
+                 background.border_color="$MINT"
+
+sketchybar --add bracket vibe_center clock weather standup_center \
+           --set vibe_center \
+                 background.color="$BG_PILL" \
+                 background.corner_radius=12 \
+                 background.height=30 \
+                 background.border_width=1 \
+                 background.border_color="$PINK"
+
+sketchybar --add bracket vibe_right agents clock_right standup power_in power_out power_batt battery \
+           --set vibe_right \
+                 background.color="$BG_PILL" \
+                 background.corner_radius=12 \
+                 background.height=30 \
+                 background.border_width=1 \
+                 background.border_color="$PINK"
 
 # ---------- Force first run ----------
 sketchybar --update

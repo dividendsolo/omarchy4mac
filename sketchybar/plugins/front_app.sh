@@ -8,7 +8,7 @@ if [ "$SENDER" = "front_app_switched" ]; then
     icon="$icon_result" \
     icon.drawing=on \
     icon.font="sketchybar-app-font:Regular:16.0" \
-    icon.color="$FG" \
+    icon.color="$ACCENT" \
     label="$INFO" \
-    label.color="$BLUE"
+    label.color="$ACCENT"
 fi

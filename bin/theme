@@ -462,6 +462,11 @@ apply_sketchybar() {
   [[ -f "$src" ]] || return 0
   [[ -d "$(dirname "$SKETCHYBAR_COLORS")" ]] || return 0
   toml_to_sketchybar < "$src" > "$SKETCHYBAR_COLORS"
+  cat >> "$SKETCHYBAR_COLORS" <<'EOF'
+# TKOS Live chrome. Survives a theme shuffle.
+_VIBE="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)/live_vibe.sh"
+[ -f "$_VIBE" ] && . "$_VIBE"
+EOF
   echo "  ${c_dim}sketchybar${c_rst} → palette regenerated"
 }
 
