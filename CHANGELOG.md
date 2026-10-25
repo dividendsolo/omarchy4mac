@@ -6,6 +6,9 @@ built. Entries that are not a dotfiles sync say so.
 
 ## 2026-10-25
 
+- Switching light and dark mode twice in a few seconds now ends on the
+  right theme. Before, the second switch was ignored while the first was
+  still running, so the theme stayed on the old mode.
 - A config change now reloads every open Ghostty window. Before, only the
   first Ghostty process reloaded, so windows from the tmux launcher or
   `omarchy-tui` kept the old look.

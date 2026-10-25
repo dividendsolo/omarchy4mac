@@ -40,5 +40,16 @@ if [[ "$settled" != "$want" ]]; then
 fi
 [[ "$want" == "$have" ]] && exit 0
 
-log "appearance is $want but theme $(cat "$STATE") is $have — switching"
-exec "$THEME" random "$want"
+# A flip that lands while an earlier switch still holds the lock is ignored by
+# `theme`, and the theme then stays on the old appearance (light → dark 9s
+# apart, 2026-10-25). So wait for the lock, switch, and re-check until the
+# theme matches the appearance.
+LOCK="$HOME/.config/theme-switcher/lock"
+for _ in 1 2 3; do
+  for _ in $(seq 60); do [[ -d "$LOCK" ]] || break; sleep 0.5; done
+  want="$("$THEME" --mode)"
+  have="$("$THEME" --appearance 2>/dev/null)" || exit 0
+  [[ "$want" == "$have" ]] && exit 0
+  log "appearance is $want but theme $(cat "$STATE") is $have — switching"
+  "$THEME" random "$want"
+done
