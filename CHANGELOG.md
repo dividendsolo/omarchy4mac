@@ -4,6 +4,12 @@ Newest first. Each entry is a sync from the private dotfiles it is exported
 from, so a date here is the day the change went public, not the day it was
 built. Entries that are not a dotfiles sync say so.
 
+## 2026-10-25
+
+- A config change now reloads every open Ghostty window. Before, only the
+  first Ghostty process reloaded, so windows from the tmux launcher or
+  `omarchy-tui` kept the old look.
+
 ## 2026-10-23
 
 - The install opens System Settings on Accessibility, waits until AeroSpace

@@ -578,11 +578,13 @@ local ghosttyConfigs = {
   os.getenv("HOME") .. "/.config/ghostty",
 }
 local ghosttyReloadTimer
+-- Reload EVERY Ghostty process: `open -na Ghostty` (tmux launcher, omarchy-tui)
+-- starts extra instances, and hs.application.find returns only the first.
 local function reloadGhostty()
-  local app = hs.application.find("com.mitchellh.ghostty")
-  if not app then return end
-  if not app:selectMenuItem({ "Ghostty", "Reload Configuration" }) then
-    hs.eventtap.keyStroke({ "cmd", "shift" }, ",", 0, app)
+  for _, app in ipairs(hs.application.applicationsForBundleID("com.mitchellh.ghostty")) do
+    if not app:selectMenuItem({ "Ghostty", "Reload Configuration" }) then
+      hs.eventtap.keyStroke({ "cmd", "shift" }, ",", 0, app)
+    end
   end
 end
 GhosttyWatchers = {}
