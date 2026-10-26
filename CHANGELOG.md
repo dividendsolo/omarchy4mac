@@ -4,6 +4,12 @@ Newest first. Each entry is a sync from the private dotfiles it is exported
 from, so a date here is the day the change went public, not the day it was
 built. Entries that are not a dotfiles sync say so.
 
+## 2026-10-26
+
+- `theme --sync` no longer stops with "rate-limited" when you install twice
+  in an hour. It now fetches the themes with one git clone instead of the
+  GitHub API, and runs in seconds (#20).
+
 ## 2026-10-25
 
 - Switching light and dark mode twice in a few seconds now ends on the

@@ -29,8 +29,8 @@ set -euo pipefail
 # Omarchy renders at theme-set time.
 REPO="omacom/omarchy"
 REF="${OMARCHY_REF:-quattro}"         # set OMARCHY_REF=master for the 3.x layout (unsupported)
-RAW="https://raw.githubusercontent.com/$REPO/$REF"
-API="https://api.github.com/repos/$REPO/contents"
+GIT_URL="https://github.com/$REPO.git"
+SRC=""                                # the sync's partial clone (set in sync_themes)
 TEMPLATES=(btop.theme.tpl ghostty.conf.tpl neovim.lua.tpl claude.json.tpl obsidian.css.tpl)
 
 CACHE="$HOME/.config/theme-switcher/cache"      # cache/<name>/{colors.toml,neovim.lua,btop.theme,claude.json,obsidian.css}
@@ -219,12 +219,15 @@ pick_random_theme() {
   echo "${pool[$((RANDOM % ${#pool[@]}))]}"
 }
 
+# One file from the sync's clone; a blob not yet local is fetched on demand.
+src_file() { git -C "$SRC" show "HEAD:$1" 2>/dev/null; }
+
 sync_templates() {
   mkdir -p "$TPL_CACHE"
   local t
   for t in "${TEMPLATES[@]}"; do
-    curl -fsSL --retry 3 --retry-delay 1 "$RAW/default/themed/$t" -o "$TPL_CACHE/$t" 2>/dev/null \
-      || die "could not fetch template $t from $REPO@$REF"
+    src_file "default/themed/$t" > "$TPL_CACHE/$t" \
+      || die "could not read template $t from $REPO@$REF"
   done
 }
 
@@ -232,25 +235,37 @@ sync_templates() {
 # find them by prefix. Existing files are kept; only missing ones download.
 sync_backgrounds() {
   local n="$1" files f got=0
-  files="$(curl -fsSL "$API/themes/$n/backgrounds?ref=$REF" 2>/dev/null | grep '"download_url"' | sed 's/.*"download_url": *"\([^"]*\)".*/\1/')" || return 0
+  # blobs only: a folder (intros/ holds videos) is not a background
+  files="$(git -C "$SRC" ls-tree "HEAD:themes/$n/backgrounds" 2>/dev/null | awk -F'\t' '$1 ~ / blob / {print $2}')" || return 0
   [[ -n "$files" ]] || return 0
   mkdir -p "$WALLPAPERS"
   while IFS= read -r f; do
     [[ -n "$f" ]] || continue
-    local base="$WALLPAPERS/${n}_$(basename "$f")"
+    local base="$WALLPAPERS/${n}_$f"
     [[ -f "$base" ]] && continue
-    curl -fsSL --retry 3 --retry-delay 1 "$f" -o "$base" 2>/dev/null && got=$((got+1))
+    src_file "themes/$n/backgrounds/$f" > "$base.part" && mv "$base.part" "$base" && got=$((got+1))
+    rm -f "$base.part"
   done <<< "$files"
   echo "$got"
 }
 
+# One shallow, blobless clone instead of the GitHub contents API (60 requests an
+# hour per IP; a sync used 24, so two installs on one network hit the limit).
+# Only the trees come down at first; each file's blob is fetched when read.
 sync_themes() {
-  command -v curl >/dev/null || die "curl is required"
-  echo "${c_bold}Fetching theme list from $REPO@$REF …${c_rst}"
+  command -v git >/dev/null || die "git is required"
+  echo "${c_bold}Fetching themes from $REPO@$REF …${c_rst}"
+  SRC="$(mktemp -d "${TMPDIR:-/tmp}/theme-sync.XXXXXX")"
+  trap 'rm -rf "$SRC"' EXIT
+  git clone --quiet --depth 1 --filter=blob:none --no-checkout --branch "$REF" "$GIT_URL" "$SRC" 2>/dev/null \
+    || die "could not clone $REPO@$REF (network down?)"
+  # fetch every theme file and template in one batch; wallpapers stay lazy
+  git -C "$SRC" sparse-checkout set --no-cone '/default/themed/' '/themes/*/colors.toml' '/themes/*/neovim.lua' 2>/dev/null \
+    && git -C "$SRC" checkout --quiet 2>/dev/null \
+    || die "could not fetch themes from $REPO@$REF"
   local names
-  names="$(curl -fsSL "$API/themes?ref=$REF" 2>/dev/null | grep '"name"' | sed 's/.*"name": *"\([^"]*\)".*/\1/')" \
-    || die "could not list themes (GitHub API unreachable or rate-limited)"
-  [[ -n "$names" ]] || die "no themes returned from API"
+  names="$(git -C "$SRC" ls-tree -d --name-only HEAD:themes)" || die "no themes/ folder in $REPO@$REF"
+  [[ -n "$names" ]] || die "no themes in $REPO@$REF"
   sync_templates
 
   mkdir -p "$CACHE"
@@ -259,7 +274,7 @@ sync_themes() {
   while IFS= read -r n; do
     [[ -n "$n" ]] || continue
     local colors nvim
-    colors="$(curl -fsSL --retry 3 --retry-delay 1 "$RAW/themes/$n/colors.toml" 2>/dev/null)" || colors=""
+    colors="$(src_file "themes/$n/colors.toml")" || colors=""
     if [[ -z "$colors" ]]; then
       printf '  %s%-18s%s %sno colors.toml — skipped%s\n' "$c_dim" "$n" "$c_rst" "$c_yel" "$c_rst"
       skipped=$((skipped+1)); continue
@@ -270,7 +285,7 @@ sync_themes() {
     # neovim: the theme's own spec, else Omarchy's aether template with the
     # palette baked in (what Omarchy itself does for themes without one).
     local nvim_src="theme"
-    nvim="$(curl -fsSL --retry 3 --retry-delay 1 "$RAW/themes/$n/neovim.lua" 2>/dev/null)" \
+    nvim="$(src_file "themes/$n/neovim.lua")" \
       || { nvim="$(render_template "$CACHE/$n/colors.toml" "$TPL_CACHE/neovim.lua.tpl")"; nvim_src="aether"; }
     printf '%s\n' "$nvim" > "$CACHE/$n/neovim.lua"
 
@@ -646,7 +661,7 @@ if [[ "$lock_taken" -eq 0 ]]; then
   echo "${c_dim}theme: switch already in progress — ignoring${c_rst}" >&2
   exit 0
 fi
-trap 'rm -rf "$LOCK"' EXIT
+trap 'rm -rf "$LOCK" ${SRC:+"$SRC"}' EXIT   # SRC: a first-use sync's clone
 
 echo "${c_bold}Switching to ${c_grn}$name${c_rst}${c_bold}:${c_rst}"
 apply_ghostty "$name"
