@@ -207,7 +207,6 @@ is also available.
 | ⌘⌃W | Wi-Fi settings |
 | ⌘⌃S | Share (LocalSend) |
 | ⌘⌃E | Emoji picker (Raycast) |
-| ⌘⌃Q | Calculator |
 | ⌘⌃⇧Q | Quit every Dock app (keeps Finder) |
 | ⌘⌃R | Set a reminder (20m message) |
 | ⌘⌃Z | Zoom (macOS accessibility) |
