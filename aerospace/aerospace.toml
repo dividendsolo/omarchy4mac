@@ -201,7 +201,6 @@ cmd-ctrl-period = 'exec-and-forget open -a HandBrake'
 
 # ---------- Omarchy v4 utilities ----------
 cmd-ctrl-e = 'exec-and-forget open "raycast://extensions/raycast/emoji-symbols/search-emoji-symbols"'   # emoji picker
-cmd-ctrl-q = 'exec-and-forget open -a Calculator'                                                       # v4: Omacalc
 # Coding agent in a fresh terminal (v4: Super+Shift+Ctrl+A), see bin/omarchy-agent.
 cmd-shift-ctrl-a = 'exec-and-forget open -na Ghostty --args -e $HOME/.local/bin/omarchy-agent'
 # Zoom (v4: Super+Ctrl+Z): fires macOS accessibility zoom (⌥⌘8). Needs

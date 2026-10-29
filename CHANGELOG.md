@@ -4,6 +4,12 @@ Newest first. Each entry is a sync from the private dotfiles it is exported
 from, so a date here is the day the change went public, not the day it was
 built. Entries that are not a dotfiles sync say so.
 
+## 2026-10-29
+
+- Lock screen works again. AeroSpace bound `cmd-ctrl-q` to Calculator, which
+  is also the macOS lock key, so both `cmd-ctrl-q` and Super+Ctrl+L opened
+  Calculator instead of locking. The Calculator bind is gone.
+
 ## 2026-10-26
 
 - `theme --sync` no longer stops with "rate-limited" when you install twice

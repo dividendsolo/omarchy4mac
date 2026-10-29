@@ -78,7 +78,6 @@ local bindings = {
   { "SUPER + CTRL + W",         "Wi-Fi settings" },
   { "SUPER + CTRL + S",         "Share (LocalSend)" },
   { "SUPER + CTRL + E",         "Emoji picker" },
-  { "SUPER + CTRL + Q",         "Calculator" },
   { "SUPER + CTRL + SHIFT + Q", "Quit every Dock app (keeps Finder)" },
   { "SUPER + CTRL + R",         "Set a reminder (20m message)" },
   { "SUPER + CTRL + Z",         "Zoom (macOS accessibility)" },
