@@ -4,6 +4,15 @@ Newest first. Each entry is a sync from the private dotfiles it is exported
 from, so a date here is the day the change went public, not the day it was
 built. Entries that are not a dotfiles sync say so.
 
+## 2026-11-02
+
+- omarchy4mac now tracks Omarchy **4.0.6**, written in the new
+  `OMARCHY_VERSION` file. 4.0.6 changes only Linux pieces (update
+  migrations, the boot passphrase keyboard, lock before suspend, TUXEDO
+  drivers), so the parity score stays at 72%. A weekly check now compares
+  this file with the newest stable Omarchy release and opens a card for each
+  new change that can come to the Mac. This entry is not a dotfiles sync.
+
 ## 2026-10-29
 
 - Lock screen works again. AeroSpace bound `cmd-ctrl-q` to Calculator, which
