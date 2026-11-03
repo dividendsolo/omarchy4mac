@@ -4,6 +4,10 @@ Newest first. Each entry is a sync from the private dotfiles it is exported
 from, so a date here is the day the change went public, not the day it was
 built. Entries that are not a dotfiles sync say so.
 
+## 2026-11-03
+
+- The X web app now opens on workspace 1 instead of the media workspace (5).
+
 ## 2026-11-02
 
 - omarchy4mac now tracks Omarchy **4.0.6**, written in the new

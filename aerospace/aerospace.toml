@@ -407,11 +407,13 @@ run = 'move-node-to-workspace 4'
 if.app-id = 'ch.protonmeet.desktop'
 run = 'move-node-to-workspace 4'
 
-# 5: media (X, YouTube, YouTube Music, YouTube TV and Spotify are Brave web apps)
+# 1: X (Brave web app)
 
 [[on-window-detected]]
 if.app-id = 'com.brave.Browser.app.lodlkdfmihgonocnmddehnfgiljnadcf'
-run = 'move-node-to-workspace 5'
+run = 'move-node-to-workspace 1'
+
+# 5: media (YouTube, YouTube Music, YouTube TV and Spotify are Brave web apps)
 
 [[on-window-detected]]
 if.app-id = 'com.brave.Browser.app.agimnkijcaahngcdmfeangaknmldooml'
