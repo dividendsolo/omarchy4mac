@@ -171,8 +171,8 @@ cmd-shift-d = 'exec-and-forget open -na Ghostty --args -e lazydocker'
 cmd-shift-o = 'exec-and-forget open -a Obsidian'
 cmd-shift-w = 'exec-and-forget open -a Typora'
 
-cmd-shift-x = 'exec-and-forget open https://x.com'   # Finicky → X PWA window
-cmd-shift-alt-x = 'exec-and-forget open https://x.com/compose/post'   # Finicky → X PWA window
+cmd-shift-x = 'exec-and-forget open https://x.com'   # Finicky → Brave
+cmd-shift-alt-x = 'exec-and-forget open https://x.com/compose/post'   # Finicky → Brave
 cmd-shift-y = 'exec-and-forget $HOME/.local/bin/omarchy-launch-browser --app=https://youtube.com --workspace=5'
 
 # ---------- Style: theme switcher ----------
