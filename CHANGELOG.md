@@ -4,6 +4,10 @@ Newest first. Each entry is a sync from the private dotfiles it is exported
 from, so a date here is the day the change went public, not the day it was
 built. Entries that are not a dotfiles sync say so.
 
+## 2026-11-06
+
+- A Friday sunset item in the top bar. On Fridays it shows today's sunset time (from wttr.in, for your IP location, read once a day), so you know when to stop working. It is orange, and it turns red in the last 30 minutes and after sunset. It is hidden on every other day, and when wttr.in cannot be reached.
+
 ## 2026-11-05
 
 - The X hotkeys (cmd-shift-x, cmd-shift-alt-x) open x.com in a normal browser tab. The X web app is gone, because it caught every x.com link, the X developer console included, and showed only the home feed.

@@ -306,7 +306,7 @@ what changed and when is in [`CHANGELOG.md`](CHANGELOG.md).
 | Omarchy Quattro has | omarchy4mac uses | Match | Why not, and the plan |
 |---|---|---|---|
 | Tiling WM: focus, move, swap, resize, fullscreen, 5 workspaces, monitors | AeroSpace | ✅ |  |
-| Top bar: logo opens menu, workspaces, indicators, clock, weather, updates badge, agents limits (Claude Code 5-hour and weekly), bluetooth, wifi, audio, battery | SketchyBar, v4 layout | ✅ |  |
+| Top bar: logo opens menu, workspaces, indicators, clock, weather, Friday sunset, updates badge, agents limits (Claude Code 5-hour and weekly), bluetooth, wifi, audio, battery | SketchyBar, v4 layout | ✅ |  |
 | Active-window borders | JankyBorders | ✅ |  |
 | All 22 v4 themes, generated from Omarchy's own templates | `theme --sync`, renders Ghostty, Neovim, btop from the v4 `.tpl` files | ✅ |  |
 | Theme chooser (Super+Ctrl+Shift+Space) | Hammerspoon chooser on ⌘⌃⇧Space | ✅ |  |

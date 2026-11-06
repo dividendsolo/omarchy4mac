@@ -185,6 +185,16 @@ sketchybar --add item standup_center center \
                  background.drawing=off \
                  script="$PLUGIN_DIR/standup.sh"
 
+# Friday sunset, centre copy (external displays): the time work stops. Shown on
+# Fridays only, red in the last 30 minutes. sunset (right) covers the built-in panel.
+sketchybar --add item sunset_center center \
+           --set sunset_center \
+                 drawing=off \
+                 update_freq=60 \
+                 background.drawing=off \
+                 script="$PLUGIN_DIR/sunset.sh" \
+           --subscribe sunset_center system_woke display_change
+
 # v4 bar order, left to right: agents · bluetooth · network · audio · power.
 # Right items lay out right-to-left in add order, so battery goes first.
 sketchybar --add item battery right \
@@ -224,6 +234,15 @@ sketchybar --add item standup right \
                  label.drawing=off \
                  background.drawing=off \
                  script="$PLUGIN_DIR/standup.sh"
+
+# Friday sunset, right copy (built-in panel), left of the stand-up icon.
+sketchybar --add item sunset right \
+           --set sunset \
+                 drawing=off \
+                 update_freq=60 \
+                 background.drawing=off \
+                 script="$PLUGIN_DIR/sunset.sh" \
+           --subscribe sunset system_woke display_change
 
 sketchybar --add item clock_right right \
            --set clock_right \
