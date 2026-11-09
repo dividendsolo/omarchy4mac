@@ -16,4 +16,6 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
+      # tests/starship-test.sh renders the prompt with the real starship.
+      - run: curl -sS https://starship.rs/install.sh | sh -s -- -y
       - run: for t in tests/*-test.sh; do echo "== $t"; bash "$t" || exit 1; done
