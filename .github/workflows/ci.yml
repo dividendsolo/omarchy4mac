@@ -1,0 +1,19 @@
+name: CI
+
+# CI runs once per PR, right before the merge, and the merge waits for it
+# (James, 2026-11-09: "the CI should run before merge, not after"). It starts
+# by hand: agent-stack/vps/scripts/ci-merge.py starts it on the PR branch and
+# merges only when it passes, and refuses a repo with no such workflow.
+# Pushes do not run it (James, 2026-10-04: Actions minutes).
+on:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: jog
+    permissions:
+      contents: read
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - run: for t in tests/*-test.sh; do echo "== $t"; bash "$t" || exit 1; done
