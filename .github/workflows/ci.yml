@@ -10,7 +10,7 @@ on:
 
 jobs:
   check:
-    runs-on: jog
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     timeout-minutes: 10
