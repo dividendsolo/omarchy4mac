@@ -820,6 +820,34 @@ ConsoleWatcher = hs.application.watcher.new(function(_, event, app)
   end
 end):start()
 
+-- Drag a widget off the bar to remove it (Omarchy 4.5, omacom/omarchy#6782): a
+-- drag that starts on SketchyBar and ends 48 px or more below it runs
+-- omarchy-bar-remove on the point where it started. `omarchy-bar-remove --reset`
+-- brings every removed widget back.
+local BAR_HEIGHT, REMOVE_PULL = 32, 48 -- sketchybarrc height=32; Omarchy's pull to arm removal
+local barDragStart
+local function screenTop(p)
+  for _, s in ipairs(hs.screen.allScreens()) do
+    local f = s:fullFrame()
+    if p.x >= f.x and p.x < f.x + f.w and p.y >= f.y and p.y < f.y + f.h then return f.y end
+  end
+end
+BarDragTap = hs.eventtap.new({ hs.eventtap.event.types.leftMouseDown, hs.eventtap.event.types.leftMouseUp }, function(e)
+  local p = e:location()
+  if e:getType() == hs.eventtap.event.types.leftMouseDown then
+    local top = screenTop(p)
+    barDragStart = (top and p.y - top < BAR_HEIGHT) and { x = p.x, y = p.y, top = top } or nil
+  elseif barDragStart then
+    local start = barDragStart
+    barDragStart = nil
+    if p.y - start.top >= BAR_HEIGHT + REMOVE_PULL then
+      hs.task.new(os.getenv("HOME") .. "/.local/bin/omarchy-bar-remove", nil,
+        { tostring(math.floor(start.x)), tostring(math.floor(start.y)) }):start()
+    end
+  end
+  return false
+end):start()
+
 -- Gaming mode hides SketchyBar; show it again when Steam quits.
 SteamWatcher = hs.application.watcher.new(function(name, event, app)
   if event == hs.application.watcher.terminated and name == "Steam" then
