@@ -146,6 +146,17 @@ hs.screen = setmetatable({ allScreens = function()
   return out
 end }, mt)
 hs.task = { new = function(path, _, args) tasks[#tasks + 1] = path .. " " .. table.concat(args, " "); return stub() end }
+-- On-screen windows, front to back (CGWindowListCopyWindowInfo): SketchyBar's
+-- bar on each screen, and the auto-hidden macOS menu bar when it is shown.
+local bars = {
+  { kCGWindowOwnerName = "sketchybar", kCGWindowAlpha = 1, kCGWindowBounds = { X = 0, Y = 0, Width = 1512, Height = 32 } },
+  { kCGWindowOwnerName = "sketchybar", kCGWindowAlpha = 1, kCGWindowBounds = { X = 1512, Y = -200, Width = 2560, Height = 32 } },
+}
+local menubar = { kCGWindowOwnerName = "Window Server", kCGWindowName = "Menubar", kCGWindowAlpha = 1,
+  kCGWindowBounds = { X = 0, Y = 0, Width = 1512, Height = 24 } }
+local hiddenMenubar = { kCGWindowOwnerName = "Window Server", kCGWindowAlpha = 0, kCGWindowBounds = { X = 0, Y = 0, Width = 1512, Height = 24 } }
+local onScreen = bars
+hs.window = setmetatable({ list = function() return onScreen end }, mt)
 dofile(arg[1])
 local function drag(x1, y1, x2, y2)
   for _, fn in ipairs(taps) do
@@ -159,6 +170,10 @@ print("off=" .. drag(800, 10, 820, 200))
 print("short=" .. drag(800, 10, 800, 60))
 print("below=" .. drag(800, 100, 800, 400))
 print("second=" .. drag(2000, -190, 2000, -100))
+onScreen = { menubar, bars[1], bars[2] }
+print("menu=" .. drag(30, 10, 30, 120))
+onScreen = { hiddenMenubar, bars[1], bars[2] }
+print("hiddenmenu=" .. drag(800, 10, 820, 200))
 LUAEOF
 )"
 check "init.lua watches mouse down and up" "taps=1" "$out"
@@ -166,6 +181,8 @@ check "a drag well below the bar removes the item it started on" "off=$HOME/.loc
 check "a short pull removes nothing" "short=nothing" "$out"
 check "a drag that starts below the bar removes nothing" "below=nothing" "$out"
 check "the bar on a second screen counts from that screen's top" "second=$HOME/.local/bin/omarchy-bar-remove 2000 -190" "$out"
+check "a press on the macOS menu bar (a menu pick) removes nothing" "menu=nothing" "$out"
+check "the hidden macOS menu bar does not block a drag off SketchyBar" "hiddenmenu=$HOME/.local/bin/omarchy-bar-remove 800 10" "$out"
 fi
 
 [[ "$fails" -eq 0 ]] && echo "PASS" || { echo "FAIL: $fails check(s)"; exit 1; }

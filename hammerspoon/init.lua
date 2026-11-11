@@ -823,7 +823,9 @@ end):start()
 -- Drag a widget off the bar to remove it (Omarchy 4.5, omacom/omarchy#6782): a
 -- drag that starts on SketchyBar and ends 48 px or more below it runs
 -- omarchy-bar-remove on the point where it started. `omarchy-bar-remove --reset`
--- brings every removed widget back.
+-- brings every removed widget back. The press must land on a SketchyBar window:
+-- the auto-hidden macOS menu bar slides down over the bar, and a press-drag-release
+-- on its menus is a menu pick, not a drag off the bar.
 local BAR_HEIGHT, REMOVE_PULL = 32, 48 -- sketchybarrc height=32; Omarchy's pull to arm removal
 local barDragStart
 local function screenTop(p)
@@ -832,11 +834,20 @@ local function screenTop(p)
     if p.x >= f.x and p.x < f.x + f.w and p.y >= f.y and p.y < f.y + f.h then return f.y end
   end
 end
+local function onSketchyBar(p) -- the frontmost visible window under p is SketchyBar's
+  for _, w in ipairs(hs.window.list(true) or {}) do -- on-screen windows, front to back
+    local b = w.kCGWindowBounds
+    if b and (w.kCGWindowAlpha or 1) > 0 and p.x >= b.X and p.x < b.X + b.Width and p.y >= b.Y and p.y < b.Y + b.Height then
+      return w.kCGWindowOwnerName == "sketchybar"
+    end
+  end
+  return false
+end
 BarDragTap = hs.eventtap.new({ hs.eventtap.event.types.leftMouseDown, hs.eventtap.event.types.leftMouseUp }, function(e)
   local p = e:location()
   if e:getType() == hs.eventtap.event.types.leftMouseDown then
     local top = screenTop(p)
-    barDragStart = (top and p.y - top < BAR_HEIGHT) and { x = p.x, y = p.y, top = top } or nil
+    barDragStart = (top and p.y - top < BAR_HEIGHT and onSketchyBar(p)) and { x = p.x, y = p.y, top = top } or nil
   elseif barDragStart then
     local start = barDragStart
     barDragStart = nil
