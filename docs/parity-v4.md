@@ -1,7 +1,7 @@
 # Omarchy v4 (Quattro) parity on this Mac
 
 Written 2026-09-02 from the `quattro` branch of `omacom/omarchy` (v4.0.2, then
-the current release; re-scored 2026-10-22 against v4.0.5, pinned 2026-11-02 at v4.0.6: its changes are Linux-only fixes) and the dotfiles as they stand. One flat list, ordered by
+the current release; re-scored 2026-10-22 against v4.0.5, pinned 2026-11-02 at v4.0.6: its changes are Linux-only fixes) and this repo as it stands. One flat list, ordered by
 how much of the daily feel each item buys. Tick items as they land.
 
 ## Where we stand
