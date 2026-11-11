@@ -1,0 +1,37 @@
+#!/bin/bash
+# Super+Return (alt-enter): a new Ghostty window in the folder of the focused
+# terminal's shell, like Omarchy's omarchy-cmd-terminal-cwd. Any other app
+# gets a terminal in $HOME (Omarchy 4.5, omacom/omarchy#15007): a browser's
+# helper shell sitting in ~/Downloads is not a terminal's shell.
+#
+# A terminal starts its shell on a pty of its own, as the session leader or
+# (Ghostty on macOS) as the child of a `login` that leads the session. A
+# helper shell another app spawns has no pty, or shares the app's.
+#
+# shortcut: an app with several windows (Ghostty tabs) gives its newest shell,
+# as Omarchy does; the focused tab's shell needs the terminal's own API.
+set -u
+AS="${AEROSPACE:-aerospace}"
+
+app=$("$AS" list-windows --focused --format '%{app-pid}' 2>/dev/null)
+dir=""
+if [[ -n $app ]]; then
+  shells=" $(grep -v '^#' /etc/shells | sed 's|.*/||' | tr '\n' ' ') "
+  pid=$(ps -Ao pid=,ppid=,stat=,tty=,comm= | awk -v app="$app" -v shells="$shells" '
+    { n = $5; sub(/^-/, "", n); sub(/.*\//, "", n)
+      pids[NR] = $1; ppid[$1] = $2; stat[$1] = $3; tty[$1] = $4; name[$1] = n }
+    END {
+      for (i = 1; i <= NR; i++) {
+        p = pids[i]
+        if (index(shells, " " name[p] " ") == 0 || tty[p] == "??" || tty[p] == tty[app]) continue
+        lead = (stat[p] ~ /s/) ? p : ppid[p]
+        if (stat[lead] !~ /s/ || ppid[lead] != app) continue
+        if (p + 0 > best + 0) best = p
+      }
+      print best
+    }')
+  [[ -n $pid ]] && dir=$(lsof -a -p "$pid" -d cwd -Fn 2>/dev/null | sed -n 's/^n//p' | head -n1)
+fi
+[[ -n $dir && -d $dir ]] || dir=$HOME
+
+exec open -na Ghostty --args --working-directory="$dir"

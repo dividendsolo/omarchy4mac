@@ -13,7 +13,7 @@ local bindings = {
   { "SUPER + SPACE",            "Raycast" },
   { "ALT + SPACE",              "Dictation on / off (Hex)" },
   { "hold RIGHT ALT",           "Dictate while held (Hex)" },
-  { "ALT + RETURN",             "Ghostty (terminal)" },
+  { "ALT + RETURN",             "Ghostty (terminal) in the focused folder" },
   { "SUPER + ALT + RETURN",     "Ghostty + tmux (Work)" },
   { "SUPER + CTRL + RETURN",    "Ghostty + herdr" },
   { "SUPER + SHIFT + RETURN",   "Browser (macOS default)" },
@@ -73,7 +73,7 @@ local bindings = {
   { "ALT + TAB",                "Next workspace on this monitor" },
   { "SUPER + CTRL + TAB",       "Back-and-forth between workspaces" },
   { "SUPER + SHIFT + ALT + ←/→/↑/↓", "Move workspace to prev/next monitor" },
-  { "SUPER + CTRL + SHIFT + ←/↓/↑/→", "Move focused window across monitors" },
+  { "SUPER + CTRL + SHIFT + ←/↓/↑/→", "Move focused window across monitors (floats centre)" },
 
   -- Resize
   { "ALT + =",                  "Grow focused window" },
