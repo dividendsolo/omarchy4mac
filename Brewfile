@@ -2,6 +2,7 @@
 
 tap "FelixKratz/formulae"   # sketchybar and borders live here, not in core
 tap "nikitabobko/tap"       # aerospace is not in homebrew/cask (issue #2)
+tap "anomalyco/tap"        # hex, the dictation app
 
 # Window manager, bar, borders, terminal, prompt, editor, monitor
 cask "nikitabobko/tap/aerospace"
@@ -31,4 +32,4 @@ cask "font-sketchybar-app-font"   # the app icons in the bar; without it the bar
 # the stand-ins the parity table scores. Skip with SKIP_APPS=1.
 cask "brave-browser" unless ENV["SKIP_APPS"]
 cask "raycast" unless ENV["SKIP_APPS"]
-cask "fluidvoice" unless ENV["SKIP_APPS"]
+cask "anomalyco/tap/hex" unless ENV["SKIP_APPS"]   # dictation: hold Right ⌥, or ⌥Space to toggle
