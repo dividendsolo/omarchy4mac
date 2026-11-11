@@ -7,6 +7,9 @@ maintainer's Mac runs from a clone of it, the same as yours.
 
 ## 2026-11-11
 
+- Install > Service > Slack (Omarchy 4.5). The menu item installs Slack
+  with Homebrew in a Ghostty window and opens it when the install ends. When
+  Slack is already there, the item just opens it.
 - The agents in the bar follow Omarchy 4.5's agents panel: Claude, Codex and
   Grok each get an item, and every limit shows a meter, its percentage and
   when it resets (a time today, else the day). Codex reads its limits from

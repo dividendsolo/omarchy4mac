@@ -33,3 +33,7 @@ cask "font-sketchybar-app-font"   # the app icons in the bar; without it the bar
 cask "brave-browser" unless ENV["SKIP_APPS"]
 cask "raycast" unless ENV["SKIP_APPS"]
 cask "anomalyco/tap/hex" unless ENV["SKIP_APPS"]   # dictation: hold Right ⌥, or ⌥Space to toggle
+
+# Installed on demand, never by install.sh: the menu's Install > Service runs
+# `brew install --cask <name>` and then opens the app (Omarchy 4.5).
+#   cask "slack"   # Install > Service > Slack
