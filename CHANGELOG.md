@@ -7,6 +7,10 @@ maintainer's Mac runs from a clone of it, the same as yours.
 
 ## 2026-11-11
 
+- Omarchy 4.5's floating workspaces and dock keys. ⌥L cycles the focused
+  workspace through tiles, accordion and floating, and the layout comes back
+  after AeroSpace restarts. ⌥M minimizes the focused window to the Dock. Both
+  are in the ⌥K overlay.
 - This repo is now the source. Changes land here by pull request, and the
   maintainer's own Mac runs from a clone of it with `install.sh`, so what you
   install is exactly what runs there. `git pull` (or rerunning `install.sh`)

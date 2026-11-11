@@ -1,0 +1,60 @@
+#!/bin/bash
+# Super+L (alt-l): cycle the focused workspace through tiles, accordion and
+# floating, like Omarchy 4.5. AeroSpace floats windows, not workspaces, so
+# floating floats every tiled window on the workspace, and leaving floating
+# tiles back only those (a window floated by an on-window-detected rule stays
+# floating). The layout is saved per workspace, and `restore` (AeroSpace's
+# after-startup-command) puts it back after AeroSpace restarts.
+#
+#   omarchy-workspace-layout [cycle]
+#   omarchy-workspace-layout restore
+#
+# shortcut: alt-a (accordion/tiles toggle) does not save, so a restart can
+# bring back the layout from the last Super+L; route alt-a here if that bites.
+set -u
+AS="${AEROSPACE:-aerospace}"
+STATE="${XDG_STATE_HOME:-$HOME/.local/state}/omarchy/workspace-layouts"
+
+apply() { # apply <workspace> <tiles|accordion|floating>
+  local ws=$1 mode=$2 id layout
+  local floated="$STATE/$ws.floated"
+  while read -r id layout; do
+    [[ -n "$id" ]] || continue
+    if [[ $mode == floating ]]; then
+      [[ $layout == floating ]] && continue
+      "$AS" layout --window-id "$id" floating && echo "$id" >>"$floated"
+    elif [[ $layout == floating ]] && grep -qx "$id" "$floated" 2>/dev/null; then
+      "$AS" layout --window-id "$id" tiling
+    fi
+  done < <("$AS" list-windows --workspace "$ws" --format '%{window-id} %{window-layout}')
+  [[ $mode == floating ]] && return 0
+  rm -f "$floated"
+  "$AS" layout --workspace "$ws" --root "$mode"
+}
+
+mkdir -p "$STATE"
+case "${1:-cycle}" in
+  cycle)
+    ws=$("$AS" list-workspaces --focused) || exit 1
+    current=$(cat "$STATE/$ws" 2>/dev/null)
+    # Tiles and accordion are read live (alt-a may have changed them).
+    if [[ $current != floating ]]; then
+      current=$("$AS" list-workspaces --focused --format '%{workspace-root-container-layout}')
+      current=${current#*_}
+    fi
+    case $current in
+      tiles) next=accordion ;;
+      accordion) next=floating ;;
+      *) next=tiles ;;
+    esac
+    apply "$ws" "$next"
+    echo "$next" >"$STATE/$ws"
+    ;;
+  restore)
+    for f in "$STATE"/*; do
+      [[ -f $f && $f != *.floated ]] || continue
+      apply "$(basename "$f")" "$(cat "$f")"
+    done
+    ;;
+  *) echo "usage: omarchy-workspace-layout [cycle|restore]" >&2; exit 2 ;;
+esac
