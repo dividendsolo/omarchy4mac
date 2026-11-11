@@ -289,11 +289,11 @@ easy, or because a Mac needed them.
 
 ## How close is this to real Omarchy?
 
-**72%** of Omarchy v4.0.6 (Quattro), scored feature by feature below: ✅ we
+**73%** of Omarchy v4.0.6 (Quattro), scored feature by feature below: ✅ we
 have it, or the Mac stand-in does the same job (1 point). ⚠️ partly there,
 with a plan (half). ❌ missing, nothing planned, whatever the reason (0).
-Items with no macOS meaning are left out. That is 24 matched, 4 partial, 8
-not portable, out of 36 scored.
+Items with no macOS meaning are left out. That is 25 matched, 4 partial, 8
+not portable, out of 37 scored.
 
 The short version: the keybinding vocabulary, the workspace model, the menu
 tree, the bar, the theme pipeline, the screensaver, and the shell are here.
@@ -308,6 +308,7 @@ what changed and when is in [`CHANGELOG.md`](CHANGELOG.md).
 | Tiling WM: focus, move, swap, resize, fullscreen, 5 workspaces, monitors | AeroSpace | ✅ |  |
 | Top bar: logo opens menu, workspaces, indicators, clock, weather, Friday sunset, updates badge, agents limits (Claude Code 5-hour and weekly), bluetooth, wifi, audio, battery | SketchyBar, v4 layout | ✅ |  |
 | Active-window borders | JankyBorders | ✅ |  |
+| Window transparency (opaque, transparent, glassy) and corners (theme, sharp, rounded), from Trigger > Appearance | `omarchy-appearance`: Ghostty opacity and blur, SketchyBar background, JankyBorders style | ✅ | macOS draws other apps solid and rounds every window itself, so the choices reach the terminal, the bar and the borders. |
 | All 22 v4 themes, generated from Omarchy's own templates | `theme --sync`, renders Ghostty, Neovim, btop from the v4 `.tpl` files | ✅ |  |
 | Theme chooser (Super+Ctrl+Shift+Space) | Hammerspoon chooser on ⌘⌃⇧Space | ✅ |  |
 | Menu tree: Apps, Learn, Trigger, Style, Setup, Install, Update, System, nested search | Hammerspoon on ⌘⌥Space, ⌘Esc to System | ✅ |  |
