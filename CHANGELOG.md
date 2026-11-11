@@ -7,6 +7,18 @@ maintainer's Mac runs from a clone of it, the same as yours.
 
 ## 2026-11-11
 
+- Omarchy 4.5's changed hotkeys (#31). ⌘⇧Q opens Calculator. Activity stays
+  on ⌥⇧T, and ⌘⌃T now opens the theme chooser. Network moves to ⌘⌃N, and
+  ⌘⌃W now switches to the next background. ⌘⌥Space opens Apps, and the
+  Omarchy menu moves to ⌘⇧Space (the key Apps had). Do Not Disturb moves
+  from ⌘⌃, to ⌘⌃⌥,, and ⌥, opens the newest notification. New keys from
+  4.5: ⌥Q quits like ⌥W, ⌘⌥L cycles the workspace layout the other way,
+  ⌘⌃⌥C takes a region screenshot, ⌘⌃⌥E opens the world clock (the Clock
+  app), and ⌘⌃⌥F hides or shows the bar (AeroSpace cannot drop the gaps at
+  runtime, so they stay). ⌘A, ⌘C and ⌘V already select, copy and paste in
+  every Mac app, terminals included, so 4.5's Super+A/C/V change needs
+  nothing here; push-to-talk on Right Alt belongs to your dictation app.
+  The ⌥K overlay and the README tables list the new keys.
 - Window transparency and corners (Omarchy 4.5), in the menu under
   Appearance > Window Transparency and Appearance > Window Corners, or with
   `omarchy-appearance transparency opaque|transparent|glassy` and

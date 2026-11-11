@@ -35,7 +35,7 @@ curl -fsSL https://raw.githubusercontent.com/dividendsolo/omarchy4mac/main/insta
 
 Near the end, the script opens System Settings on Accessibility and waits.
 Turn on AeroSpace and Hammerspoon, press Return, and it restarts both. Then ⌥K
-for the keybindings, ⌘⌥Space for the menu.
+for the keybindings, ⌘⇧Space for the menu.
 
 **Update:** run the same script again. It pulls, relinks, resyncs themes, and
 restarts the services. `~/code/omarchy4mac/install.sh --dry-run` reports what
@@ -132,6 +132,7 @@ is also available.
 | ⌘⇧N | Ghostty + nvim |
 | ⌘⇧D | Ghostty + lazydocker |
 | ⌘⇧M | Spotify |
+| ⌘⇧Q | Calculator |
 | ⌘⇧A | Claude |
 | ⌘⇧⌥A | Grok (app window) |
 | ⌘⇧O | Obsidian |
@@ -153,10 +154,12 @@ is also available.
 | Keys | Action |
 |---|---|
 | ⌥W | Quit focused app |
+| ⌥Q | Quit focused app (same as ⌥W) |
 | ⌃⌥⌫ | Close all windows but current |
 | ⌥S | Toggle floating / tiling |
 | ⌥A | Toggle accordion / tiles (workspace) |
 | ⌥L | Cycle workspace: tiles / accordion / floating (kept across restarts) |
+| ⌘⌥L | Cycle workspace layout the other way |
 | ⌥M | Minimize window (to the Dock) |
 | ⌥J | Toggle tiles horizontal / vertical |
 | ⌥F | Fullscreen (tile) |
@@ -208,22 +211,27 @@ is also available.
 |---|---|
 | ⌘⌃A | Sound settings |
 | ⌘⌃B | Bluetooth settings |
-| ⌘⌃W | Wi-Fi settings |
+| ⌘⌃N | Network (Wi-Fi settings) |
 | ⌘⌃S | Share (LocalSend) |
 | ⌘⌃E | Emoji picker (Raycast) |
 | ⌘⌃⇧Q | Quit every Dock app (keeps Finder) |
 | ⌘⌃R | Set a reminder (20m message) |
 | ⌘⌃Z | Zoom (macOS accessibility) |
 | ⌘⇧⌃A | Coding agent (the pick in Setup > Defaults > Agent, Claude Code by default) |
-| ⌘⌃T / ⌥⇧T | Activity (Ghostty + btop) |
+| ⌥⇧T | Activity (Ghostty + btop) |
+| ⌘⌃⌥E | World clock (Clock) |
+| ⌘⌃⌥F | Full screen desktop: hide or show the bar (the gaps stay) |
 | ⌘⌃H | System Information |
 | ⌘⌃. | HandBrake |
 | ⌘⌃L | Lock screen |
 | ⌘⌃I | Toggle caffeinate (keep awake) |
-| ⌘⌃, | Toggle Do Not Disturb |
+| ⌥, | Open the newest notification |
+| ⌘⌃⌥, | Toggle Do Not Disturb |
 | ⌘⌃C | Screenshot picker (⇧⌘5) |
+| ⌘⌃⌥C | Screenshot of a region (⇧⌘4) |
 | ⌘⌃V | Clipboard history (Raycast) |
 | ⌘⌃P | Cycle wallpaper |
+| ⌘⌃W | Next background (cycle wallpaper) |
 | ⌘⌃G | Gaming mode |
 | ⌘⌃⌥T | Date & time toast |
 | ⌘⌃⌥W | Weather toast |
@@ -234,9 +242,10 @@ is also available.
 
 | Keys | Action |
 |---|---|
-| ⌘⌥⎵ | Omarchy control menu |
-| ⌘⇧⎵ | Apps launcher (curated) |
+| ⌘⌥⎵ | Apps launcher (curated) |
+| ⌘⇧⎵ | Omarchy control menu |
 | ⌘⌃⇧⎵ | Theme chooser |
+| ⌘⌃T | Theme chooser |
 | ⌥T | Random theme (matches system light/dark) |
 | ⌥K | Show keybinding overlay |
 
@@ -315,7 +324,7 @@ what changed and when is in [`CHANGELOG.md`](CHANGELOG.md).
 | Window transparency (opaque, transparent, glassy) and corners (theme, sharp, rounded), from Appearance > Window Transparency / Window Corners | `omarchy-appearance`: Ghostty opacity and blur, SketchyBar background, JankyBorders style | ✅ | macOS draws other apps solid and rounds every window itself, so the choices reach the terminal, the bar and the borders. |
 | All 22 v4 themes, generated from Omarchy's own templates | `theme --sync`, renders Ghostty, Neovim, btop from the v4 `.tpl` files | ✅ |  |
 | Theme chooser (Super+Ctrl+Shift+Space) | Hammerspoon chooser on ⌘⌃⇧Space | ✅ |  |
-| Menu tree: Apps, Learn, Appearance, Trigger, Setup, Install, Update, System, nested search (4.5: Appearance replaces Style) | Hammerspoon on ⌘⌥Space, ⌘Esc to System | ✅ |  |
+| Menu tree: Apps, Learn, Appearance, Trigger, Setup, Install, Update, System, nested search (4.5: Appearance replaces Style) | Hammerspoon on ⌘⇧Space, ⌘Esc to System | ✅ |  |
 | Keybinding overlay (Super+K) | ⌥K, every binding listed | ✅ |  |
 | Web apps as app windows (Super+Shift+letter) | `--app=` windows of the default browser on the same keys (HEY, Photos, YouTube, Grok, Google Chat) | ✅ |  |
 | Screensaver: ttfx ASCII art per monitor after 150 s | Hammerspoon idle timer, Ghostty + ttfx per display | ✅ |  |
@@ -335,7 +344,7 @@ what changed and when is in [`CHANGELOG.md`](CHANGELOG.md).
 | Install in one command, update in one command | `install.sh`, rerun to update; `uninstall.sh` to back out | ✅ |  |
 | Theme backgrounds downloaded with the theme | `theme --sync` pulls each theme's `backgrounds/` into `~/Pictures/Wallpapers` | ✅ |  |
 | Theme reaches tmux, lazygit, VS Code | Terminal, editor, btop, Claude Code, Obsidian | ⚠️ | Planned when tmux is daily: render v4's tmux template and reload live sessions. lazygit and VS Code only if asked. |
-| Night light toggle | None | ⚠️ | Planned: Night Shift via osascript on ⌘⌃N and a menu item. Small. |
+| Night light toggle | None | ⚠️ | Planned: Night Shift via osascript in the menu under Trigger > Toggle (Omarchy 4.5 dropped its key; ⌘⌃N is Network now). Small. |
 | OCR capture-text (Super+Ctrl+Print) | macOS Live Text, by hand | ⚠️ | Planned: region screenshot, Vision text extraction, clipboard, one script. |
 | Bar hide/show key | None | ⚠️ | Planned: `sketchybar --bar hidden=toggle` on ⌘⇧Space. One line. |
 | Theme colors on the volume / brightness indicator (the box when you press a volume key) | Apple's, unthemed | ❌ | The theme cannot reach it. Apple owns it. |

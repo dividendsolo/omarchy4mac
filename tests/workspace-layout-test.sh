@@ -56,6 +56,21 @@ check "floating -> tiles tiles back only the windows it floated" \
   "layout --window-id 11 tiling;layout --window-id 12 tiling;layout --workspace 2 --root tiles;" "$(calls)"
 check "tiles is saved" tiles "$(cat "$STATE/2")"
 
+# Super+Alt+L (Omarchy 4.5): `back` cycles the other way, tiles -> floating
+# -> accordion -> tiles.
+echo h_tiles >"$TMP/root"
+printf '11 h_tiles\n' >"$TMP/windows"
+run back
+check "back: tiles -> floating" "layout --window-id 11 floating;" "$(calls)"
+check "back: floating is saved" floating "$(cat "$STATE/2")"
+printf '11 floating\n' >"$TMP/windows"
+run back
+check "back: floating -> accordion" "layout --window-id 11 tiling;layout --workspace 2 --root accordion;" "$(calls)"
+echo h_accordion >"$TMP/root"
+run back
+check "back: accordion -> tiles" "layout --workspace 2 --root tiles;" "$(calls)"
+check "back: tiles is saved" tiles "$(cat "$STATE/2")"
+
 # After a restart AeroSpace rebuilds every workspace in tiles; restore puts
 # back what was saved.
 echo floating >"$STATE/2"

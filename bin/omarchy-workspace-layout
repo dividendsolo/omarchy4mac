@@ -7,6 +7,7 @@
 # after-startup-command) puts it back after AeroSpace restarts.
 #
 #   omarchy-workspace-layout [cycle]
+#   omarchy-workspace-layout back      (Super+Alt+L: the other way round)
 #   omarchy-workspace-layout restore
 #
 # shortcut: alt-a (accordion/tiles toggle) does not save, so a restart can
@@ -33,8 +34,9 @@ apply() { # apply <workspace> <tiles|accordion|floating>
 }
 
 mkdir -p "$STATE"
-case "${1:-cycle}" in
-  cycle)
+set -- "${1:-cycle}"
+case "$1" in
+  cycle|back)
     ws=$("$AS" list-workspaces --focused) || exit 1
     current=$(cat "$STATE/$ws" 2>/dev/null)
     # Tiles and accordion are read live (alt-a may have changed them).
@@ -42,9 +44,12 @@ case "${1:-cycle}" in
       current=$("$AS" list-workspaces --focused --format '%{workspace-root-container-layout}')
       current=${current#*_}
     fi
-    case $current in
-      tiles) next=accordion ;;
-      accordion) next=floating ;;
+    case $1:$current in
+      back:tiles) next=floating ;;
+      back:floating) next=accordion ;;
+      back:*) next=tiles ;;
+      *:tiles) next=accordion ;;
+      *:accordion) next=floating ;;
       *) next=tiles ;;
     esac
     apply "$ws" "$next"
@@ -56,5 +61,5 @@ case "${1:-cycle}" in
       apply "$(basename "$f")" "$(cat "$f")"
     done
     ;;
-  *) echo "usage: omarchy-workspace-layout [cycle|restore]" >&2; exit 2 ;;
+  *) echo "usage: omarchy-workspace-layout [cycle|back|restore]" >&2; exit 2 ;;
 esac
