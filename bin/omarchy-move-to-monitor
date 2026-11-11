@@ -1,0 +1,21 @@
+#!/bin/bash
+# Super+Ctrl+Shift+arrow: move the focused window to the next monitor that
+# way. AeroSpace keeps a floating window's offset from the monitor's corner,
+# so on a monitor of another size it lands off-centre or partly off screen;
+# Omarchy 4.5 centres it there (omacom/omarchy#14549), and so does this.
+# A tiled window needs nothing: AeroSpace tiles it on the new monitor.
+#
+#   omarchy-move-to-monitor left|right|up|down
+set -u
+AS="${AEROSPACE:-aerospace}"
+HS="${HS:-hs}"
+
+"$AS" move-node-to-monitor --wrap-around --focus-follows-window "$1" || exit
+read -r id layout screen < <("$AS" list-windows --focused \
+  --format '%{window-id} %{window-layout} %{monitor-appkit-nsscreen-screens-id}')
+[[ ${layout:-} == floating ]] || exit 0
+# Both go into Lua source below, so only plain numbers pass.
+[[ $id =~ ^[0-9]+$ && $screen =~ ^[0-9]+$ ]] || exit 0
+# An AeroSpace window id is the macOS window number Hammerspoon uses, and the
+# screen id is the 1-based index in NSScreen.screens (hs.screen.allScreens).
+"$HS" -c "local w, s = hs.window.get($id), hs.screen.allScreens()[$screen]; if w and s then w:centerOnScreen(s, true, 0) end"
