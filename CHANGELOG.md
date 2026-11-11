@@ -27,6 +27,16 @@ maintainer's Mac runs from a clone of it, the same as yours.
   daylight saving leaves the log quiet (a test now runs it across
   2026-11-01). The tray drawer, tooltips, hover reveal and wallpaper sampling
   are not ported: SketchyBar has no tray, tooltips or wallpaper sampling.
+- Brave and web app fixes from Omarchy 4.5. ⌘⇧↩ (and every web app key)
+  opens Safari when the default browser named in macOS is no longer
+  installed, instead of doing nothing. ⌥⇧L copies the address of the front
+  browser tab, in any Brave profile and in web app windows, like Omarchy's
+  Copy URL (the first use asks to let Hammerspoon read the browser). New
+  `omarchy-chromium-setup`, run by `install.sh`: it copies the 1Password and
+  Bitwarden native messaging hosts to every Chromium browser on the Mac, so
+  their extensions connect to the desktop app, and turns on overlay
+  scrollbars in those browsers (after their next start). Web notifications
+  grouped by site are not ported: macOS groups notifications by app.
 - Menu fixes from Omarchy 4.5. An installed item stays in the menu, dimmed
   and marked "✓ installed" (Install > Service > Slack), instead of looking
   like one more thing to install. Setup > Defaults > Agent installs a missing

@@ -37,6 +37,7 @@ local bindings = {
   { "SUPER + SHIFT + ALT + X",  "X: new post" },
   { "SUPER + SHIFT + Y",        "YouTube (app window)" },
   { "SUPER + SHIFT + /",        "1Password" },
+  { "ALT + SHIFT + L",          "Copy the browser tab's URL" },
   { "SUPER + SHIFT + C",        "HEY Calendar (app window)" },
   { "SUPER + SHIFT + E",        "HEY Mail (app window)" },
 
@@ -196,6 +197,13 @@ hs.hotkey.bind({"cmd", "ctrl"},        "p", function() notifyFromScript("~/.loca
 -- Omarchy 4.5: Super+Ctrl+W is the background switcher (Network moved to Super+Ctrl+N).
 hs.hotkey.bind({"cmd", "ctrl"},        "w", function() notifyFromScript("~/.local/bin/omarchy-cycle-wallpaper") end)
 hs.hotkey.bind({"cmd", "ctrl"},        "g", function() notifyFromScript("~/.local/bin/gaming-mode") end)
+-- Omarchy 4.5's Copy URL (Alt+Shift+L): the front browser tab's address to the clipboard.
+hs.hotkey.bind({"alt", "shift"}, "l", function()
+  local front = hs.application.frontmostApplication()
+  -- A bundle id is letters, digits, dots and dashes; anything else stays out of the shell line.
+  local id = ((front and front:bundleID()) or ""):gsub("[^%w%.%-]", "")
+  notifyFromScript("~/.local/bin/omarchy-copy-url '" .. id .. "'")
+end)
 hs.hotkey.bind({"cmd", "ctrl", "shift"}, "q", function()
   hs.alert.show("Quitting all apps")
   hs.task.new("/bin/bash", nil, { "-lc", "~/.local/bin/quit-all" }):start()
