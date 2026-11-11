@@ -47,7 +47,7 @@ for mode in cfg.get("mode", {}).values():
 # hs.hotkey.bind({"cmd","ctrl","shift"}, "space", …) — the display list above is
 # not a binding, so only the calls count.
 for mods, key in re.findall(r'hs\.hotkey\.bind\(\s*\{([^}]*)\}\s*,\s*"([^"]+)"', lua_text):
-    key = {"`": "backtick"}.get(key, key)   # Hammerspoon's name -> AeroSpace's
+    key = {"`": "backtick", ",": "comma"}.get(key, key)   # Hammerspoon's name -> AeroSpace's
     bound.add(canon([m.strip().strip('"') for m in mods.split(",")] + [key]))
 print(f"# {len(bound)} chords bound in the config")
 
