@@ -11,6 +11,8 @@ require("hs.ipc")
 local bindings = {
   -- Launching
   { "SUPER + SPACE",            "Raycast" },
+  { "ALT + SPACE",              "Dictation on / off (Hex)" },
+  { "hold RIGHT ALT",           "Dictate while held (Hex)" },
   { "ALT + RETURN",             "Ghostty (terminal)" },
   { "SUPER + ALT + RETURN",     "Ghostty + tmux (Work)" },
   { "SUPER + CTRL + RETURN",    "Ghostty + herdr" },
@@ -188,6 +190,13 @@ hs.hotkey.bind({"cmd", "ctrl", "shift"}, "q", function()
   hs.alert.show("Quitting all apps")
   hs.task.new("/bin/bash", nil, { "-lc", "~/.local/bin/quit-all" }):start()
 end)
+
+-- Dictation (Omarchy 4.5, #28): Hex. Holding Right Option is Hex's own shortcut
+-- (install.sh sets it); Hex can't also take ⌥Space, so the toggle goes through its CLI.
+-- dictation: begin
+local HEX = "/Applications/Hex.app/Contents/MacOS/hex"
+hs.hotkey.bind({"alt"}, "space", function() hs.task.new(HEX, nil, { "dictation", "toggle" }):start() end)
+-- dictation: end
 
 -- Reminder (v4: Super+Ctrl+R): "20m stand up", "1h30 call back", "45s tea".
 -- A notification fires when the time is up. Timers live for this session.
