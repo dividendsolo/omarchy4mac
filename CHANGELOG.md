@@ -18,6 +18,15 @@ maintainer's Mac runs from a clone of it, the same as yours.
   through every window, floating ones too; tests now hold both. Rerun
   `install.sh` once after the pull: it links the two new scripts,
   `omarchy-terminal` and `omarchy-move-to-monitor`.
+- Omarchy 4.5 bar polish (#37). The wheel over the workspaces moves to the
+  workspace before (up) or after (down). Drag a widget 48 px or more below
+  the bar and it leaves the bar, and stays off after a reload;
+  `omarchy-bar-remove --reset` brings every removed widget back.
+  Right-click the clock to show seconds; right-click again to hide them.
+  The clock runs on the bar's own timer, so the repeated hour at the end of
+  daylight saving leaves the log quiet (a test now runs it across
+  2026-11-01). The tray drawer, tooltips, hover reveal and wallpaper sampling
+  are not ported: SketchyBar has no tray, tooltips or wallpaper sampling.
 - Menu fixes from Omarchy 4.5. An installed item stays in the menu, dimmed
   and marked "✓ installed" (Install > Service > Slack), instead of looking
   like one more thing to install. Setup > Defaults > Agent installs a missing
