@@ -7,6 +7,7 @@ maintainer's Mac runs from a clone of it, the same as yours.
 
 ## 2026-11-11
 
+<<<<<<< ours
 - Security hardening from a review before adoption (#45). The theme chooser
   runs `theme` with the theme name as an argument, never through a shell.
   `theme` refuses a theme name outside letters, digits, `.`, `_` and `-`,
@@ -17,12 +18,21 @@ maintainer's Mac runs from a clone of it, the same as yours.
   `install.sh` builds ttfx at a fixed commit (`cargo install --rev`). The
   weather, sunset and weather notice fetch `https://wttr.in`.
 
+=======
+<<<<<<< ours
+- Omarchy 4.5's floating workspaces and dock keys. ⌥L cycles the focused
+  workspace through tiles, accordion and floating, and the layout comes back
+  after AeroSpace restarts. ⌥M minimizes the focused window to the Dock. Both
+  are in the ⌥K overlay.
+=======
+>>>>>>> theirs
 - Omarchy 4.5's Appearance menu replaces Style on ⌘⌥Space, right before
   Trigger: Theme, Background, Font, Menu Bar, Windows, Branding, Dock,
   Workspace Layout, Animations and Unlock, plus Light / Dark, Random Theme
   and Sync Themes. Each item opens the theme chooser, a config file, an
   AeroSpace layout command or the matching System Settings pane, and menu
   search finds them all. `tests/menu-test.sh` checks the branch.
+>>>>>>> theirs
 - This repo is now the source. Changes land here by pull request, and the
   maintainer's own Mac runs from a clone of it with `install.sh`, so what you
   install is exactly what runs there. `git pull` (or rerunning `install.sh`)

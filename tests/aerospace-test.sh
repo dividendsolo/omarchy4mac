@@ -33,6 +33,17 @@ for key in alt-f cmd-alt-f cmd-ctrl-f; do
   check "$key is fullscreen below the bar" fullscreen "$(get_file mode.main.binding.$key)"
 done
 check "alt-a still toggles accordion" "layout accordion tiles" "$(get_file mode.main.binding.alt-a)"
+# Omarchy 4.5: Super+L cycles tiles/accordion/floating, Super+M minimizes to
+# the Dock, and the saved layouts come back when AeroSpace starts.
+check "alt-l cycles the workspace layout" \
+  'exec-and-forget $HOME/.local/bin/omarchy-workspace-layout cycle' "$(get_file mode.main.binding.alt-l)"
+check "alt-m minimizes to the Dock" macos-native-minimize "$(get_file mode.main.binding.alt-m)"
+check "startup restores saved layouts" \
+  "['exec-and-forget \$HOME/.local/bin/omarchy-workspace-layout restore']" "$(get_file after-startup-command)"
+LUA="${HAMMERSPOON_LUA:-$HERE/../hammerspoon/init.lua}"
+for key in "ALT + L" "ALT + M"; do
+  check "overlay lists $key" 1 "$(grep -c "{ \"$key\"," "$LUA")"
+done
 
 if pgrep -xq AeroSpace && command -v aerospace >/dev/null; then
   echo "loaded in AeroSpace:"

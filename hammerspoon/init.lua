@@ -42,6 +42,8 @@ local bindings = {
   { "CTRL + ALT + BACKSPACE",   "Close all windows but current" },
   { "ALT + S",                  "Toggle floating / tiling" },
   { "ALT + A",                  "Toggle accordion / tiles (workspace)" },
+  { "ALT + L",                  "Cycle workspace: tiles / accordion / floating" },
+  { "ALT + M",                  "Minimize window (to the Dock)" },
   { "ALT + J",                  "Toggle tiles horizontal / vertical" },
   { "ALT + F",                  "Fullscreen (tile)" },
   { "SUPER + ALT + F",          "Fullscreen (tile)" },
