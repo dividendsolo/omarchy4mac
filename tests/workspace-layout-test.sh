@@ -56,6 +56,17 @@ check "floating -> tiles tiles back only the windows it floated" \
   "layout --window-id 11 tiling;layout --window-id 12 tiling;layout --workspace 2 --root tiles;" "$(calls)"
 check "tiles is saved" tiles "$(cat "$STATE/2")"
 
+# Omarchy 4.5 (omacom/omarchy#16143): a window a float rule floats is never the
+# floating workspace's, even the first one that opens while the workspace
+# floats, so leaving floating leaves it floating.
+echo h_accordion >"$TMP/root"
+printf '11 h_tiles\n' >"$TMP/windows"
+run
+printf '11 floating\n14 floating\n' >"$TMP/windows"
+run
+check "a window a float rule floated stays floating after floating ends" \
+  "layout --window-id 11 tiling;layout --workspace 2 --root tiles;" "$(calls)"
+
 # Super+Alt+L (Omarchy 4.5): `back` cycles the other way, tiles -> floating
 # -> accordion -> tiles.
 echo h_tiles >"$TMP/root"
