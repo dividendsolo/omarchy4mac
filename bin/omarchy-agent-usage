@@ -1,0 +1,359 @@
+#!/usr/bin/python3
+"""Coding-agent limits for the bar (Omarchy 4.5 agents panel: the
+omarchy-agent-usage-<provider> collectors).
+
+  omarchy-agent-usage claude|codex|grok [--force]
+
+Prints one line for that provider's SketchyBar item, each limit a meter and
+its reset time, for example "5h ▰▰▱▱▱ 42% 3:10pm · 7d ▰▱▱▱▱ 18% Thu", or
+nothing when its limits are unknown. Exits 1, printing nothing, when the
+provider has no login here, so the bar hides it.
+
+- Claude: Anthropic's OAuth usage endpoint, with the login Claude Code keeps
+  in the macOS Keychain ("Claude Code-credentials").
+- Codex: Codex's own app-server (`codex app-server`, account/rateLimits/read),
+  as upstream reads it, for a ChatGPT login in ~/.codex (CODEX_HOME). An API
+  key login has no plan limits, so it shows nothing.
+- Grok: xAI's billing endpoint, the one Grok's /usage reads, with the login in
+  ~/.grok/auth.json (GROK_HOME).
+
+Tokens go nowhere but the request and are never printed or cached. Each
+answer is cached for 15 minutes, because the endpoints rate-limit. A failed
+check shows the last answer; a window whose reset time has passed shows 0%.
+Runs on macOS's /usr/bin/python3 (3.9).
+"""
+
+import datetime as dt
+import json
+import os
+import re
+import select
+import shutil
+import subprocess
+import sys
+import time
+import urllib.error
+import urllib.request
+from pathlib import Path
+
+CACHE_DIR = Path.home() / ".cache" / "omarchy" / "agent-usage"
+MAX_AGE = 900
+# SketchyBar runs plugins with launchd's short PATH; the CLIs live in these.
+EXTRA_PATH = [str(Path.home() / p) for p in (".local/bin", ".bun/bin", ".npm-global/bin")] + [
+  "/opt/homebrew/bin", "/usr/local/bin"]
+
+
+class NoLogin(Exception):
+  """The provider has no login here: the item hides, whatever the cache says."""
+
+
+def parse_time(value):
+  when = dt.datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+  return when if when.tzinfo else when.replace(tzinfo=dt.timezone.utc)
+
+
+def epoch_iso(seconds):
+  try:
+    seconds = float(seconds)
+  except (TypeError, ValueError):
+    return None
+  return dt.datetime.fromtimestamp(seconds, dt.timezone.utc).isoformat() if seconds > 0 else None
+
+
+def span_label(minutes):
+  if minutes and minutes % 1440 == 0:
+    return f"{minutes // 1440}d"
+  if minutes and minutes % 60 == 0:
+    return f"{minutes // 60}h"
+  return f"{minutes}m" if minutes else "limit"
+
+
+# ---- Claude ---------------------------------------------------------------
+
+def claude_login():
+  found = subprocess.run(
+    ["security", "find-generic-password", "-s", "Claude Code-credentials", "-w"],
+    capture_output=True, text=True, timeout=10,
+  )
+  if found.returncode != 0 or not found.stdout.strip():
+    raise NoLogin()
+  return json.loads(found.stdout)["claudeAiOauth"]["accessToken"]
+
+
+def claude_probe(token):
+  request = urllib.request.Request("https://api.anthropic.com/api/oauth/usage", headers={
+    "Authorization": "Bearer " + token,
+    "anthropic-beta": "oauth-2025-04-20",
+    "Accept": "application/json",
+  })
+  with urllib.request.urlopen(request, timeout=10) as response:
+    payload = json.loads(response.read())
+  limits = []
+  for label, keys in (("5h", ["five_hour"]), ("7d", ["seven_day_oauth_apps", "seven_day"])):
+    bucket = next((payload[k] for k in keys if isinstance(payload.get(k), dict)), None)
+    if bucket and bucket.get("utilization") is not None:
+      limits.append({"label": label, "percent": float(bucket["utilization"]), "resetsAt": bucket.get("resets_at")})
+  return limits
+
+
+# ---- Codex ----------------------------------------------------------------
+
+def codex_login():
+  home = Path(os.environ.get("CODEX_HOME") or Path.home() / ".codex")
+  try:
+    config = (home / "config.toml").read_text()
+  except OSError:
+    config = ""
+  store = re.search(r'^\s*cli_auth_credentials_store\s*=\s*"(\w+)"', config, re.M)
+  if store and store.group(1) != "file":
+    return home  # keyring or auto store: only Codex knows; its answer decides.
+  try:
+    auth = json.loads((home / "auth.json").read_text())
+  except (OSError, ValueError):
+    raise NoLogin()
+  # An API key login bills by the token and has no plan limits to show.
+  if auth.get("auth_mode") == "apikey" or (auth.get("auth_mode") is None and auth.get("OPENAI_API_KEY")):
+    raise NoLogin()
+  if not auth.get("tokens"):
+    raise NoLogin()
+  return home
+
+
+def codex_window(window):
+  if not isinstance(window, dict) or window.get("usedPercent") is None:
+    return None
+  return {
+    "label": span_label(int(window.get("windowDurationMins") or 0)),
+    "percent": float(window["usedPercent"]),
+    "resetsAt": epoch_iso(window.get("resetsAt")),
+  }
+
+
+def codex_limits(result):
+  """Limits from an account/rateLimits/read result: the general bucket's
+  windows, then a spend cap (a Business seat can have only the cap)."""
+  buckets = result.get("rateLimitsByLimitId")
+  bucket = buckets.get("codex") if isinstance(buckets, dict) else None
+  if not isinstance(bucket, dict):
+    bucket = result.get("rateLimits") if isinstance(result.get("rateLimits"), dict) else {}
+  limits = [w for w in (codex_window(bucket.get("primary")), codex_window(bucket.get("secondary"))) if w]
+  cap = bucket.get("individualLimit")
+  if isinstance(cap, dict):
+    if cap.get("limit") and cap.get("used") is not None:
+      percent = 100.0 * float(cap["used"]) / float(cap["limit"])
+    elif cap.get("remainingPercent") is not None:
+      percent = 100.0 - float(cap["remainingPercent"])
+    else:
+      percent = None
+    if percent is not None:
+      limits.append({"label": "$", "percent": percent, "resetsAt": epoch_iso(cap.get("resetsAt"))})
+  return limits
+
+
+def codex_probe(home):
+  path = os.pathsep.join([os.environ.get("PATH", "")] + EXTRA_PATH)
+  codex = shutil.which("codex", path=path)
+  if not codex:
+    # A login shell finds a codex installed outside the PATH above (nvm), as bin/omarchy-agent does.
+    found = subprocess.run(["zsh", "-lic", "command -v codex"], capture_output=True, text=True,
+                           stdin=subprocess.DEVNULL, timeout=10).stdout.split()
+    codex = found[-1] if found and os.path.isabs(found[-1]) else None
+  if not codex:
+    raise RuntimeError("codex not found")
+  # The npm launcher needs the node that sits beside it.
+  path = os.path.dirname(codex) + os.pathsep + path
+  proc = subprocess.Popen(
+    [codex, "-s", "read-only", "-a", "on-request", "app-server"],
+    stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+    env=dict(os.environ, PATH=path, CODEX_HOME=str(home)),
+  )
+  try:
+    def send(message):
+      proc.stdin.write((json.dumps(message) + "\n").encode())
+      proc.stdin.flush()
+
+    pending = b""
+
+    def reply(request_id, timeout=8):
+      # Read the raw fd: notifications can arrive in the same write as a reply.
+      nonlocal pending
+      deadline = time.monotonic() + timeout
+      while True:
+        while b"\n" in pending:
+          line, pending = pending.split(b"\n", 1)
+          try:
+            message = json.loads(line)
+          except ValueError:
+            continue
+          if isinstance(message, dict) and message.get("id") == request_id:
+            return message
+        remaining = deadline - time.monotonic()
+        if remaining <= 0 or not select.select([proc.stdout], [], [], remaining)[0]:
+          raise TimeoutError("codex app-server did not answer")
+        chunk = os.read(proc.stdout.fileno(), 65536)
+        if not chunk:
+          raise RuntimeError("codex app-server exited")
+        pending += chunk
+
+    send({"id": 1, "method": "initialize", "params": {"clientInfo": {"name": "omarchy-agent-usage", "version": "1"}}})
+    reply(1)
+    send({"method": "initialized", "params": {}})
+    send({"id": 2, "method": "account/rateLimits/read", "params": {}})
+    answer = reply(2)
+  finally:
+    proc.kill()
+    proc.wait()
+  error = answer.get("error")
+  if isinstance(error, dict):
+    if "auth" in str(error.get("message", "")).lower():
+      raise NoLogin()
+    raise RuntimeError(error.get("message"))
+  return codex_limits(answer.get("result") or {})
+
+
+# ---- Grok -----------------------------------------------------------------
+
+GROK_BILLING = "https://cli-chat-proxy.grok.com/v1/billing"
+REFRESH_LIFETIME = 30 * 24 * 3600
+
+
+def grok_login():
+  home = Path(os.environ.get("GROK_HOME") or Path.home() / ".grok")
+  try:
+    auth = json.loads((home / "auth.json").read_text())
+  except (OSError, ValueError):
+    raise NoLogin()
+  # One login per issuer; the first is the CLI's own.
+  entry = next((v for v in auth.values() if isinstance(v, dict)), {}) if isinstance(auth, dict) else {}
+  if not entry.get("key"):
+    raise NoLogin()
+  expires = entry.get("expires_at")
+  if expires and parse_time(expires).timestamp() <= time.time():
+    # Grok mints a new access token from its refresh token when it starts, so
+    # a lapsed one only pauses the limits; a refresh token past its 30 days
+    # is a sign-in to redo.
+    if entry.get("refresh_token") and time.time() - parse_time(expires).timestamp() < REFRESH_LIFETIME:
+      raise RuntimeError("access token lapsed")
+    raise NoLogin()
+  return entry["key"]
+
+
+def grok_get(token, url):
+  request = urllib.request.Request(url, headers={"Authorization": "Bearer " + token, "Accept": "application/json"})
+  try:
+    with urllib.request.urlopen(request, timeout=8) as response:
+      return json.loads(response.read())
+  except urllib.error.HTTPError as error:
+    if error.code in (401, 403):
+      raise NoLogin()
+    raise
+
+
+def money(value):
+  # Protobuf JSON: a money field is {"val": n}, and a zero is left out.
+  return float((value.get("val") or 0) if isinstance(value, dict) else (value or 0))
+
+
+def grok_monthly(data):
+  config = data["config"]
+  quota = money(config["monthlyLimit"])
+  if quota <= 0:
+    raise ValueError("no monthly quota")
+  return {"label": "mo", "percent": 100.0 * money(config.get("used")) / quota,
+          "resetsAt": parse_time(config["billingPeriodEnd"]).isoformat()}
+
+
+def grok_limits(credits, monthly):
+  """The weekly (or monthly) credits window, and the monthly quota beside it
+  for a unified-billing account. `monthly` fetches the monthly answer."""
+  config = credits["config"]
+  period = config["currentPeriod"]
+  used = config.get("creditUsagePercent")
+  if used is None and config.get("isUnifiedBillingUser") is True:
+    return [grok_monthly(monthly())]
+  window = {"label": "7d" if "WEEK" in str(period.get("type")) else "mo",
+            "percent": money(used), "resetsAt": parse_time(period["end"]).isoformat()}
+  limits = [window]
+  if config.get("isUnifiedBillingUser") is True and window["label"] == "7d":
+    try:
+      limits.append(grok_monthly(monthly()))
+    except Exception:
+      pass  # the weekly window stands on its own
+  return limits
+
+
+def grok_probe(token):
+  credits = grok_get(token, GROK_BILLING + "?format=credits")
+  return grok_limits(credits, lambda: grok_get(token, GROK_BILLING))
+
+
+PROVIDERS = {
+  "claude": (claude_login, claude_probe),
+  "codex": (codex_login, codex_probe),
+  "grok": (grok_login, grok_probe),
+}
+
+
+# ---- Output ---------------------------------------------------------------
+
+def limits(provider, force=False):
+  login, probe = PROVIDERS[provider]
+  cache = CACHE_DIR / f"{provider}-limits.json"
+  try:
+    cached = json.loads(cache.read_text())
+  except Exception:
+    cached = None
+  try:
+    credential = login()
+    if cached and not force and time.time() - cached["checkedAt"] < MAX_AGE:
+      return cached["limits"]
+    fresh = probe(credential)
+  except NoLogin:
+    return None
+  except Exception:
+    # Rate limited, offline, a lapsed token: the last answer still describes the account.
+    return cached["limits"] if cached else []
+  cache.parent.mkdir(parents=True, exist_ok=True)
+  cache.write_text(json.dumps({"checkedAt": time.time(), "limits": fresh}))
+  return fresh
+
+
+def meter(percent, cells=5):
+  filled = max(0, min(cells, round(percent / 100 * cells)))
+  return "▰" * filled + "▱" * (cells - filled)
+
+
+def reset_text(resets_at, now):
+  when = parse_time(resets_at).astimezone(now.tzinfo)
+  if when.date() == now.date():
+    return when.strftime("%-I:%M%p").lower()
+  return when.strftime("%a")
+
+
+def line(provider_limits, now):
+  parts = []
+  for limit in provider_limits:
+    percent, resets_at = max(0.0, min(100.0, float(limit["percent"]))), limit.get("resetsAt")
+    if resets_at and parse_time(resets_at) <= now:
+      percent, resets_at = 0.0, None
+    text = f"{limit['label']} {meter(percent)} {round(percent)}%"
+    if resets_at:
+      text += " " + reset_text(resets_at, now)
+    parts.append(text)
+  return " · ".join(parts)
+
+
+def main():
+  args = [a for a in sys.argv[1:] if not a.startswith("--")]
+  if len(args) != 1 or args[0] not in PROVIDERS:
+    sys.exit("usage: omarchy-agent-usage claude|codex|grok [--force]")
+  found = limits(args[0], "--force" in sys.argv)
+  if found is None:
+    sys.exit(1)  # no login here: the bar hides the provider
+  text = line(found, dt.datetime.now().astimezone())
+  if text:
+    print(text)
+
+
+if __name__ == "__main__":
+  main()

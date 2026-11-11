@@ -7,6 +7,14 @@ maintainer's Mac runs from a clone of it, the same as yours.
 
 ## 2026-11-11
 
+- The agents in the bar follow Omarchy 4.5's agents panel: Claude, Codex and
+  Grok each get an item, and every limit shows a meter, its percentage and
+  when it resets (a time today, else the day). Codex reads its limits from
+  `codex app-server` for a ChatGPT login in `~/.codex`, Grok from xAI's
+  billing endpoint for the login in `~/.grok`. A provider you are not signed
+  in to stays off the bar. The collector is now one script,
+  `omarchy-agent-usage claude|codex|grok`; the bar runs it from the clone, so
+  a `git pull` is enough. Omarchy's other 20 providers are not ported.
 - Window transparency and corners (Omarchy 4.5), in the menu under
   Appearance > Window Transparency and Appearance > Window Corners, or with
   `omarchy-appearance transparency opaque|transparent|glassy` and
