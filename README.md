@@ -62,7 +62,7 @@ theme cache, wallpapers, logs, and the snapshot. `--remove-packages` also
 uninstalls AeroSpace, Hammerspoon, SketchyBar, and borders. Flags combine.
 Shared tools from the Brewfile (Ghostty, Neovim, fzf…) are listed, not removed.
 
-**Options:** `SKIP_APPS=1` skips Brave, Raycast, and FluidVoice. Not in the
+**Options:** `SKIP_APPS=1` skips Brave, Raycast, and Hex. Not in the
 Brewfile, install what you use: Steam (gaming mode), Claude Code and Obsidian
 (the theme reaches them), Signal, 1Password, Typora, LocalSend, HandBrake.
 Each has a key; the key does nothing until the app exists.
@@ -147,6 +147,8 @@ is also available.
 | ⌘⇧C | HEY Calendar (app window) |
 | ⌘⇧E | HEY Mail (app window) |
 | ⌘⎵ | Raycast launcher |
+| ⌥⎵ | Dictation on / off (Hex) |
+| Hold right ⌥ | Dictate while held, type on release (Hex) |
 
 ### Window / Layout
 
@@ -332,7 +334,7 @@ what changed and when is in [`CHANGELOG.md`](CHANGELOG.md).
 | Screenshots, screen recording | macOS ⌘⇧5 | ✅ | Matched by the OS, not by this repo. |
 | Notifications (mako) | macOS Notification Center | ✅ | Matched by the OS. |
 | App launcher (walker) | Raycast (free plan) on ⌘Space | ✅ | Works the same for launching. No walker port needed. |
-| Voice typing (voxtype) | [FluidVoice](https://fluidvoice.app) | ✅ | Free, open source, Whisper on-device. Not bundled; install it yourself. |
+| Voice typing (Omarchy 4.5: Superwhisper on Alt+Space, hold Right Alt) | [Hex](https://github.com/anomalyco/hex) | ✅ | Free, open source (MIT), transcribes on the Mac. `install.sh` installs it and sets its shortcut to hold Right ⌥; ⌥⎵ toggles a dictation through Hammerspoon. |
 | Install in one command, update in one command | `install.sh`, rerun to update; `uninstall.sh` to back out | ✅ |  |
 | Theme backgrounds downloaded with the theme | `theme --sync` pulls each theme's `backgrounds/` into `~/Pictures/Wallpapers` | ✅ |  |
 | Theme reaches tmux, lazygit, VS Code | Terminal, editor, btop, Claude Code, Obsidian | ⚠️ | Planned when tmux is daily: render v4's tmux template and reload live sessions. lazygit and VS Code only if asked. |

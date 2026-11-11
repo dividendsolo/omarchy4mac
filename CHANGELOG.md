@@ -8,6 +8,7 @@ maintainer's Mac runs from a clone of it, the same as yours.
 ## 2026-11-11
 
 <<<<<<< ours
+<<<<<<< ours
 - The agents in the bar follow Omarchy 4.5's agents panel: Claude, Codex and
   Grok each get an item, and every limit shows a meter, its percentage and
   when it resets (a time today, else the day). Codex reads its limits from
@@ -16,6 +17,13 @@ maintainer's Mac runs from a clone of it, the same as yours.
   in to stays off the bar. The collector is now one script,
   `omarchy-agent-usage claude|codex|grok`; the bar runs it from the clone, so
   a `git pull` is enough. Omarchy's other 20 providers are not ported.
+=======
+- Hex is the dictation app (Omarchy 4.5 ships Superwhisper). `install.sh`
+  installs it from `anomalyco/tap` in place of FluidVoice and sets its
+  shortcut: hold Right Option to dictate, let go to type the words. ⌥Space
+  starts a dictation and the next ⌥Space ends it. Hex transcribes on the Mac,
+  free and open source.
+>>>>>>> theirs
 =======
 - Microsoft 365 as web apps (Omarchy 4.5). Install > Service > Microsoft
   lists Outlook, Word, Excel, PowerPoint, Teams and OneDrive, and the Apps
