@@ -7,6 +7,11 @@ maintainer's Mac runs from a clone of it, the same as yours.
 
 ## 2026-11-11
 
+- Wallpaper file names can no longer run AppleScript (#50). `theme` and the
+  ⌘⌃P wallpaper cycler hand the picture path to `osascript` as an argument
+  instead of pasting it into the script, and `theme --sync` skips an
+  upstream background whose file name has anything but letters, digits,
+  dot, underscore or dash.
 - Window transparency and corners (Omarchy 4.5), in the menu under
   Appearance > Window Transparency and Appearance > Window Corners, or with
   `omarchy-appearance transparency opaque|transparent|glassy` and

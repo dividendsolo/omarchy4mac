@@ -32,5 +32,6 @@ idx=$(( (idx + 1) % ${#files[@]} ))
 echo "$idx" > "$STATE"
 
 next="${files[$idx]}"
-osascript -e "tell application \"System Events\" to set picture of every desktop to \"$next\"" 2>/dev/null
+# the path goes in as argv, never inside script text (#50)
+osascript -e 'on run argv' -e 'tell application "System Events" to set picture of every desktop to item 1 of argv' -e 'end run' "$next" 2>/dev/null
 echo "Wallpaper|||$(basename "$next")"
