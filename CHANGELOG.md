@@ -7,19 +7,21 @@ maintainer's Mac runs from a clone of it, the same as yours.
 
 ## 2026-11-11
 
-<<<<<<< ours
 - Wallpaper file names can no longer run AppleScript (#50). `theme` and the
   ⌘⌃P wallpaper cycler hand the picture path to `osascript` as an argument
   instead of pasting it into the script, and `theme --sync` skips an
   upstream background whose file name has anything but letters, digits,
   dot, underscore or dash.
-=======
+- Hex is the dictation app (Omarchy 4.5 ships Superwhisper). `install.sh`
+  installs it from `anomalyco/tap` in place of FluidVoice and sets its
+  shortcut: hold Right Option to dictate, let go to type the words. ⌥Space
+  starts a dictation and the next ⌥Space ends it. Hex transcribes on the Mac,
+  free and open source.
 - Microsoft 365 as web apps (Omarchy 4.5). Install > Service > Microsoft
   lists Outlook, Word, Excel, PowerPoint, Teams and OneDrive, and the Apps
   launcher (⌘⇧Space) has an entry for each. Each opens in its own app window
   of your default browser (a tab in Safari or Firefox). Nothing installs:
   pick one and sign in.
->>>>>>> theirs
 - Window transparency and corners (Omarchy 4.5), in the menu under
   Appearance > Window Transparency and Appearance > Window Corners, or with
   `omarchy-appearance transparency opaque|transparent|glassy` and

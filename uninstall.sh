@@ -292,5 +292,5 @@ note "(System Settings > Privacy & Security), and the desktop picture if no snap
 [ "$PKGS" = 1 ] || note "WM packages left installed; rerun with --remove-packages to remove them."
 note "Shared tools from the Brewfile, remove by hand if unwanted:"
 note "  brew uninstall starship btop neovim fastfetch bun eza bat fzf zoxide"
-note "  brew uninstall --cask ghostty font-hack-nerd-font brave-browser raycast fluidvoice"
+note "  brew uninstall --cask ghostty font-hack-nerd-font brave-browser raycast hex"
 note "Open a new terminal (or exec zsh) so the shell hook is gone."
