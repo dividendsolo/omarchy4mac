@@ -16,11 +16,17 @@ check() { # check <description> <expected> <actual>
 }
 command -v python3 >/dev/null || { echo "FAIL: python3 is not installed"; exit 1; }
 
-T="$(mktemp -d)"; mkdir -p "$T/home"
+T="$(mktemp -d)"; mkdir -p "$T/home/.local/bin"
+# A stand-in ttfx (the CI runner has none): without it the script's loop spins
+# on "command not found" and floods the pty.
+printf '#!/bin/sh\nexec sleep 30\n' > "$T/home/.local/bin/ttfx"; chmod +x "$T/home/.local/bin/ttfx"
 
 # A 24x80 pty keeps the script in its size wait for 2 s: no read runs then.
+# The parent drains the pty (macOS blocks a writer on a small, full pty buffer)
+# and kills the whole session with SIGKILL if SIGTERM does not end it in 2 s,
+# so the test can never hang the run.
 ECHO_STATE="$(HOME="$T/home" python3 - "$BIN" <<'PY'
-import fcntl, os, pty, signal, struct, sys, termios, time
+import fcntl, os, pty, select, signal, struct, sys, termios, time
 master, slave = pty.openpty()
 fcntl.ioctl(slave, termios.TIOCSWINSZ, struct.pack("HHHH", 24, 80, 0, 0))
 pid = os.fork()
@@ -29,10 +35,23 @@ if pid == 0:
     fcntl.ioctl(slave, termios.TIOCSCTTY, 0)
     for fd in (0, 1, 2): os.dup2(slave, fd)
     os.execv("/bin/bash", ["bash", sys.argv[1]])
-time.sleep(0.8)
-print("off" if not termios.tcgetattr(slave)[3] & termios.ECHO else "on")
+def drain(seconds):
+    end = time.time() + seconds
+    while time.time() < end:
+        if select.select([master], [], [], 0.05)[0]:
+            try: os.read(master, 4096)
+            except OSError: return
+drain(0.8)
+print("off" if not termios.tcgetattr(slave)[3] & termios.ECHO else "on", flush=True)
 os.kill(pid, signal.SIGTERM)
-os.waitpid(pid, 0)
+end = time.time() + 2
+while time.time() < end and os.waitpid(pid, os.WNOHANG) == (0, 0):
+    drain(0.05)
+try:
+    os.killpg(pid, signal.SIGKILL)
+    os.waitpid(pid, 0)
+except (ProcessLookupError, ChildProcessError):
+    pass
 PY
 )"
 rm -rf "$T"
