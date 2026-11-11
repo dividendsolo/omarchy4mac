@@ -508,9 +508,10 @@ showThemeChooser = function()
 
   local chooser = hs.chooser.new(function(choice)
     if choice then
-      hs.task.new("/bin/bash", function()
+      -- the name is one argv element, never shell text: it comes from upstream folder names
+      hs.task.new(os.getenv("HOME") .. "/.local/bin/theme", function()
         hs.notify.new({title="Theme", informativeText="Switched to " .. choice.themeName, withdrawAfter=3}):send()
-      end, { "-lc", "~/.local/bin/theme " .. choice.themeName }):start()
+      end, { choice.themeName }):start()
     end
   end)
   chooser:choices(choices)

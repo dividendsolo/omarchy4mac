@@ -29,7 +29,11 @@ end
 hs = stub()
 require = function() return stub() end
 hs.execute = function(cmd) ran[#ran + 1] = cmd; return "" end
-hs.task = { new = function(_, _, args) ran[#ran + 1] = args[#args]; return stub() end }
+local tasks = {}
+hs.task = { new = function(path, _, args)
+  ran[#ran + 1] = args[#args]; tasks[#tasks + 1] = { path = path, args = args }
+  return stub()
+end }
 hs.chooser = { new = function(cb)
   local c = { cb = cb, shown = {} }
   function c:choices(list) self.shown = list end
@@ -132,6 +136,17 @@ local function searchAll(items, path)
   end
 end
 searchAll(EXPECT, "Appearance")
+
+-- ---- theme chooser: the name is one argv element, never shell text (#45) --
+omarchyMenu("Appearance")
+for _, r in ipairs(choosers[#choosers].shown) do if r.text == "Theme" then pick(choosers[#choosers], r); break end end
+local evil = "x; touch /tmp/pwned $(id)"
+choosers[#choosers].cb({ themeName = evil })
+local t = tasks[#tasks]
+check("theme chooser runs ~/.local/bin/theme itself, no shell",
+  t.path == os.getenv("HOME") .. "/.local/bin/theme", t.path)
+check("theme chooser passes the name as its only argument",
+  #t.args == 1 and t.args[1] == evil, table.concat(t.args, " | "))
 
 if fails > 0 then print(fails .. " failed"); os.exit(1) end
 print("all passed")

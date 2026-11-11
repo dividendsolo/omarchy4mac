@@ -47,7 +47,7 @@ if [ -f "$CACHE" ]; then
   [ "$CACHED_DAY" = "$TODAY" ] && SUNSET="$CACHED_SUNSET"
 fi
 if [ -z "$SUNSET" ]; then
-  SUNSET="$(curl -s --max-time 5 'wttr.in/?format=%s' 2>/dev/null | tr -d '[:space:]')"
+  SUNSET="$(curl -s --max-time 5 'https://wttr.in/?format=%s' 2>/dev/null | tr -d '[:space:]')"
   [[ "$SUNSET" =~ ^[0-9]{2}:[0-9]{2}(:[0-9]{2})?$ ]] || hide
   mkdir -p "$(dirname "$CACHE")"
   echo "$TODAY $SUNSET" > "$CACHE"

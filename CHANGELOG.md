@@ -7,6 +7,16 @@ maintainer's Mac runs from a clone of it, the same as yours.
 
 ## 2026-11-11
 
+- Security hardening from a review before adoption (#45). The theme chooser
+  runs `theme` with the theme name as an argument, never through a shell.
+  `theme` refuses a theme name outside letters, digits, `.`, `_` and `-`,
+  and `theme --sync` skips upstream themes with such names. `theme --sync`
+  now takes the omacom/omarchy commit written in the new `OMARCHY_COMMIT`
+  file (v4.0.6) instead of the head of `quattro`: bump it together with
+  `OMARCHY_VERSION` (set `OMARCHY_REF` to a branch or SHA to override once).
+  `install.sh` builds ttfx at a fixed commit (`cargo install --rev`). The
+  weather, sunset and weather notice fetch `https://wttr.in`.
+
 - Omarchy 4.5's Appearance menu replaces Style on ⌘⌥Space, right before
   Trigger: Theme, Background, Font, Menu Bar, Windows, Branding, Dock,
   Workspace Layout, Animations and Unlock, plus Light / Dark, Random Theme
