@@ -7,6 +7,11 @@ maintainer's Mac runs from a clone of it, the same as yours.
 
 ## 2026-11-11
 
+- Hex is the dictation app (Omarchy 4.5 ships Superwhisper). `install.sh`
+  installs it from `anomalyco/tap` in place of FluidVoice and sets its
+  shortcut: hold Right Option to dictate, let go to type the words. ⌥Space
+  starts a dictation and the next ⌥Space ends it. Hex transcribes on the Mac,
+  free and open source.
 - Window transparency and corners (Omarchy 4.5), in the menu under
   Appearance > Window Transparency and Appearance > Window Corners, or with
   `omarchy-appearance transparency opaque|transparent|glassy` and
