@@ -7,7 +7,8 @@
 # A monitor's own workspaces (the first pattern of their entry in
 # [workspace-to-monitor-force-assignment]) come first, and guests from an
 # unplugged monitor after them, so unplugging a monitor renumbers nothing.
-export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+# Appended, not prepended: an aerospace already on PATH (the test stub) wins.
+export PATH="$PATH:/opt/homebrew/bin:/usr/local/bin"
 
 mode=focus
 case ${1:-} in
