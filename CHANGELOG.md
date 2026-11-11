@@ -10,6 +10,18 @@ maintainer's Mac runs from a clone of it, the same as yours.
 - Install > Service > Slack (Omarchy 4.5). The menu item installs Slack
   with Homebrew in a Ghostty window and opens it when the install ends. When
   Slack is already there, the item just opens it.
+- Omarchy 4.5's changed hotkeys (#31). ⌘⇧Q opens Calculator. Activity stays
+  on ⌥⇧T, and ⌘⌃T now opens the theme chooser. Network moves to ⌘⌃N, and
+  ⌘⌃W now switches to the next background. ⌘⌥Space opens Apps, and the
+  Omarchy menu moves to ⌘⇧Space (the key Apps had). Do Not Disturb moves
+  from ⌘⌃, to ⌘⌃⌥,, and ⌥, opens the newest notification. New keys from
+  4.5: ⌥Q quits like ⌥W, ⌘⌥L cycles the workspace layout the other way,
+  ⌘⌃⌥C takes a region screenshot, ⌘⌃⌥E opens the world clock (the Clock
+  app), and ⌘⌃⌥F hides or shows the bar (AeroSpace cannot drop the gaps at
+  runtime, so they stay). ⌘A, ⌘C and ⌘V already select, copy and paste in
+  every Mac app, terminals included, so 4.5's Super+A/C/V change needs
+  nothing here; holding Right Option talks to Hex (below).
+  The ⌥K overlay and the README tables list the new keys.
 - Wallpaper file names can no longer run AppleScript (#50). `theme` and the
   ⌘⌃P wallpaper cycler hand the picture path to `osascript` as an argument
   instead of pasting it into the script, and `theme --sync` skips an
@@ -22,7 +34,7 @@ maintainer's Mac runs from a clone of it, the same as yours.
   free and open source.
 - Microsoft 365 as web apps (Omarchy 4.5). Install > Service > Microsoft
   lists Outlook, Word, Excel, PowerPoint, Teams and OneDrive, and the Apps
-  launcher (⌘⇧Space) has an entry for each. Each opens in its own app window
+  launcher (⌘⌥Space) has an entry for each. Each opens in its own app window
   of your default browser (a tab in Safari or Firefox). Nothing installs:
   pick one and sign in.
 - Window transparency and corners (Omarchy 4.5), in the menu under

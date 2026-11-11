@@ -13,6 +13,7 @@ TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
 mkdir -p "$TMP/bin"
 cat > "$TMP/bin/aerospace" <<'STUB'
 #!/bin/bash
+touch "$WS_TEST_LOG.stub"
 case "$1 ${2:-}" in
   "config --config-path") echo "$WS_TEST_TOML" ;;
   "list-monitors --focused") echo "$WS_TEST_MONITOR" ;;
@@ -50,6 +51,16 @@ check "a bad number does nothing" "" "$(run 'VA2446 (2)' '2 3' 'x' 2>/dev/null)"
 check "--move sends the window, focus stays" "move-node-to-workspace 5" "$(run 'Built-in Retina Display' '4 5' --move 2)"
 check "--move-follow sends the window and follows" "move-node-to-workspace 5 ; workspace 5" \
   "$(run 'Built-in Retina Display' '4 5' --move-follow 2)"
+
+# A Mac has the real aerospace in /opt/homebrew/bin: the script must still run
+# the stub. A copy of the script points that dir at a decoy that only leaves a mark.
+mkdir -p "$TMP/brew"
+printf '#!/bin/bash\ntouch "%s/decoy"\n' "$TMP" > "$TMP/brew/aerospace"
+chmod +x "$TMP/brew/aerospace"
+sed "s#/opt/homebrew/bin#$TMP/brew#" "$SCRIPT" > "$TMP/omarchy-workspace"
+rm -f "$TMP/log.stub" "$TMP/decoy"
+SCRIPT="$TMP/omarchy-workspace" run 'VA2446 (2)' '2 3' 1 >/dev/null
+check "the stub is the aerospace that ran" "stub" "$( [[ -e $TMP/log.stub ]] && echo stub)$( [[ -e $TMP/decoy ]] && echo ' decoy')"
 
 echo "aerospace.toml:"
 python3 - "$TOML" <<'PY' || fails=$((fails + 1))
