@@ -419,6 +419,15 @@ local MENU = {
       { text = "Gaming Mode", sub = "Quit apps, Tailscale down, Steam", action = toast("gaming-mode") },
       { text = "Quit All", sub = "Quit every Dock app, keep Finder", action = sh("~/.local/bin/quit-all") },
       { text = "Screensaver", sub = "Enable or disable the idle screensaver", action = toast("omarchy-toggle-screensaver") },
+      -- Omarchy 4.5 (omacom/omarchy#13430): mirror theme switches to and from herdr machines.
+      { text = "Herdr Theme Sync", action = function()
+          local on = hs.fs.attributes(os.getenv("HOME") .. "/.config/theme-switcher/herdr-sync")
+          hs.alert.show((hs.execute("~/.local/bin/theme --herdr-sync " .. (on and "off" or "on")):gsub("%s+$", "")), 3)
+        end,
+        sub = function()
+          return (hs.fs.attributes(os.getenv("HOME") .. "/.config/theme-switcher/herdr-sync") and "✓ " or "")
+            .. "Mirror theme switches to your herdr machines"
+        end },
     }},
     { text = "Transcode", sub = "HandBrake", action = app("HandBrake") },
     { text = "Speed Test", sub = "Network (Cloudflare)", action = url("https://speed.cloudflare.com") },
@@ -603,7 +612,7 @@ hs.hotkey.bind({"cmd", "shift"}, "space", function() showOmarchyMenu() end)
 -- Theme chooser (SUPER+CTRL+SHIFT+SPACE)
 ----------------------------------------------------------------------
 local themeChooser
-showThemeChooser = function()
+showThemeChooser = function(selectRow)
   if closeIfOpen(themeChooser) then return end
   local cache = os.getenv("HOME") .. "/.config/theme-switcher/cache"
   local themes = {}
@@ -639,14 +648,39 @@ showThemeChooser = function()
       end, { "-lc", '~/.local/bin/theme "$1"', "theme", choice.themeName }):start()
     end
   end)
+
+  -- Omarchy 4.5 (omacom/omarchy#14713): delete a theme from the chooser. ⌘⌫,
+  -- not Delete alone, which edits the search text. Asks first; then the chooser
+  -- reopens on the theme before the deleted one.
+  local delKey = hs.hotkey.new({"cmd"}, "delete", function()
+    local row = themeChooser:selectedRowContents()
+    if not row or not row.themeName then return end
+    if row.themeName == current then
+      hs.alert.show(row.themeName .. " is the current theme. Switch to another theme first.", 3)
+      return
+    end
+    local index = themeChooser:selectedRow()
+    themeChooser:hide()
+    local button = hs.dialog.blockAlert("Delete the " .. row.themeName .. " theme?",
+      "Theme Sync will not bring it back.", "Delete", "Cancel", "warning")
+    if button ~= "Delete" then return showThemeChooser(index) end
+    hs.task.new(os.getenv("HOME") .. "/.local/bin/theme", function(code, _, err)
+      if code ~= 0 then hs.alert.show("Could not delete " .. row.themeName .. ": " .. (err or ""), 4) end
+      showThemeChooser(math.max(index - 1, 1))
+    end, { "--remove", row.themeName }):start()
+  end)
+  themeChooser:showCallback(function() delKey:enable() end)
+  themeChooser:hideCallback(function() delKey:delete() end)
+
   themeChooser:choices(choices)
   themeChooser:width(20)
   themeChooser:rows(10)
   themeChooser:bgDark(true)
   themeChooser:fgColor(COLORS.blue)
   themeChooser:subTextColor(COLORS.fg)
-  themeChooser:placeholderText("Pick a theme…")
+  themeChooser:placeholderText("Pick a theme… (⌘⌫ deletes)")
   themeChooser:show()
+  if selectRow then themeChooser:selectedRow(math.min(selectRow, #choices)) end
 end
 
 hs.hotkey.bind({"cmd", "ctrl", "shift"}, "space", showThemeChooser)

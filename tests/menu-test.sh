@@ -60,7 +60,10 @@ end }
 local styled = {}
 hs.styledtext = { new = function(s, attrs) styled[s] = attrs; return s end }
 local hotkeys = {}
-hs.hotkey = { bind = function(mods, key, fn) hotkeys[table.concat(mods, "+") .. "+" .. key] = fn end }
+hs.hotkey = {
+  bind = function(mods, key, fn) hotkeys[table.concat(mods, "+") .. "+" .. key] = fn end,
+  new = function() return { enable = function() end, delete = function() end } end,
+}
 local reloads = 0
 hs.reload = function() reloads = reloads + 1 end
 dofile(arg[1])
