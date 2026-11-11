@@ -17,6 +17,6 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       # tests/starship-test.sh renders the prompt with the real starship;
-      # tests/console-test.sh runs the console geometry from init.lua under lua.
-      - run: brew install starship lua
+      # tests/menu-test.sh and tests/console-test.sh run hammerspoon/init.lua in luajit.
+      - run: brew install starship luajit
       - run: for t in tests/*-test.sh; do echo "== $t"; bash "$t" || exit 1; done

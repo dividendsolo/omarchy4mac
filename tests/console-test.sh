@@ -2,7 +2,7 @@
 # Checks the Quake-style agent console (Omarchy 4.5, Super + Grave, #27):
 # the panel geometry in hammerspoon/init.lua, run under Lua, and the wiring
 # (Hammerspoon owns ⌘` and ⌘⇧`, AeroSpace no longer binds them, and a new
-# console starts the default agent). Needs `lua` (brew install lua).
+# console starts the default agent). Needs `luajit` (brew install luajit), or `lua`.
 #
 #   tests/console-test.sh
 set -u
@@ -16,8 +16,8 @@ check() { # check <description> <expected> <actual>
   else echo "  FAIL  $1 (expected '$2', got '$3')"; fails=$((fails + 1)); fi
 }
 
-LUA_BIN="$(command -v lua || command -v luajit || command -v lua5.4)" ||
-  { echo "FAIL: lua is not installed (brew install lua)"; exit 1; }
+LUA_BIN="$(command -v luajit || command -v lua || command -v lua5.4)" ||
+  { echo "FAIL: luajit is not installed (brew install luajit)"; exit 1; }
 
 # consoleFrame is a pure function between two marker lines; run that exact code.
 FN="$(sed -n '/^-- console-frame: begin/,/^-- console-frame: end/p' "$LUA_FILE")"
