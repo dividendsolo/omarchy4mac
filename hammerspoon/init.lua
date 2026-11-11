@@ -98,7 +98,7 @@ local bindings = {
   { "SUPER + CTRL + ALT + B",   "Battery toast" },
   { "SUPER + ESC",              "System menu (Lock/Sleep/Restart/…)" },
 
-  -- Style
+  -- Appearance
   { "SUPER + ALT + SPACE",      "Omarchy control menu" },
   { "SUPER + SHIFT + SPACE",    "Apps launcher (curated)" },
   { "SUPER + CTRL + SHIFT + SPACE", "Theme chooser" },
@@ -285,6 +285,36 @@ local MENU = {
     { text = "Tmux", sub = "Cheat sheet", action = url("https://tmuxcheatsheet.com") },
     { text = "Herdr", sub = "Keybindings", action = url("https://herdr.dev/docs/") },
   }},
+  -- Omarchy 4.5 (omacom/omarchy#15973): Appearance replaces Style, right before Trigger.
+  { text = "Appearance", sub = "Theme, background, windows, dock", children = {
+    { text = "Theme", sub = "Pick a theme", action = function() showThemeChooser() end },
+    { text = "Background", sub = "Next wallpaper for this theme", action = toast("omarchy-cycle-wallpaper") },
+    { text = "Font", sub = "Terminal font (Ghostty config)", action = nvimEdit(os.getenv("HOME") .. "/Library/Application Support/com.mitchellh.ghostty/config") },
+    { text = "Menu Bar", sub = "SketchyBar and the macOS menu bar", children = {
+      { text = "Hide or Show", sub = "Hide or show SketchyBar", action = sh("/opt/homebrew/bin/sketchybar --bar hidden=toggle") },
+      { text = "Config", sub = "Edit sketchybarrc", action = nvimEdit(D .. "/sketchybar/sketchybarrc") },
+      { text = "macOS Menu Bar", sub = "Control Center settings", action = settings("com.apple.ControlCenter-Settings.extension") },
+    }},
+    { text = "Windows", sub = "Gaps and borders", children = {
+      { text = "Gaps", sub = "Edit [gaps] in aerospace.toml", action = nvimEdit(D .. "/aerospace/aerospace.toml") },
+      { text = "Borders", sub = "Edit bordersrc (width, colour, corners)", action = nvimEdit(D .. "/borders/bordersrc") },
+    }},
+    { text = "Branding", sub = "Screensaver and About", children = {
+      { text = "Screensaver", sub = "Edit the ASCII art", action = nvimEdit(os.getenv("HOME") .. "/.config/omarchy/branding/screensaver.txt") },
+      { text = "About", sub = "fastfetch", action = ghostty("fastfetch") },
+    }},
+    { text = "Dock", sub = "Desktop & Dock settings", action = settings("com.apple.Desktop-Settings.extension") },
+    { text = "Workspace Layout", sub = "AeroSpace layout of this workspace", children = {
+      { text = "Tiles / Accordion", sub = "alt-a", action = sh("/opt/homebrew/bin/aerospace layout accordion tiles") },
+      { text = "Split Direction", sub = "alt-j", action = sh("/opt/homebrew/bin/aerospace layout tiles horizontal vertical") },
+      { text = "Float / Tile", sub = "alt-s", action = sh("/opt/homebrew/bin/aerospace layout floating tiling") },
+    }},
+    { text = "Animations", sub = "Reduce motion (Accessibility > Display)", action = settings("com.apple.Accessibility-Settings.extension") },
+    { text = "Unlock", sub = "Lock Screen settings", action = settings("com.apple.Lock-Screen-Settings.extension") },
+    { text = "Light / Dark", sub = "macOS appearance", action = settings("com.apple.Appearance-Settings.extension") },
+    { text = "Random Theme", sub = "Shuffle within light/dark", action = sh("~/.local/bin/theme random") },
+    { text = "Sync Themes", sub = "Pull Omarchy 4 themes", action = ghostty("~/.local/bin/theme --sync") },
+  }},
   { text = "Trigger", sub = "Do a thing now", children = {
     { text = "Emoji", sub = "Raycast emoji picker", action = url("raycast://extensions/raycast/emoji-symbols/search-emoji-symbols") },
     { text = "Capture", sub = "Screenshot / record / colour", children = {
@@ -312,14 +342,6 @@ local MENU = {
       { text = "Weather", sub = "wttr.in", action = toast("omarchy-notice weather") },
       { text = "Battery", sub = "Charge and source", action = toast("omarchy-notice battery") },
     }},
-  }},
-  { text = "Style", sub = "Theme, background, look", children = {
-    { text = "Theme", sub = "Pick a theme", action = function() showThemeChooser() end },
-    { text = "Theme random", sub = "Shuffle within light/dark", action = sh("~/.local/bin/theme random") },
-    { text = "Background", sub = "Next wallpaper for this theme", action = toast("omarchy-cycle-wallpaper") },
-    { text = "Screensaver text", sub = "Edit the ASCII art", action = nvimEdit(os.getenv("HOME") .. "/.config/omarchy/branding/screensaver.txt") },
-    { text = "Sync themes", sub = "Pull Omarchy 4 themes", action = ghostty("~/.local/bin/theme --sync") },
-    { text = "Appearance", sub = "macOS light / dark", action = settings("com.apple.Appearance-Settings.extension") },
   }},
   { text = "Setup", sub = "Configure the desktop", children = {
     { text = "Defaults", sub = "Default apps", children = {

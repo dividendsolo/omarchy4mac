@@ -7,6 +7,12 @@ maintainer's Mac runs from a clone of it, the same as yours.
 
 ## 2026-11-11
 
+- Omarchy 4.5's Appearance menu replaces Style on ⌘⌥Space, right before
+  Trigger: Theme, Background, Font, Menu Bar, Windows, Branding, Dock,
+  Workspace Layout, Animations and Unlock, plus Light / Dark, Random Theme
+  and Sync Themes. Each item opens the theme chooser, a config file, an
+  AeroSpace layout command or the matching System Settings pane, and menu
+  search finds them all. `tests/menu-test.sh` checks the branch.
 - This repo is now the source. Changes land here by pull request, and the
   maintainer's own Mac runs from a clone of it with `install.sh`, so what you
   install is exactly what runs there. `git pull` (or rerunning `install.sh`)
