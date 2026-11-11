@@ -3,7 +3,7 @@
 # Reload: brew services restart borders
 # Docs: https://github.com/FelixKratz/JankyBorders
 
-# Window corners from Trigger > Appearance (bin/omarchy-appearance): sharp is square, theme and rounded are round.
+# Window corners from Appearance > Window Corners (bin/omarchy-appearance): sharp is square, theme and rounded are round.
 style=round
 [[ "$(cat "$HOME/.config/omarchy/window-corners" 2>/dev/null)" == sharp ]] && style=square
 

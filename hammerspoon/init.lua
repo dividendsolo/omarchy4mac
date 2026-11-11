@@ -266,7 +266,7 @@ local function keystroke(code, mods)
   return sh([[osascript -e 'tell application "System Events" to key code ]] .. code .. [[ using {]] .. mods .. [[}']])
 end
 local function toast(scriptName) return function() notifyFromScript("~/.local/bin/" .. scriptName) end end
--- Trigger > Appearance (Omarchy 4.5): one choice row, checked when it is the saved one.
+-- Appearance > Window Transparency / Window Corners (Omarchy 4.5): one choice row, checked when it is the saved one.
 local APPEARANCE = os.getenv("HOME") .. "/.local/bin/omarchy-appearance"
 local function look(what, value, text, sub)
   return { text = text, action = function() hs.alert.show((hs.execute(APPEARANCE .. " " .. what .. " " .. value):gsub("%s+$", "")), 4) end,
@@ -307,6 +307,16 @@ local MENU = {
       { text = "Gaps", sub = "Edit [gaps] in aerospace.toml", action = nvimEdit(D .. "/aerospace/aerospace.toml") },
       { text = "Borders", sub = "Edit bordersrc (width, colour, corners)", action = nvimEdit(D .. "/borders/bordersrc") },
     }},
+    { text = "Window Transparency", sub = "Terminal and bar", children = {
+      look("transparency", "opaque", "Opaque Windows", "Solid terminal and bar"),
+      look("transparency", "transparent", "Transparent Windows", "See-through terminal (default)"),
+      look("transparency", "glassy", "Glassy Windows", "Frosted terminal and bar"),
+    }},
+    { text = "Window Corners", sub = "Window borders", children = {
+      look("corners", "theme", "Theme Corners", "The default round border"),
+      look("corners", "sharp", "Sharp Corners", "Square borders"),
+      look("corners", "rounded", "Rounded Corners", "Round borders"),
+    }},
     { text = "Branding", sub = "Screensaver and About", children = {
       { text = "Screensaver", sub = "Edit the ASCII art", action = nvimEdit(os.getenv("HOME") .. "/.config/omarchy/branding/screensaver.txt") },
       { text = "About", sub = "fastfetch", action = ghostty("fastfetch") },
@@ -333,18 +343,6 @@ local MENU = {
     { text = "Share", sub = "LocalSend", children = {
       { text = "Send", sub = "Open LocalSend", action = app("LocalSend") },
       { text = "Receive", sub = "Open LocalSend", action = app("LocalSend") },
-    }},
-    { text = "Appearance", sub = "Window transparency and corners", children = {
-      { text = "Window Transparency", sub = "Terminal and bar", children = {
-        look("transparency", "opaque", "Opaque Windows", "Solid terminal and bar"),
-        look("transparency", "transparent", "Transparent Windows", "See-through terminal (default)"),
-        look("transparency", "glassy", "Glassy Windows", "Frosted terminal and bar"),
-      }},
-      { text = "Window Corners", sub = "Window borders", children = {
-        look("corners", "theme", "Theme Corners", "The default round border"),
-        look("corners", "sharp", "Sharp Corners", "Square borders"),
-        look("corners", "rounded", "Rounded Corners", "Round borders"),
-      }},
     }},
     { text = "Toggle", sub = "Switch something on or off", children = {
       { text = "Stay Awake", sub = "caffeinate on/off", action = sh([[pgrep -x caffeinate >/dev/null && pkill -x caffeinate || (caffeinate -dimsu &)]]) },

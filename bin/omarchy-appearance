@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# omarchy-appearance — Omarchy 4.5's Trigger > Appearance on the Mac.
+# omarchy-appearance — Omarchy 4.5's Appearance > Window Transparency / Window Corners on the Mac.
 #
 #   omarchy-appearance transparency [opaque|transparent|glassy]
 #   omarchy-appearance corners      [theme|sharp|rounded]

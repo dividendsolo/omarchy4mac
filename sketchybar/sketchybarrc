@@ -6,7 +6,7 @@ PLUGIN_DIR="$CONFIG_DIR/plugins"
 source "$CONFIG_DIR/colors.sh"
 
 # ---------- Bar ----------
-# Background from Trigger > Appearance > Window Transparency (bin/omarchy-appearance).
+# Background from Appearance > Window Transparency (bin/omarchy-appearance).
 case "$(cat "$HOME/.config/omarchy/window-transparency" 2>/dev/null)" in
   opaque) BAR_COLOR="$BG" ;;
   glassy) BAR_COLOR="0x59${BG#0xff}" ;;   # Omarchy's glassy bar: alpha 0.35 over the blur

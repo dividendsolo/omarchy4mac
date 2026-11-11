@@ -310,7 +310,7 @@ what changed and when is in [`CHANGELOG.md`](CHANGELOG.md).
 | Tiling WM: focus, move, swap, resize, fullscreen, 5 workspaces, monitors | AeroSpace | ✅ |  |
 | Top bar: logo opens menu, workspaces, indicators, clock, weather, Friday sunset, updates badge, agents limits (Claude Code 5-hour and weekly), bluetooth, wifi, audio, battery | SketchyBar, v4 layout | ✅ |  |
 | Active-window borders | JankyBorders | ✅ |  |
-| Window transparency (opaque, transparent, glassy) and corners (theme, sharp, rounded), from Trigger > Appearance | `omarchy-appearance`: Ghostty opacity and blur, SketchyBar background, JankyBorders style | ✅ | macOS draws other apps solid and rounds every window itself, so the choices reach the terminal, the bar and the borders. |
+| Window transparency (opaque, transparent, glassy) and corners (theme, sharp, rounded), from Appearance > Window Transparency / Window Corners | `omarchy-appearance`: Ghostty opacity and blur, SketchyBar background, JankyBorders style | ✅ | macOS draws other apps solid and rounds every window itself, so the choices reach the terminal, the bar and the borders. |
 | All 22 v4 themes, generated from Omarchy's own templates | `theme --sync`, renders Ghostty, Neovim, btop from the v4 `.tpl` files | ✅ |  |
 | Theme chooser (Super+Ctrl+Shift+Space) | Hammerspoon chooser on ⌘⌃⇧Space | ✅ |  |
 | Menu tree: Apps, Learn, Appearance, Trigger, Setup, Install, Update, System, nested search (4.5: Appearance replaces Style) | Hammerspoon on ⌘⌥Space, ⌘Esc to System | ✅ |  |

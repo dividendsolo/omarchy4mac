@@ -7,9 +7,10 @@ maintainer's Mac runs from a clone of it, the same as yours.
 
 ## 2026-11-11
 
-- Window transparency and corners (Omarchy 4.5), in the menu under Trigger >
-  Appearance, or with `omarchy-appearance transparency opaque|transparent|glassy`
-  and `omarchy-appearance corners theme|sharp|rounded`. Opaque makes the
+- Window transparency and corners (Omarchy 4.5), in the menu under
+  Appearance > Window Transparency and Appearance > Window Corners, or with
+  `omarchy-appearance transparency opaque|transparent|glassy` and
+  `omarchy-appearance corners theme|sharp|rounded`. Opaque makes the
   terminal and the bar solid, Transparent is the look you had, and Glassy
   frosts the terminal (Ghostty blur) and the bar. Other apps stay opaque, so
   only terminals are see-through, as in Omarchy. Sharp gives square window

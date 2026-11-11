@@ -1,5 +1,5 @@
 #!/bin/bash
-# Checks Trigger > Appearance (Omarchy 4.5): bin/omarchy-appearance saves the
+# Checks Appearance > Window Transparency / Window Corners (Omarchy 4.5): bin/omarchy-appearance saves the
 # window transparency and corners, Ghostty, SketchyBar and JankyBorders follow
 # the saved choice, and the choice is read again after a restart (the bar and
 # the borders read it when they start). Throwaway HOME; sketchybar, brew, hs
