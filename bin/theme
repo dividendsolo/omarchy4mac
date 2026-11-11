@@ -261,7 +261,7 @@ sync_templates() {
 # find them by prefix. Existing files are kept; only missing ones download.
 sync_backgrounds() {
   local n="$1" files f got=0
-  # blobs only: a folder (intros/ holds videos) is not a background
+  # blobs only: a folder (intros/, below) is not a background
   files="$(git -C "$SRC" ls-tree "HEAD:themes/$n/backgrounds" 2>/dev/null | awk -F'\t' '$1 ~ / blob / {print $2}')" || return 0
   [[ -n "$files" ]] || return 0
   mkdir -p "$WALLPAPERS"
@@ -272,6 +272,18 @@ sync_backgrounds() {
     [[ -f "$base" ]] && continue
     src_file "themes/$n/backgrounds/$f" > "$base.part" && mv "$base.part" "$base" && got=$((got+1))
     rm -f "$base.part"
+  done <<< "$files"
+  # Omarchy 4.5 theme intros: backgrounds/intros/<stem>.mp4 plays before the
+  # still <stem>.* (omarchy-bg-set finds it in $WALLPAPERS/intros).
+  files="$(git -C "$SRC" ls-tree "HEAD:themes/$n/backgrounds/intros" 2>/dev/null | awk -F'\t' '$1 ~ / blob / {print $2}')" || files=""
+  while IFS= read -r f; do
+    [[ -n "$f" ]] || continue
+    valid_name "$f" || continue
+    local intro="$WALLPAPERS/intros/${n}_$f"
+    [[ -f "$intro" ]] && continue
+    mkdir -p "$WALLPAPERS/intros"
+    src_file "themes/$n/backgrounds/intros/$f" > "$intro.part" && mv "$intro.part" "$intro"
+    rm -f "$intro.part"
   done <<< "$files"
   echo "$got"
 }
@@ -624,13 +636,15 @@ remember_wallpaper() {
 
 apply_wallpaper() {
   local name="$1" dir="$HOME/Pictures/Wallpapers"
-  local current; current="$(osascript -e 'tell application "System Events" to tell current desktop to get picture' 2>/dev/null)"
+  # a video background shows its still frame as the picture: remember the video itself
+  local current; current="$(cat "$HOME/.local/state/omarchy/background-video" 2>/dev/null)" || current=""
+  [[ -n "$current" ]] || current="$(osascript -e 'tell application "System Events" to tell current desktop to get picture' 2>/dev/null)"
   remember_wallpaper "$(current_theme)" "$current" "$name"
   local remembered; remembered="$(cat "$BG_MEMORY/$name" 2>/dev/null)" || remembered=""
   [[ -f "$remembered" ]] || remembered=""
   shopt -s nullglob nocaseglob
   # Declare, then assign: bash 3.2 drops `local files=( <glob> )` entirely.
-  local files; files=( "$dir/${name}_"*.{jpg,jpeg,png,heic,webp} )
+  local files; files=( "$dir/${name}_"*.{jpg,jpeg,png,heic,webp,mp4,mov,m4v} )
   shopt -u nocaseglob
   # bash 3.2 + set -u: ${#files[@]} on an empty array is "unbound", so test the join.
   # Thanks to @tylerkessler (omarchy4mac#6).
@@ -648,8 +662,8 @@ apply_wallpaper() {
 
   local pick="$remembered"
   [[ -n "$pick" ]] || pick="${files[$((RANDOM % ${#files[@]}))]}"
-  # the path goes in as argv, never inside script text (#50)
-  osascript -e 'on run argv' -e 'tell application "System Events" to set picture of every desktop to item 1 of argv' -e 'end run' "$pick" >/dev/null 2>&1
+  # an image (with its intro, if the theme has one) or a looping video (Omarchy 4.5)
+  "$(dirname "$0")/omarchy-bg-set" "$pick" || true
   # keep the cycler's index in step so ⌘⌃P starts from this picture
   local idx=0 i=0
   for f in "${files[@]-}"; do [[ "$f" == "$pick" ]] && idx=$i; i=$((i+1)); done

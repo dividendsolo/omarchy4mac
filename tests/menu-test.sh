@@ -116,7 +116,9 @@ local EXPECT = {
       { "Tiles / Accordion", "aerospace layout accordion tiles" },
       { "Split Direction",   "aerospace layout tiles horizontal vertical" },
       { "Float / Tile",      "aerospace layout floating tiling" } } },
-  { "Animations",       "x-apple.systempreferences:com.apple.Accessibility-Settings.extension" },
+  { "Animations",       "chooser:Appearance › Animations › ", {
+      { "Theme Intros",   "omarchy-toggle-intros" },
+      { "Reduce Motion",  "x-apple.systempreferences:com.apple.Accessibility-Settings.extension" } } },
   { "Unlock",           "x-apple.systempreferences:com.apple.Lock-Screen-Settings.extension" },
   { "Light / Dark",     "x-apple.systempreferences:com.apple.Appearance-Settings.extension" },
   { "Random Theme",     "theme random" },

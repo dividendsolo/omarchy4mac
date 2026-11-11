@@ -55,6 +55,7 @@ for app in AeroSpace Hammerspoon; do
   pgrep -x "$app" >/dev/null 2>&1 && run osascript -e "quit app \"$app\"" || true
 done
 pgrep -f theme-appearance-listener >/dev/null 2>&1 && run pkill -f theme-appearance-listener || true
+pgrep -x omarchy-video-wallpaper >/dev/null 2>&1 && run pkill -x omarchy-video-wallpaper || true
 
 # ---- 2. Symlinks (only ones pointing into the clone) ----------------------
 unlink_cfg() {  # unlink_cfg <absolute target>
@@ -83,6 +84,7 @@ if [ -d "$HOME/.local/bin" ]; then
 fi
 # Compiled listener is a real file, not a link.
 [ -f "$HOME/.local/bin/theme-appearance-listener" ] && run rm -f "$HOME/.local/bin/theme-appearance-listener"
+[ -f "$HOME/.local/bin/omarchy-video-wallpaper" ] && run rm -f "$HOME/.local/bin/omarchy-video-wallpaper"
 # ttfx link install.sh made (the cargo binary itself is only removed with --purge).
 [ -L "$HOME/.local/bin/ttfx" ] && [ "$(readlink "$HOME/.local/bin/ttfx")" = "$HOME/.cargo/bin/ttfx" ] \
   && run rm "$HOME/.local/bin/ttfx"

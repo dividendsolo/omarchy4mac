@@ -17,6 +17,9 @@ trap exit_screensaver SIGINT SIGTERM SIGHUP SIGQUIT
 printf '\033]0;org.omarchy.screensaver\007'   # window title (AeroSpace finds it by this)
 printf '\033]11;rgb:00/00/00\007'   # black background
 printf '\033[?25l'                  # hide the cursor
+# Echo off for the whole run: `read -s` covers only its own wait, and a key
+# typed between reads flashed in the corner (Omarchy 4.5, omacom/omarchy#16596).
+stty -echo 2>/dev/null
 
 # The pty starts at 80x24 and only resizes once the window is laid out; ttfx
 # measures once at startup, so wait for the real size.

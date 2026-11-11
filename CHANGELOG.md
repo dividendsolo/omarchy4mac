@@ -7,6 +7,15 @@ maintainer's Mac runs from a clone of it, the same as yours.
 
 ## 2026-11-11
 
+- Video backgrounds, theme intros and a quiet screensaver exit (Omarchy 4.5).
+  A background can be a video: it loops behind your windows, muted, and its
+  still frame becomes the desktop picture, so the lock screen shows that
+  frame. Set one with ⌘⌃P or `omarchy-bg-set <file>`. A theme's intro plays
+  once when you switch to its background and when you log in;
+  Appearance > Animations > Theme Intros (or macOS Reduce Motion) turns them
+  off. `install.sh` builds the player, `omarchy-video-wallpaper`, with
+  `swiftc`; rerun it after the pull. The key that ends the screensaver no
+  longer shows in the corner.
 - The theme pipeline catches up with Omarchy 4.5 (#36). Each theme
   reopens with the wallpaper it had when you left it; a remembered picture
   that is gone falls back to another of the theme's wallpapers, and ⌘⌃W
