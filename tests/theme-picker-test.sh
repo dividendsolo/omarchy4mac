@@ -33,6 +33,7 @@ local ran, tasks, choosers, binds, keys, alerts = {}, {}, {}, {}, {}, {}
 hs.execute = function(cmd) ran[#ran + 1] = cmd; return "" end
 hs.fs = { attributes = function(p) local f = io.open(p) if f then f:close(); return {} end end }
 hs.alert = { show = function(msg) alerts[#alerts + 1] = msg end }
+hs.styledtext = { new = function(s) return s end }
 hs.task = { new = function(path, cb, args)
   local t = { path = path, args = args, cb = cb }
   tasks[#tasks + 1] = t
@@ -61,6 +62,7 @@ hs.chooser = { new = function(cb)
   function c:selectedRow(n) if n then self.row = n end; return self.row end
   function c:selectedRowContents() return self.shown[self.row] end
   function c:show() self.visible = true; if self.onShow then self.onShow() end end
+  function c:isVisible() return self.visible end
   function c:hide() self.visible = false; if self.onHide then self.onHide() end end
   choosers[#choosers + 1] = c
   return setmetatable(c, { __index = function() return function() end end })

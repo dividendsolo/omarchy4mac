@@ -3,8 +3,16 @@
 # No argument: print the pick (Claude Code when none is made yet). With a name:
 # store it where v4 does, ~/.config/omarchy/defaults/agent. The output line is
 # "title|||body" so the Hammerspoon menu can show it as a notification.
-export PATH="$HOME/.local/bin:$HOME/.bun/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
+# An agent that is not installed is installed first, in a Ghostty window you
+# can watch (`--install`, Omarchy 4.5); the pick changes only if that works.
+export PATH="$HOME/.local/bin:$HOME/.bun/bin:${HOMEBREW_PREFIX:-/opt/homebrew}/bin:/usr/local/bin:$PATH"
 agent_file="$HOME/.config/omarchy/defaults/agent"
+
+installing=false
+if [[ ${1:-} == --install ]]; then
+  installing=true
+  shift
+fi
 
 if (( $# == 0 )); then
   [[ -f $agent_file ]] && read -r agent <"$agent_file"
@@ -13,18 +21,27 @@ if (( $# == 0 )); then
 fi
 
 case "$1" in
-  claude|claude-code) agent=claude;   name="Claude Code" ;;
-  codex)              agent=codex;    name="Codex" ;;
-  grok)               agent=grok;     name="Grok" ;;
-  hermes)             agent=hermes;   name="Hermes" ;;
-  openclaw)           agent=openclaw; name="OpenClaw" ;;
-  *) echo "Usage: omarchy-default-agent [claude|codex|grok|hermes|openclaw]" >&2; exit 1 ;;
+  claude|claude-code) agent=claude;   name="Claude Code"; install="brew install --cask claude-code" ;;
+  codex)              agent=codex;    name="Codex";       install="brew install --cask codex" ;;
+  grok)               agent=grok;     name="Grok";        install="npm install -g @xai-official/grok" ;;
+  hermes)             agent=hermes;   name="Hermes"
+    install="curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash" ;;
+  openclaw)           agent=openclaw; name="OpenClaw";    install="npm install -g openclaw@latest" ;;
+  *) echo "Usage: omarchy-default-agent [--install] [claude|codex|grok|hermes|openclaw]" >&2; exit 1 ;;
 esac
 
 # nvm installs (codex) live outside the fixed PATH above, so ask a login shell.
 if ! command -v "$agent" >/dev/null && ! zsh -lic "command -v $agent" >/dev/null 2>&1; then
-  echo "Agent|||$name is not installed"
-  exit 1
+  if [[ $installing == false ]]; then
+    open -na Ghostty --args -e "$HOME/.local/bin/omarchy-tui" "$HOME/.local/bin/omarchy-default-agent" --install "$agent"
+    echo "Agent|||Installing $name in Ghostty"
+    exit 0
+  fi
+  echo "Installing $name: $install"
+  if ! zsh -lc "$install"; then
+    echo "Could not install $name; the default agent is unchanged" >&2
+    exit 1
+  fi
 fi
 
 mkdir -p "${agent_file:h}"

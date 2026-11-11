@@ -14,6 +14,8 @@ command -v luajit >/dev/null || { echo "  FAIL  luajit is not installed (brew in
 TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
 # One cached theme, so the theme chooser opens instead of its "no themes" notice.
 mkdir -p "$TMP/.config/theme-switcher/cache/tokyo-night"
+# Update > Config > Hammerspoon checks the file Hammerspoon loads.
+mkdir -p "$TMP/.hammerspoon"
 
 HOME="$TMP" luajit - "$LUA" <<'LUAEOF'
 local fails = 0
@@ -47,9 +49,23 @@ hs.chooser = { new = function(cb)
   function c:choices(list) self.shown = list end
   function c:queryChangedCallback(f) self.query = f end
   function c:placeholderText(p) self.placeholder = p end
+  function c:rows(n) self.nrows = n end
+  -- A chooser counts as on screen only when a check says so (c.open = true).
+  function c:isVisible() return self.open == true end
+  function c:hide() self.open = false; self.hidden = true end
   choosers[#choosers + 1] = c
   return setmetatable(c, { __index = function() return function() end end })
 end }
+-- Dimmed text: hs.styledtext.new(s, { color = ... }) keeps the string and records the style.
+local styled = {}
+hs.styledtext = { new = function(s, attrs) styled[s] = attrs; return s end }
+local hotkeys = {}
+hs.hotkey = {
+  bind = function(mods, key, fn) hotkeys[table.concat(mods, "+") .. "+" .. key] = fn end,
+  new = function() return { enable = function() end, delete = function() end } end,
+}
+local reloads = 0
+hs.reload = function() reloads = reloads + 1 end
 dofile(arg[1])
 
 local function texts(rows)
@@ -241,6 +257,80 @@ for _, e in ipairs(M365) do
     check("Apps launcher " .. e[1] .. " opens " .. e[2], did:find(e[2], 1, true) ~= nil, did)
   end
 end
+
+-- ---- installed items are dimmed, not hidden (Omarchy 4.5, omacom/omarchy#6955) --
+local function serviceRow(name)
+  omarchyMenu("Install")
+  for _, r in ipairs(choosers[#choosers].shown) do if r.text == "Service" then pick(choosers[#choosers], r); break end end
+  for _, r in ipairs(choosers[#choosers].shown) do if r.text == name then return r end end
+end
+local slackPath
+hs.application.pathForBundleID = function(id) return id == "com.tinyspeck.slackmacgap" and slackPath or nil end
+slackPath = nil; styled = {}
+local row = serviceRow("Slack")
+local DIM = "#565f89" -- the palette's comment colour
+local function dimmed(s) return styled[s] ~= nil and styled[s].color.hex == DIM end
+check("Slack not installed: listed, not dimmed", row ~= nil and styled.Slack ~= nil and not dimmed("Slack")
+  and row.subText:sub(1, #"✓") ~= "✓", row and row.subText)
+slackPath = "/Applications/Slack.app"; styled = {}
+row = serviceRow("Slack")
+check("Slack installed: still listed", row ~= nil)
+check("Slack installed: dimmed", dimmed("Slack"))
+check("Slack installed: marked ✓ installed", row and row.subText == "✓ installed", row and row.subText)
+omarchyMenu(); local c = choosers[#choosers]; c.query("slack")
+local hit; for _, r in ipairs(c.shown) do if r.subText:find("Install › Service › Slack", 1, true) then hit = r end end
+styled = {}; omarchyMenu(); c = choosers[#choosers]; c.query("slack"); hit = nil
+for _, r in ipairs(c.shown) do if r.subText:find("Install › Service › Slack", 1, true) then hit = r end end
+check("search hit for an installed Slack is dimmed too", hit ~= nil and dimmed("Slack"))
+
+-- ---- every row of a level shows; nothing is cut off (omacom/omarchy#13916) ----
+omarchyMenu("Appearance")
+c = choosers[#choosers]
+check("Appearance shows all " .. #c.shown .. " rows", c.nrows == #c.shown, tostring(c.nrows))
+omarchyMenu()
+c = choosers[#choosers]
+check("root shows all " .. #c.shown .. " rows", c.nrows == #c.shown, tostring(c.nrows))
+
+-- ---- a second press closes the open menu (omacom/omarchy#6725) ----------------
+omarchyMenu()
+c = choosers[#choosers]; c.open = true
+local before = #choosers
+omarchyMenu()
+check("second omarchyMenu() closes the open menu", c.hidden == true and #choosers == before)
+c.open = false
+hotkeys["cmd+shift+space"]()
+c = choosers[#choosers]; c.open = true; before = #choosers
+hotkeys["cmd+shift+space"]()
+check("second ⌘⇧Space closes the menu", c.hidden == true and #choosers == before)
+for _, key in ipairs({ "alt+k", "cmd+alt+space", "cmd+ctrl+t" }) do
+  hotkeys[key]()
+  c = choosers[#choosers]; c.open = true; before = #choosers
+  hotkeys[key]()
+  check("second " .. key .. " closes its chooser", c.hidden == true and #choosers == before)
+  c.open = false
+end
+
+-- ---- the keybindings overlay leaves no process (omacom/omarchy#7564) ---------
+local nRan, nTasks = #ran, #tasks
+before = #choosers
+hotkeys["alt+k"](); hotkeys["alt+k"]()
+check("⌥K runs no command and starts no task", #ran == nRan and #tasks == nTasks)
+check("⌥K reuses one chooser", #choosers == before)
+
+-- ---- Update › Config › Hammerspoon keeps the menu on a half-written file (omacom/omarchy#16268) --
+local cfg = os.getenv("HOME") .. "/.hammerspoon/init.lua"
+local whole = io.open(arg[1]):read("*a")
+local function reloadWith(text)
+  local f = io.open(cfg, "w"); f:write(text); f:close()
+  local n = reloads
+  omarchyMenu("Update")
+  for _, r in ipairs(choosers[#choosers].shown) do if r.text == "Config" then pick(choosers[#choosers], r); break end end
+  for _, r in ipairs(choosers[#choosers].shown) do if r.text == "Hammerspoon" then choosers[#choosers].cb(r); break end end
+  return reloads > n
+end
+check("reload runs on a whole init.lua", reloadWith(whole))
+check("reload is refused on a half-written init.lua", not reloadWith(whole:sub(1, math.floor(#whole / 2))))
+check("reload is refused on an empty init.lua", not reloadWith(""))
 
 if fails > 0 then print(fails .. " failed"); os.exit(1) end
 print("all passed")

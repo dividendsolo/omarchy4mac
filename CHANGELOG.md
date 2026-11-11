@@ -20,6 +20,16 @@ maintainer's Mac runs from a clone of it, the same as yours.
   `~/.local/state/omarchy4mac/theme-herdr.log`. Catppuccin now starts Neovim
   on `catppuccin-mocha`. Omarchy's font-size fix is for Foot; Ghostty keeps
   `font-size` apart from `font-family`, so nothing changes here.
+- Menu fixes from Omarchy 4.5. An installed item stays in the menu, dimmed
+  and marked "✓ installed" (Install > Service > Slack), instead of looking
+  like one more thing to install. Setup > Defaults > Agent installs a missing
+  agent in a Ghostty window and makes it the default only when the install
+  works (Claude Code and Codex with Homebrew, Grok and OpenClaw with npm,
+  Hermes with its installer). Update > Config > Hammerspoon reloads only a
+  whole init.lua, so a reload during a `git pull` keeps the running menu.
+  Each menu level is tall enough to show all its rows. The same key (or the
+  bar logo) a second time closes the menu, the ⌥K overlay, Apps and the theme
+  chooser, and the ⌥K overlay starts no process.
 - Install > Service > Slack (Omarchy 4.5). The menu item installs Slack
   with Homebrew in a Ghostty window and opens it when the install ends. When
   Slack is already there, the item just opens it.
