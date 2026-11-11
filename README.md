@@ -125,7 +125,7 @@ is also available.
 | ⌥↩ | Ghostty (terminal) |
 | ⌘⌥↩ | Ghostty + tmux (attaches to the session "Work", or makes it) |
 | ⌘⌃↩ | Ghostty + herdr (agent multiplexer) |
-| ⌘⇧↩ | Browser (macOS default) |
+| ⌘⇧↩ | Browser (macOS default; Safari when that browser is gone) |
 | ⌘⇧⌥B | Browser (private window) |
 | ⌘⌥C | Chrome |
 | ⌘⇧F | Finder |
@@ -145,6 +145,7 @@ is also available.
 | ⌘⇧⌥X | X: new post |
 | ⌘⇧Y | YouTube (app window) |
 | ⌘⇧/ | 1Password |
+| ⌥⇧L | Copy the browser tab's URL (any Brave profile, web app windows too) |
 | ⌘⇧C | HEY Calendar (app window) |
 | ⌘⇧E | HEY Mail (app window) |
 | ⌘⎵ | Raycast launcher |
@@ -329,6 +330,7 @@ what changed and when is in [`CHANGELOG.md`](CHANGELOG.md).
 | Menu tree: Apps, Learn, Appearance, Trigger, Setup, Install, Update, System, nested search (4.5: Appearance replaces Style; Install > Service > Slack; installed items dimmed; a missing default agent installs when chosen) | Hammerspoon on ⌘⇧Space, ⌘Esc to System; the same key again closes it | ✅ |  |
 | Keybinding overlay (Super+K) | ⌥K, every binding listed | ✅ |  |
 | Web apps as app windows (Super+Shift+letter) | `--app=` windows of the default browser on the same keys (HEY, Photos, YouTube, Grok, Google Chat) | ✅ |  |
+| Chromium fixes (4.5): browser key falls back when the default browser is gone, Copy URL (Alt+Shift+L) in every Brave profile, password-manager native messaging hosts, overlay scrollbars | ⌘⇧↩ opens Safari when the default browser is gone; ⌥⇧L copies the front tab's URL; `omarchy-chromium-setup` (run by `install.sh`) copies the 1Password and Bitwarden hosts to every Chromium browser and turns on overlay scrollbars | ✅ | Web notifications grouped by site (4.5) are not ported: macOS Notification Center groups by app. |
 | Microsoft 365 web apps (4.5: Install > Service > Microsoft) | Outlook, Word, Excel, PowerPoint, Teams and OneDrive under Install > Service > Microsoft and in the Apps launcher, each a `--app=` window of the default browser | ✅ |  |
 | Screensaver: ttfx ASCII art per monitor after 150 s | Hammerspoon idle timer, Ghostty + ttfx per display | ✅ |  |
 | Shell defaults: eza, bat, fzf, zoxide, git and tool aliases | `zsh/omarchy.zsh` | ✅ |  |

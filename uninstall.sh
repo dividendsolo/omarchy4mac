@@ -233,6 +233,13 @@ run defaults delete NSGlobalDomain _HIHideMenuBar 2>/dev/null || true
 run defaults delete com.apple.controlcenter AutoHideMenuBarOption 2>/dev/null || true
 run defaults delete com.apple.WindowManager StandardHideWidgets 2>/dev/null || true
 run defaults delete com.apple.WindowManager StageManagerHideWidgets 2>/dev/null || true
+# omarchy-chromium-setup's overlay scrollbars. The password-manager hosts it
+# copied stay: each one only points at its vendor's own app.
+for b in com.google.Chrome com.google.Chrome.beta com.google.Chrome.canary org.chromium.Chromium \
+  com.brave.Browser com.brave.Browser.beta com.brave.Browser.nightly com.microsoft.edgemac \
+  com.microsoft.edgemac.Beta com.microsoft.edgemac.Dev com.vivaldi.Vivaldi net.imput.helium company.thebrowser.Browser; do
+  run defaults delete "$b" AppleShowScrollBars 2>/dev/null || true
+done
 if [ "$DRY" != 1 ]; then
   killall Dock WindowManager 2>/dev/null || true
   osascript -e 'tell application "System Events" to set autohide menu bar of dock preferences to false' >/dev/null 2>&1 || true

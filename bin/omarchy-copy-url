@@ -1,0 +1,21 @@
+#!/bin/zsh
+# Copy URL (Omarchy's Alt+Shift+L, its Chromium extension): copy the address of
+# the front tab to the clipboard. Hammerspoon runs it on ⌥⇧L with the bundle id
+# of the frontmost app. Chromium's AppleScript lists the windows of every
+# profile, web app windows included, in front-to-back order, so this works in
+# any Brave profile (Omarchy 4.5, omacom/omarchy#10292 and #10308). The first
+# use asks once to let Hammerspoon read the browser (Automation).
+#   omarchy-copy-url <bundle id>
+bundle=${1:-}
+# An installed web app (com.brave.Browser.app.<id>) is a shim; its browser answers.
+bundle=${bundle%%.app.*}
+case ${bundle:l} in
+  com.brave.browser*|com.google.chrome*|org.chromium.chromium|com.microsoft.edgemac*|com.vivaldi.vivaldi|net.imput.helium|company.thebrowser.browser)
+    query='URL of active tab of front window' ;;
+  com.apple.safari*) query='URL of front document' ;;
+  *) echo "Copy URL|||The front app is not a browser"; exit 1 ;;
+esac
+url=$(osascript -e "tell application id \"$bundle\" to $query" 2>/dev/null)
+[[ -n $url ]] || { echo "Copy URL|||No browser window to copy from"; exit 1; }
+print -rn -- "$url" | pbcopy
+echo "Copy URL|||$url"

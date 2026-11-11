@@ -8,7 +8,8 @@
 #                                        (it is a browser window, so the browser
 #                                        rule in aerospace.toml sends it to 1)
 # A Finicky install is the https handler, not a browser, so its defaultBrowser
-# from ~/.finicky.js stands in for it.
+# from ~/.finicky.js stands in for it. A handler that is no longer installed
+# falls back to Safari.
 export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
 
 handler() {
@@ -24,6 +25,13 @@ elif [[ $bundle == se.johnste.finicky ]]; then
   name=$(perl -ne 'print $1 and exit if /defaultBrowser:\s*["'\'']([^"'\'']+)/' "$HOME/.finicky.js" 2>/dev/null)
   bundle=$(osascript -e "id of app \"${name:-Safari}\"" 2>/dev/null || echo com.apple.Safari)
 fi
+# The handler can outlive its browser (Omarchy 4.5, omacom/omarchy#16422): then
+# `open -b` fails and the key does nothing, so open Safari, the Mac's own browser.
+installed() {
+  [[ -n $(osascript -l JavaScript -e 'ObjC.import("AppKit")' -e 'function run(argv) {
+    return $.NSWorkspace.sharedWorkspace.URLForApplicationWithBundleIdentifier(argv[0]).isNil() ? "" : "yes" }' "$1" 2>/dev/null) ]]
+}
+installed "$bundle" || bundle=com.apple.Safari
 
 private=false app="" workspace=""
 for arg in "$@"; do
