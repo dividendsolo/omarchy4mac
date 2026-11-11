@@ -7,7 +7,7 @@ case "$1" in
     echo "Date & Time|||$(date '+%A, %B %-d  %-I:%M %p')"
     ;;
   weather)
-    body="$(curl -s --max-time 3 'wttr.in/?format=%l:+%c+%t+(%C)' 2>/dev/null || echo 'No connection')"
+    body="$(curl -s --max-time 3 'https://wttr.in/?format=%l:+%c+%t+(%C)' 2>/dev/null || echo 'No connection')"
     echo "Weather|||$body"
     ;;
   battery)

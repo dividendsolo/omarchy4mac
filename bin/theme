@@ -16,7 +16,8 @@
 #   theme -s | --sync     download / refresh all themes from the Omarchy repo
 #   theme --no-reload <n> switch without reloading nvim, btop, sketchybar
 #
-# `--sync` pulls every theme from github.com/omacom/omarchy (quattro), renders
+# `--sync` pulls every theme from github.com/omacom/omarchy at the commit pinned
+# in OMARCHY_COMMIT (repo root, next to OMARCHY_VERSION), renders
 # Ghostty, btop, and neovim from Omarchy's own templates, and fetches each
 # theme's backgrounds into ~/Pictures/Wallpapers. Switching is then offline.
 
@@ -28,7 +29,7 @@ set -euo pipefail
 # neovim spec are rendered from default/themed/*.tpl, the same templates
 # Omarchy renders at theme-set time.
 REPO="omacom/omarchy"
-REF="${OMARCHY_REF:-quattro}"         # set OMARCHY_REF=master for the 3.x layout (unsupported)
+REF="${OMARCHY_REF:-}"                # empty: the commit in OMARCHY_COMMIT; a branch or SHA overrides
 GIT_URL="https://github.com/$REPO.git"
 SRC=""                                # the sync's partial clone (set in sync_themes)
 TEMPLATES=(btop.theme.tpl ghostty.conf.tpl neovim.lua.tpl claude.json.tpl obsidian.css.tpl)
@@ -68,6 +69,24 @@ ghostty_theme_dirs() {
 
 c_bold=$'\033[1m'; c_dim=$'\033[2m'; c_grn=$'\033[32m'; c_red=$'\033[31m'; c_yel=$'\033[33m'; c_rst=$'\033[0m'
 die() { echo "${c_red}error:${c_rst} $*" >&2; exit 1; }
+
+# A theme name reaches Lua (hs -c), AppleScript and file paths: letters,
+# digits, dot, underscore and dash only. Upstream folder names are not trusted.
+valid_name() { [[ "$1" =~ ^[A-Za-z0-9._-]+$ ]]; }
+
+# The omacom/omarchy commit `--sync` takes, from OMARCHY_COMMIT in this repo.
+# ~/.local/bin/theme is a symlink into the clone, so follow it to the repo.
+pinned_commit() {
+  local self="$0" l
+  while [[ -L "$self" ]]; do
+    l="$(readlink "$self")"
+    if [[ "$l" == /* ]]; then self="$l"; else self="$(dirname "$self")/$l"; fi
+  done
+  local f; f="$(cd "$(dirname "$self")/.." && pwd)/OMARCHY_COMMIT"
+  local sha; sha="$(tr -d '[:space:]' < "$f" 2>/dev/null)" || sha=""
+  [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || die "no pinned commit in $f (bump it with OMARCHY_VERSION)"
+  echo "$sha"
+}
 
 # Toast for callers with no terminal (AeroSpace exec-and-forget, launchd).
 # Without this, alt-t shows nothing at all — failures were invisible.
@@ -254,14 +273,17 @@ sync_backgrounds() {
 # Only the trees come down at first; each file's blob is fetched when read.
 sync_themes() {
   command -v git >/dev/null || die "git is required"
+  [[ -n "$REF" ]] || REF="$(pinned_commit)"
   echo "${c_bold}Fetching themes from $REPO@$REF …${c_rst}"
   SRC="$(mktemp -d "${TMPDIR:-/tmp}/theme-sync.XXXXXX")"
   trap 'rm -rf "$SRC"' EXIT
-  git clone --quiet --depth 1 --filter=blob:none --no-checkout --branch "$REF" "$GIT_URL" "$SRC" 2>/dev/null \
-    || die "could not clone $REPO@$REF (network down?)"
+  # init + fetch, not clone --branch: a clone cannot take a commit SHA
+  { git init --quiet "$SRC" && git -C "$SRC" remote add origin "$GIT_URL" \
+      && git -C "$SRC" fetch --quiet --depth 1 --filter=blob:none origin "$REF"; } 2>/dev/null \
+    || die "could not fetch $REPO@$REF (network down?)"
   # fetch every theme file and template in one batch; wallpapers stay lazy
   git -C "$SRC" sparse-checkout set --no-cone '/default/themed/' '/themes/*/colors.toml' '/themes/*/neovim.lua' 2>/dev/null \
-    && git -C "$SRC" checkout --quiet 2>/dev/null \
+    && git -C "$SRC" checkout --quiet FETCH_HEAD 2>/dev/null \
     || die "could not fetch themes from $REPO@$REF"
   local names
   names="$(git -C "$SRC" ls-tree -d --name-only HEAD:themes)" || die "no themes/ folder in $REPO@$REF"
@@ -273,6 +295,10 @@ sync_themes() {
   local n got=0 skipped=0
   while IFS= read -r n; do
     [[ -n "$n" ]] || continue
+    if ! valid_name "$n"; then
+      printf '  %s%-18s%s %sinvalid name — skipped%s\n' "$c_dim" "$n" "$c_rst" "$c_yel" "$c_rst"
+      skipped=$((skipped+1)); continue
+    fi
     local colors nvim
     colors="$(src_file "themes/$n/colors.toml")" || colors=""
     if [[ -z "$colors" ]]; then
@@ -639,6 +665,7 @@ if [[ "$name" == "random" && ! -d "$CACHE/random" ]]; then
   name="$(pick_random_theme "$want")"
   echo "${c_dim}random pick ($want mode):${c_rst} ${c_bold}$name${c_rst}"
 fi
+valid_name "$name" || die "invalid theme name: $name"
 if [[ ! -d "$CACHE/$name" ]]; then
   echo "${c_red}unknown theme:${c_rst} $name" >&2; echo >&2; list_themes >&2; exit 1
 fi
