@@ -59,7 +59,7 @@ sketchybar --add item logo left \
 # ---------- AeroSpace workspaces ----------
 for sid in 1 2 3 4 5; do
   sketchybar --add item space."$sid" left \
-             --subscribe space."$sid" aerospace_workspace_change \
+             --subscribe space."$sid" aerospace_workspace_change mouse.scrolled \
              --set space."$sid" \
                    icon="$sid" \
                    label.drawing=off \
@@ -144,8 +144,7 @@ sketchybar --add item clock center \
                  icon.color="$MAGENTA" \
                  label.color="$FG" \
                  script="$PLUGIN_DIR/clock.sh" \
-                 click_script='open "x-apple.systempreferences:com.apple.Date-Time-Settings.extension"' \
-           --subscribe clock display_change
+           --subscribe clock display_change mouse.clicked
 
 sketchybar --add item weather center \
            --set weather \
@@ -256,8 +255,8 @@ sketchybar --add item clock_right right \
                  icon="󰥔" \
                  icon.color="$MAGENTA" \
                  label.color="$FG" \
-                 click_script='open "x-apple.systempreferences:com.apple.Date-Time-Settings.extension"'
-
+                 script="$PLUGIN_DIR/clock.sh" \
+           --subscribe clock_right mouse.clicked
 
 sketchybar --add item volume right \
            --set volume \
@@ -297,6 +296,17 @@ for provider in grok codex claude; do
 done
 sketchybar --set agents.claude \
                  click_script="open -na Ghostty --args -e $HOME/.local/bin/omarchy-tui bunx ccusage daily"
+
+# ---------- Widgets dragged off the bar ----------
+# bin/omarchy-bar-remove (a drag off the bar, from Hammerspoon) moves a widget into
+# the popup of this never-drawn item: its script keeps running, unseen. The list
+# keeps them off after a reload; `omarchy-bar-remove --reset` brings them back.
+sketchybar --add item bar_removed left --set bar_removed drawing=off popup.drawing=off
+if [ -f "$HOME/.config/omarchy/bar-removed" ]; then
+  while read -r removed; do
+    [ -n "$removed" ] && sketchybar --set "$removed" position=popup.bar_removed
+  done < "$HOME/.config/omarchy/bar-removed"
+fi
 
 # ---------- Force first run ----------
 sketchybar --update

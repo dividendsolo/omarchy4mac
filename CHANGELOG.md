@@ -7,6 +7,7 @@ maintainer's Mac runs from a clone of it, the same as yours.
 
 ## 2026-11-11
 
+<<<<<<< ours
 - The theme pipeline catches up with Omarchy 4.5 (#36). Each theme
   reopens with the wallpaper it had when you left it; a remembered picture
   that is gone falls back to another of the theme's wallpapers, and ⌘⌃W
@@ -20,6 +21,19 @@ maintainer's Mac runs from a clone of it, the same as yours.
   `~/.local/state/omarchy4mac/theme-herdr.log`. Catppuccin now starts Neovim
   on `catppuccin-mocha`. Omarchy's font-size fix is for Foot; Ghostty keeps
   `font-size` apart from `font-family`, so nothing changes here.
+=======
+<<<<<<< ours
+- Omarchy 4.5 bar polish (#37). The wheel over the workspaces moves to the
+  workspace before (up) or after (down). Drag a widget 48 px or more below
+  the bar and it leaves the bar, and stays off after a reload;
+  `omarchy-bar-remove --reset` brings every removed widget back.
+  Right-click the clock to show seconds; right-click again to hide them.
+  The clock runs on the bar's own timer, so the repeated hour at the end of
+  daylight saving leaves the log quiet (a test now runs it across
+  2026-11-01). The tray drawer, tooltips, hover reveal and wallpaper sampling
+  are not ported: SketchyBar has no tray, tooltips or wallpaper sampling.
+=======
+>>>>>>> theirs
 - Menu fixes from Omarchy 4.5. An installed item stays in the menu, dimmed
   and marked "✓ installed" (Install > Service > Slack), instead of looking
   like one more thing to install. Setup > Defaults > Agent installs a missing
@@ -30,6 +44,7 @@ maintainer's Mac runs from a clone of it, the same as yours.
   Each menu level is tall enough to show all its rows. The same key (or the
   bar logo) a second time closes the menu, the ⌥K overlay, Apps and the theme
   chooser, and the ⌥K overlay starts no process.
+>>>>>>> theirs
 - Install > Service > Slack (Omarchy 4.5). The menu item installs Slack
   with Homebrew in a Ghostty window and opens it when the install ends. When
   Slack is already there, the item just opens it.
