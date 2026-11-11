@@ -1,8 +1,17 @@
 # Changelog
 
-Newest first. Each entry is a sync from the private dotfiles it is exported
-from, so a date here is the day the change went public, not the day it was
-built. Entries that are not a dotfiles sync say so.
+Newest first. Until 2026-11-11 this repo was exported from a private
+dotfiles repo; entries before that date are those exports. Since then this
+repo is the only source: every change lands here by pull request, and the
+maintainer's Mac runs from a clone of it, the same as yours.
+
+## 2026-11-11
+
+- This repo is now the source. Changes land here by pull request, and the
+  maintainer's own Mac runs from a clone of it with `install.sh`, so what you
+  install is exactly what runs there. `git pull` (or rerunning `install.sh`)
+  is the whole update.
+- `tests/sunset-test.sh` checks the Friday sunset item.
 
 ## 2026-11-06
 
