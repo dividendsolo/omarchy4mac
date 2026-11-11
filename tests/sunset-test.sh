@@ -57,7 +57,7 @@ check "Friday, wttr.in down: hidden" "drawing=off" "$out"
 echo "wttr.in over https (#45):"
 for cmd in "$PLUGIN" "$HERE/../sketchybar/plugins/weather.sh" "$HERE/../bin/omarchy-notice weather"; do
   : > "$TMP/curl.log"; rm -f "$TMP/cache"
-  PATH="$TMP/bin:$PATH" CONFIG_DIR="$CONFIG_DIR" NAME=x SUNSET_NOW="2026-11-06 14:00" SUNSET_CACHE="$TMP/cache" \
+  PATH="$TMP/bin:$PATH" CONFIG_DIR="$CONFIG_DIR" NAME=sunset_center SUNSET_NOW="2026-11-06 14:00" SUNSET_CACHE="$TMP/cache" \
     SUNSET_TEST_LOG="$TMP/log" CURL_TEST_LOG="$TMP/curl.log" bash $cmd >/dev/null 2>&1
   url="$(grep -o '[^ ]*wttr.in[^ ]*' "$TMP/curl.log")"
   check "${cmd##*/} fetches https://wttr.in" "https://wttr.in/" "$url"

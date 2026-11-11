@@ -143,10 +143,14 @@ for _, r in ipairs(choosers[#choosers].shown) do if r.text == "Theme" then pick(
 local evil = "x; touch /tmp/pwned $(id)"
 choosers[#choosers].cb({ themeName = evil })
 local t = tasks[#tasks]
-check("theme chooser runs ~/.local/bin/theme itself, no shell",
-  t.path == os.getenv("HOME") .. "/.local/bin/theme", t.path)
-check("theme chooser passes the name as its only argument",
-  #t.args == 1 and t.args[1] == evil, table.concat(t.args, " | "))
+-- a login shell, like every other menu command: theme needs Homebrew's PATH
+-- (sketchybar, nvim, hs) to reload the apps
+check("theme chooser runs in a login shell",
+  t.path == "/bin/bash" and t.args[1] == "-lc", t.path .. " " .. tostring(t.args[1]))
+check("theme chooser script holds no theme name",
+  t.args[2] == '~/.local/bin/theme "$1"', tostring(t.args[2]))
+check("theme chooser passes the name as one argument ($1)",
+  #t.args == 4 and t.args[4] == evil, table.concat(t.args, " | "))
 
 if fails > 0 then print(fails .. " failed"); os.exit(1) end
 print("all passed")
