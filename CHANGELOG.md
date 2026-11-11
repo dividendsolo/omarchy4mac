@@ -7,6 +7,7 @@ maintainer's Mac runs from a clone of it, the same as yours.
 
 ## 2026-11-11
 
+<<<<<<< ours
 - Omarchy 4.5 bar polish (#37). The wheel over the workspaces moves to the
   workspace before (up) or after (down). Drag a widget 48 px or more below
   the bar and it leaves the bar, and stays off after a reload;
@@ -16,6 +17,18 @@ maintainer's Mac runs from a clone of it, the same as yours.
   daylight saving leaves the log quiet (a test now runs it across
   2026-11-01). The tray drawer, tooltips, hover reveal and wallpaper sampling
   are not ported: SketchyBar has no tray, tooltips or wallpaper sampling.
+=======
+- Menu fixes from Omarchy 4.5. An installed item stays in the menu, dimmed
+  and marked "✓ installed" (Install > Service > Slack), instead of looking
+  like one more thing to install. Setup > Defaults > Agent installs a missing
+  agent in a Ghostty window and makes it the default only when the install
+  works (Claude Code and Codex with Homebrew, Grok and OpenClaw with npm,
+  Hermes with its installer). Update > Config > Hammerspoon reloads only a
+  whole init.lua, so a reload during a `git pull` keeps the running menu.
+  Each menu level is tall enough to show all its rows. The same key (or the
+  bar logo) a second time closes the menu, the ⌥K overlay, Apps and the theme
+  chooser, and the ⌥K overlay starts no process.
+>>>>>>> theirs
 - Install > Service > Slack (Omarchy 4.5). The menu item installs Slack
   with Homebrew in a Ghostty window and opens it when the install ends. When
   Slack is already there, the item just opens it.
