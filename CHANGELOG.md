@@ -16,6 +16,16 @@ maintainer's Mac runs from a clone of it, the same as yours.
   borders; Theme and Rounded keep the round ones. The choice is saved and
   comes back after a restart. Ghostty shows a new transparency after you quit
   and reopen it.
+- Omarchy 4.5's floating workspaces and dock keys. ⌥L cycles the focused
+  workspace through tiles, accordion and floating, and the layout comes back
+  after AeroSpace restarts. ⌥M minimizes the focused window to the Dock. Both
+  are in the ⌥K overlay.
+- Omarchy 4.5's Appearance menu replaces Style on ⌘⌥Space, right before
+  Trigger: Theme, Background, Font, Menu Bar, Windows, Branding, Dock,
+  Workspace Layout, Animations and Unlock, plus Light / Dark, Random Theme
+  and Sync Themes. Each item opens the theme chooser, a config file, an
+  AeroSpace layout command or the matching System Settings pane, and menu
+  search finds them all. `tests/menu-test.sh` checks the branch.
 - This repo is now the source. Changes land here by pull request, and the
   maintainer's own Mac runs from a clone of it with `install.sh`, so what you
   install is exactly what runs there. `git pull` (or rerunning `install.sh`)
