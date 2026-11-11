@@ -222,6 +222,7 @@ local M365 = {
 omarchyMenu("Install")
 local inst = texts(choosers[#choosers].shown)
 check("Install has Service", (", " .. inst .. ","):find(", Service,", 1, true) ~= nil, inst)
+slackThere = true   -- Slack installed: the item only opens it
 walk({ { "Microsoft", "chooser:Install › Service › Microsoft › ", M365 }, { "Slack", "ran:launchOrFocus Slack" } },
   { "Install", "Service" })
 searchAll(M365, "Install › Service › Microsoft")
