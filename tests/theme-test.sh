@@ -188,6 +188,21 @@ check "the toggle turns off" test ! -e "$H/.config/theme-switcher/herdr-sync"
 : > "$LOG"; run nowall; sleep 1
 check "sync off: no push" bash -c "! grep -q '^ssh' '$LOG'"
 rm -rf "$T"
+# One machine asleep: ssh exits 255 there, and the next machine still gets the theme
+herdr_setup; touch "$R/.config/theme-switcher/herdr-sync"
+printf '#!/bin/bash\n[[ "$*" == "machine list" ]] && printf "1\\tdown\\tme@down\\tmain\\tenabled\\n2\\tbox\\tme@box\\tmain\\tenabled\\n"\nexit 0\n' > "$STUBS/herdr"
+cat > "$STUBS/ssh" <<EOF
+#!/bin/bash
+echo "ssh \$*" >> "$LOG"
+[[ "\$*" == *me@down* ]] && { cat >/dev/null; echo "ssh: connect to host down: Operation timed out" >&2; exit 255; }
+HOME="$R" /bin/bash -s
+EOF
+chmod +x "$STUBS"/*
+run --herdr-sync on; run withwall
+wait_for "$H/.local/state/omarchy4mac/theme-herdr.log" "me@box"
+check "an unreachable machine is logged" grep -q 'me@down: unreachable' "$H/.local/state/omarchy4mac/theme-herdr.log"
+check "the next machine still gets the theme" grep -q 'me@box: set withwall' "$H/.local/state/omarchy4mac/theme-herdr.log"
+rm -rf "$T"
 
 echo "theme --sync takes the commit pinned in OMARCHY_COMMIT (#45):"
 setup

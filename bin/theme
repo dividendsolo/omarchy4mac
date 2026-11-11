@@ -686,7 +686,7 @@ herdr_sync_toggle() {
 # shortcut: no lock between runs (macOS has no flock); two quick switches can
 # land out of order on a slow machine, and the next switch corrects it.
 herdr_push() {
-  local herdr targets target theme result
+  local herdr targets target theme result rc
   # launchd and hotkey shells often lack Homebrew on PATH
   herdr="$(command -v herdr 2>/dev/null || true)"
   [[ -n "$herdr" || ! -x /opt/homebrew/bin/herdr ]] || herdr=/opt/homebrew/bin/herdr
@@ -726,7 +726,9 @@ EOF
     valid_name "$theme" || return 0
     result="$(printf 'theme=%q from=%q\n%s\n' "$theme" "$(hostname -s 2>/dev/null || hostname)" "$remote" |
       ssh -o BatchMode=yes -o ConnectTimeout=5 -o ServerAliveInterval=5 -o ServerAliveCountMax=2 \
-        "$target" bash -l -s 2>&1 | tail -n 1)"
+        "$target" bash -l -s 2>&1 | tail -n 1)" && rc=0 || rc=$?
+    # ssh exits 255 when it cannot reach the machine (asleep, offline); go on to the next one
+    (( rc != 255 )) || result=""
     echo "$(date '+%F %T') $target: ${result:-unreachable}"
   done <<< "$targets"
 }
