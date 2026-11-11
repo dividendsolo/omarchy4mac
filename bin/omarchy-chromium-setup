@@ -1,0 +1,49 @@
+#!/bin/zsh
+# Omarchy 4.5's Chromium fixes, for every Chromium browser on this Mac (one
+# with a profile folder in ~/Library/Application Support). install.sh runs it;
+# run it again after you install a browser or a password manager.
+#  - Password managers (omacom/omarchy#10292): 1Password and Bitwarden register
+#    their native messaging host with the browsers they know. Their manifest
+#    is copied to the others, so the extension connects to the desktop app.
+#    A host a vendor wrote stays as it is. 1Password also asks you to allow a
+#    browser it does not know (1Password > Settings > Browser).
+#  - Overlay scrollbars (omacom/omarchy#14456): scrollbars show only while you
+#    scroll, even with a mouse plugged in. Takes effect on the browser's next start.
+AS="$HOME/Library/Application Support"
+browsers=(  # bundle id|profile folder
+  "com.google.Chrome|Google/Chrome"
+  "com.google.Chrome.beta|Google/Chrome Beta"
+  "com.google.Chrome.canary|Google/Chrome Canary"
+  "org.chromium.Chromium|Chromium"
+  "com.brave.Browser|BraveSoftware/Brave-Browser"
+  "com.brave.Browser.beta|BraveSoftware/Brave-Browser-Beta"
+  "com.brave.Browser.nightly|BraveSoftware/Brave-Browser-Nightly"
+  "com.microsoft.edgemac|Microsoft Edge"
+  "com.microsoft.edgemac.Beta|Microsoft Edge Beta"
+  "com.microsoft.edgemac.Dev|Microsoft Edge Dev"
+  "com.vivaldi.Vivaldi|Vivaldi"
+  "net.imput.helium|net.imput.helium"
+  "company.thebrowser.Browser|Arc/User Data"
+)
+hosts=(com.1password.1password.json com.8bit.bitwarden.json)
+
+installed=()
+for b in $browsers; do [[ -d "$AS/${b#*|}" ]] && installed+=$b; done
+
+for host in $hosts; do
+  src=""
+  for b in $installed; do
+    [[ -f "$AS/${b#*|}/NativeMessagingHosts/$host" ]] && { src="$AS/${b#*|}/NativeMessagingHosts/$host"; break; }
+  done
+  [[ -n $src ]] || continue
+  for b in $installed; do
+    dst="$AS/${b#*|}/NativeMessagingHosts/$host"
+    [[ -e $dst ]] && continue
+    mkdir -p "${dst%/*}" && cp "$src" "$dst" && echo "  ${host%.json} -> ${b%%|*}"
+  done
+done
+
+for b in $installed; do
+  defaults write "${b%%|*}" AppleShowScrollBars -string WhenScrolling
+done
+echo "Chromium browsers set up: ${#installed}"

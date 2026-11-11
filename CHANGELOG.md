@@ -7,7 +7,6 @@ maintainer's Mac runs from a clone of it, the same as yours.
 
 ## 2026-11-11
 
-<<<<<<< ours
 - Video backgrounds, theme intros and a quiet screensaver exit (Omarchy 4.5).
   A background can be a video: it loops behind your windows, muted, and its
   still frame becomes the desktop picture, so the lock screen shows that
@@ -17,7 +16,19 @@ maintainer's Mac runs from a clone of it, the same as yours.
   off. `install.sh` builds the player, `omarchy-video-wallpaper`, with
   `swiftc`; rerun it after the pull. The key that ends the screensaver no
   longer shows in the corner.
-=======
+- The theme pipeline catches up with Omarchy 4.5 (#36). Each theme
+  reopens with the wallpaper it had when you left it; a remembered picture
+  that is gone falls back to another of the theme's wallpapers, and ⌘⌃W
+  cycles on from it. ⌘⌫ in the theme chooser deletes a theme after a
+  confirmation (not the current one); `theme --remove <name>` does the same
+  from a terminal, and `theme --sync` no longer brings a deleted theme back.
+  Trigger > Toggle > Herdr Theme Sync (or `theme --herdr-sync on`) mirrors
+  each theme switch over SSH to every enabled machine in `herdr machine
+  list`; a machine takes it only when its own sync is on, and an Omarchy
+  machine is reached the same way Omarchy does it. The log is
+  `~/.local/state/omarchy4mac/theme-herdr.log`. Catppuccin now starts Neovim
+  on `catppuccin-mocha`. Omarchy's font-size fix is for Foot; Ghostty keeps
+  `font-size` apart from `font-family`, so nothing changes here.
 - Omarchy 4.5's window fixes (#39). ⌥↩ opens the new Ghostty window in the
   folder of the focused terminal's shell, and in your home folder when the
   focused app is not a terminal (a browser's download helper no longer sends
@@ -38,7 +49,16 @@ maintainer's Mac runs from a clone of it, the same as yours.
   daylight saving leaves the log quiet (a test now runs it across
   2026-11-01). The tray drawer, tooltips, hover reveal and wallpaper sampling
   are not ported: SketchyBar has no tray, tooltips or wallpaper sampling.
->>>>>>> theirs
+- Brave and web app fixes from Omarchy 4.5. ⌘⇧↩ (and every web app key)
+  opens Safari when the default browser named in macOS is no longer
+  installed, instead of doing nothing. ⌥⇧L copies the address of the front
+  browser tab, in any Brave profile and in web app windows, like Omarchy's
+  Copy URL (the first use asks to let Hammerspoon read the browser). New
+  `omarchy-chromium-setup`, run by `install.sh`: it copies the 1Password and
+  Bitwarden native messaging hosts to every Chromium browser on the Mac, so
+  their extensions connect to the desktop app, and turns on overlay
+  scrollbars in those browsers (after their next start). Web notifications
+  grouped by site are not ported: macOS groups notifications by app.
 - Menu fixes from Omarchy 4.5. An installed item stays in the menu, dimmed
   and marked "✓ installed" (Install > Service > Slack), instead of looking
   like one more thing to install. Setup > Defaults > Agent installs a missing

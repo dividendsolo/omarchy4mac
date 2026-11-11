@@ -366,6 +366,10 @@ if [ "$DRY" != 1 ]; then
   osascript -e 'tell application "System Events" to set autohide menu bar of dock preferences to true' >/dev/null 2>&1 || true
 fi
 
+# ---- 7c. Chromium browsers: password-manager hosts and overlay scrollbars (Omarchy 4.5)
+say "Setting up the Chromium browsers (password managers, overlay scrollbars)"
+run "$SRC/bin/omarchy-chromium-setup"
+
 # ---- 8. Services ----------------------------------------------------------
 say "Starting services"
 run brew services restart sketchybar

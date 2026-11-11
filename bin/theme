@@ -15,6 +15,9 @@
 #                         (or of [name], if given)
 #   theme -s | --sync     download / refresh all themes from the Omarchy repo
 #   theme --no-reload <n> switch without reloading nvim, btop, sketchybar
+#   theme --remove <name> delete a theme (not the current one); --sync skips it
+#                         from then on (delete its line in ~/.config/theme-switcher/removed)
+#   theme --herdr-sync [on|off]  mirror theme switches to your herdr machines
 #
 # `--sync` pulls every theme from github.com/omacom/omarchy at the commit pinned
 # in OMARCHY_COMMIT (repo root, next to OMARCHY_VERSION), renders
@@ -40,6 +43,10 @@ OBSIDIAN_JSON="$HOME/Library/Application Support/obsidian/obsidian.json"
 TPL_CACHE="$HOME/.config/theme-switcher/templates"
 WALLPAPERS="$HOME/Pictures/Wallpapers"
 STATE="$HOME/.config/theme-switcher/current"
+REMOVED="$HOME/.config/theme-switcher/removed"         # one name per line: --sync skips these
+BG_MEMORY="$HOME/.config/theme-switcher/backgrounds"   # <theme>: the path of its last wallpaper
+HERDR_SYNC="$HOME/.config/theme-switcher/herdr-sync"   # present: switches mirror to herdr machines
+HERDR_LOG="$HOME/.local/state/omarchy4mac/theme-herdr.log"
 NVIM_THEME_FILE="$HOME/.config/nvim/lua/plugins/theme.lua"
 BTOP_THEMES_DIR="$HOME/.config/btop/themes"
 BTOP_CONFIG="$HOME/.config/btop/btop.conf"
@@ -312,6 +319,10 @@ sync_themes() {
       printf '  %s%-18s%s %sinvalid name — skipped%s\n' "$c_dim" "$n" "$c_rst" "$c_yel" "$c_rst"
       skipped=$((skipped+1)); continue
     fi
+    if grep -qxF "$n" "$REMOVED" 2>/dev/null; then
+      printf '  %s%-18s%s %sremoved — skipped%s\n' "$c_dim" "$n" "$c_rst" "$c_yel" "$c_rst"
+      skipped=$((skipped+1)); continue
+    fi
     local colors nvim
     colors="$(src_file "themes/$n/colors.toml")" || colors=""
     if [[ -z "$colors" ]]; then
@@ -326,6 +337,9 @@ sync_themes() {
     local nvim_src="theme"
     nvim="$(src_file "themes/$n/neovim.lua")" \
       || { nvim="$(render_template "$CACHE/$n/colors.toml" "$TPL_CACHE/neovim.lua.tpl")"; nvim_src="aether"; }
+    # catppuccin-nvim exists only in new catppuccin/nvim checkouts; Omarchy 4.5
+    # names the flavour instead (omacom/omarchy#12864), the pinned commit does not.
+    nvim="${nvim//catppuccin-nvim/catppuccin-mocha}"
     printf '%s\n' "$nvim" > "$CACHE/$n/neovim.lua"
 
     # btop + ghostty from the templates
@@ -608,48 +622,145 @@ PY
   echo "  ${c_dim}obsidian${c_rst} → Omarchy theme in $count vault(s)"
 }
 
+# The outgoing theme keeps the picture on the desktop (omacom/omarchy#7718),
+# unless that picture belongs to another theme: it only stayed because the
+# outgoing theme has no wallpaper of its own.
+remember_wallpaper() {
+  local old="$1" pic="$2" t
+  [[ -n "$pic" && "$old" != "$3" ]] && valid_name "$old" && [[ -d "$CACHE/$old" ]] || return 0
+  while IFS= read -r t; do
+    [[ "$t" != "$old" && "$(basename "$pic")" == "${t}_"* ]] && return 0
+  done < <(installed_themes)
+  mkdir -p "$BG_MEMORY"; printf '%s\n' "$pic" > "$BG_MEMORY/$old"
+}
+
 apply_wallpaper() {
   local name="$1" dir="$HOME/Pictures/Wallpapers"
-  [[ -d "$dir" ]] || return 0
+  # a video background shows its still frame as the picture: remember the video itself
+  local current; current="$(cat "$HOME/.local/state/omarchy/background-video" 2>/dev/null)" || current=""
+  [[ -n "$current" ]] || current="$(osascript -e 'tell application "System Events" to tell current desktop to get picture' 2>/dev/null)"
+  remember_wallpaper "$(current_theme)" "$current" "$name"
+  local remembered; remembered="$(cat "$BG_MEMORY/$name" 2>/dev/null)" || remembered=""
+  [[ -f "$remembered" ]] || remembered=""
   shopt -s nullglob nocaseglob
   # Declare, then assign: bash 3.2 drops `local files=( <glob> )` entirely.
   local files; files=( "$dir/${name}_"*.{jpg,jpeg,png,heic,webp,mp4,mov,m4v} )
   shopt -u nocaseglob
   # bash 3.2 + set -u: ${#files[@]} on an empty array is "unbound", so test the join.
   # Thanks to @tylerkessler (omarchy4mac#6).
-  if [[ -z "${files[*]-}" ]]; then
+  if [[ -z "${files[*]-}" && -z "$remembered" ]]; then
     echo "  ${c_yel}wallpaper${c_rst} ! none found for '$name' in $dir — skipped"
     WALLPAPER_NOTE=" No wallpaper for this theme in ~/Pictures/Wallpapers, so the previous wallpaper stays."
     return 0
   fi
 
   # If current desktop picture is already from this theme, keep it
-  local current; current="$(osascript -e 'tell application "System Events" to tell current desktop to get picture' 2>/dev/null)"
-  if [[ -n "$current" && "$(basename "$current")" == "${name}_"* ]]; then
+  if [[ -n "$current" && ( "$(basename "$current")" == "${name}_"* || "$current" == "$remembered" ) ]]; then
     echo "  ${c_dim}wallpaper${c_rst} kept $(basename "$current")"
     return 0
   fi
 
-  local pick="${files[$((RANDOM % ${#files[@]}))]}"
+  local pick="$remembered"
+  [[ -n "$pick" ]] || pick="${files[$((RANDOM % ${#files[@]}))]}"
   # an image (with its intro, if the theme has one) or a looping video (Omarchy 4.5)
   "$(dirname "$0")/omarchy-bg-set" "$pick" || true
   # keep the cycler's index in step so ⌘⌃P starts from this picture
   local idx=0 i=0
-  for f in "${files[@]}"; do [[ "$f" == "$pick" ]] && idx=$i; i=$((i+1)); done
-  mkdir -p "$HOME/.cache"; echo "$idx" > "$HOME/.cache/omarchy-wallpaper-index"
+  for f in "${files[@]-}"; do [[ "$f" == "$pick" ]] && idx=$i; i=$((i+1)); done
+  # omarchy-cycle-wallpaper keeps one index per theme
+  mkdir -p "$HOME/.cache"; echo "$idx" > "$HOME/.cache/omarchy-wallpaper-index-$name"
   echo "  ${c_dim}wallpaper${c_rst} → $(basename "$pick")"
+}
+
+# Delete a theme and what --sync generated for it (omacom/omarchy#14713).
+remove_theme() {
+  local name="$1" td
+  valid_name "$name" || die "invalid theme name: $name"
+  [[ -d "$CACHE/$name" ]] || die "unknown theme: $name"
+  [[ "$name" != "$(current_theme)" ]] || die "'$name' is the current theme; switch to another first"
+  rm -rf "${CACHE:?}/$name" "$BG_MEMORY/$name" "$BTOP_THEMES_DIR/omarchy-$name.theme"
+  while IFS= read -r td; do rm -f "$td/omarchy-$name"; done < <(ghostty_theme_dirs)
+  grep -qxF "$name" "$REMOVED" 2>/dev/null || { mkdir -p "$(dirname "$REMOVED")"; echo "$name" >> "$REMOVED"; }
+  echo "${c_grn}removed $name.${c_rst} ${c_dim}--sync skips it; delete its line in ${REMOVED/#$HOME/~} to get it back.${c_rst}"
+}
+
+herdr_sync_toggle() {
+  case "${1:-}" in
+    on)  mkdir -p "$(dirname "$HERDR_SYNC")"; : > "$HERDR_SYNC" ;;
+    off) rm -f "$HERDR_SYNC" ;;
+    "")  ;;
+    *)   die "usage: theme --herdr-sync [on|off]" ;;
+  esac
+  [[ -f "$HERDR_SYNC" ]] && echo "herdr theme sync: on" || echo "herdr theme sync: off"
+}
+
+# Mirror the current theme to every enabled herdr machine (omacom/omarchy#13430).
+# Runs in the background after a switch. A machine takes the theme only when
+# its own sync is on; THEME_SYNC_FROM stops it from echoing the theme back.
+# shortcut: no lock between runs (macOS has no flock); two quick switches can
+# land out of order on a slow machine, and the next switch corrects it.
+herdr_push() {
+  local herdr targets target theme result rc
+  # launchd and hotkey shells often lack Homebrew on PATH
+  herdr="$(command -v herdr 2>/dev/null || true)"
+  [[ -n "$herdr" || ! -x /opt/homebrew/bin/herdr ]] || herdr=/opt/homebrew/bin/herdr
+  [[ -n "$herdr" ]] || { echo "$(date '+%F %T') herdr not found"; return 0; }
+  # Columns: id, label, SSH target, session, state. This Mac may be listed; it is already on the theme.
+  targets="$("$herdr" machine list 2>/dev/null | awk -F '\t' '$5 == "enabled" { print $3 }')"
+  # The remote runs under a login shell for its PATH. Braces make bash read the
+  # whole script before running it, so nothing it runs eats the rest.
+  local remote
+  read -r -d '' remote <<'EOF' || true
+{
+  if [[ -x ~/.local/bin/theme ]]; then
+    # omarchy4mac
+    if [[ ! -f ~/.config/theme-switcher/herdr-sync ]]; then echo "theme sync is off"; exit; fi
+    if [[ $(cat ~/.config/theme-switcher/current 2>/dev/null) == "$theme" ]]; then echo "already on $theme"; exit; fi
+    if THEME_SYNC_FROM="$from" ~/.local/bin/theme "$theme" >/dev/null 2>&1; then echo "set $theme"; else echo "failed to set $theme"; fi
+    exit
+  fi
+  # Omarchy: the same steps as omarchy-theme-set-herdr-machines
+  if [[ ! -f ~/.local/state/omarchy/toggles/herdr-theme-sync ]]; then echo "theme sync is off"; exit; fi
+  if [[ $(cat ~/.local/state/omarchy/current/theme.name 2>/dev/null) == "$theme" ]]; then echo "already on $theme"; exit; fi
+  export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+  instance=$(hyprctl instances -j 2>/dev/null | jq -r 'max_by(.time) // empty | "\(.instance) \(.wl_socket)"')
+  if [[ -z $instance ]]; then echo "no Hyprland session"; exit; fi
+  read -r HYPRLAND_INSTANCE_SIGNATURE WAYLAND_DISPLAY <<<"$instance"
+  export HYPRLAND_INSTANCE_SIGNATURE WAYLAND_DISPLAY
+  export DBUS_SESSION_BUS_ADDRESS="unix:path=$XDG_RUNTIME_DIR/bus"
+  export OMARCHY_THEME_SYNC_FROM="$from"
+  if omarchy theme set "$theme" >/dev/null 2>&1; then echo "set $theme"; else echo "failed to set $theme"; fi
+} </dev/null
+EOF
+  # One machine at a time, so an SSH agent like 1Password asks at most once.
+  # The theme travels on stdin as a quoted assignment, never in the ssh command.
+  while IFS= read -r target; do
+    [[ -n "$target" && "$target" != -* ]] || continue   # never an ssh option
+    theme="$(current_theme)"
+    valid_name "$theme" || return 0
+    result="$(printf 'theme=%q from=%q\n%s\n' "$theme" "$(hostname -s 2>/dev/null || hostname)" "$remote" |
+      ssh -o BatchMode=yes -o ConnectTimeout=5 -o ServerAliveInterval=5 -o ServerAliveCountMax=2 \
+        "$target" bash -l -s 2>&1 | tail -n 1)" && rc=0 || rc=$?
+    # ssh exits 255 when it cannot reach the machine (asleep, offline); go on to the next one
+    (( rc != 255 )) || result=""
+    echo "$(date '+%F %T') $target: ${result:-unreachable}"
+  done <<< "$targets"
 }
 
 # --- arg parsing ------------------------------------------------------------
 do_reload=1; want_appearance=0; args=()
-for a in "$@"; do
+while [[ $# -gt 0 ]]; do
+  a="$1"; shift
   case "$a" in
     -s|--sync)   sync_themes; exit 0 ;;
+    --remove)    remove_theme "${1:-}"; exit 0 ;;
+    --herdr-sync) herdr_sync_toggle "${1:-}"; exit 0 ;;
+    --herdr-push) herdr_push; exit 0 ;;
     -l|--list)   list_themes; exit 0 ;;
     --mode)      system_appearance; exit 0 ;;
     --appearance) want_appearance=1 ;;
     --no-reload) do_reload=0 ;;
-    -h|--help)   sed -n '3,18p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help)   sed -n '3,22p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     -*)          die "unknown option: $a" ;;
     *)           args+=("$a") ;;
   esac
@@ -711,6 +822,11 @@ apply_btop "$name"
 apply_sketchybar "$name"
 apply_wallpaper "$name"
 mkdir -p "$(dirname "$STATE")"; echo "$name" > "$STATE"
+# Detached and logged, so SSH never holds up a switch (or the hotkey's task).
+if [[ -f "$HERDR_SYNC" && -z "${THEME_SYNC_FROM:-}" ]]; then
+  mkdir -p "$(dirname "$HERDR_LOG")"
+  nohup /bin/bash "$0" --herdr-push >> "$HERDR_LOG" 2>&1 < /dev/null &
+fi
 
 # What the eye sees reloads first. Hermes starts one Python per profile and
 # took 4s+ (more under lane load), which held the bar on the old theme.
