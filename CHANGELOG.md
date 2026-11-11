@@ -7,6 +7,14 @@ maintainer's Mac runs from a clone of it, the same as yours.
 
 ## 2026-11-11
 
+- Each monitor has its own workspaces, like Omarchy 4.5. ⌥1–5 (and ⌘⇧1–5,
+  ⌘⇧⌥1–5) work on the workspaces of the monitor you are on: ⌥1 is that
+  monitor's first workspace, and the keys never jump to another monitor.
+  ⌘ plus an arrow moves focus on to the next display at the edge of the
+  screen, and ⌥⇥ goes to the next workspace on the same monitor (back and
+  forth stays on ⌘⌃⇥). When you unplug a monitor, its workspaces come after
+  the ones already on the screen they land on, so nothing is renumbered, and
+  the other screen of a matched pair keeps its own workspaces.
 - This repo is now the source. Changes land here by pull request, and the
   maintainer's own Mac runs from a clone of it with `install.sh`, so what you
   install is exactly what runs there. `git pull` (or rerunning `install.sh`)
