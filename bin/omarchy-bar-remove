@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# Takes a widget off the bar (Omarchy 4.5: drag a widget off the bar to remove
+# it, omacom/omarchy#6782). Hammerspoon runs it when a drag starts on the bar
+# and ends well below it.
+#
+#   omarchy-bar-remove <x> <y>   remove the item drawn at that screen point
+#   omarchy-bar-remove --reset   put every removed item back
+#
+# The item moves into the popup of bar_removed, an item that is never drawn,
+# so its script keeps running and nothing complains in the log. The names stay
+# in ~/.config/omarchy/bar-removed, which sketchybarrc applies on every reload.
+set -euo pipefail
+PATH="$PATH:/opt/homebrew/bin:/usr/local/bin"
+LIST="$HOME/.config/omarchy/bar-removed"
+
+if [ "${1:-}" = --reset ]; then
+  rm -f "$LIST"
+  sketchybar --reload
+  exit 0
+fi
+num='^-?[0-9]+(\.[0-9]+)?$'
+[[ $# -eq 2 && $1 =~ $num && $2 =~ $num ]] || { echo "usage: omarchy-bar-remove <x> <y> | --reset" >&2; exit 2; }
+
+# The drawn item whose box holds the point (screen points, top-left origin, the
+# same as Hammerspoon's), or nothing while the bar is hidden.
+item="$(python3 - "$1" "$2" <<'PY'
+import json, subprocess, sys
+x, y = float(sys.argv[1]), float(sys.argv[2])
+def query(what):
+    return json.loads(subprocess.run(["sketchybar", "--query", what], capture_output=True, text=True).stdout)
+bar = query("bar")
+if bar.get("hidden") != "off":
+    sys.exit()
+for name in bar["items"]:
+    item = query(name)
+    geo = item.get("geometry", {})
+    if geo.get("drawing") != "on" or geo.get("position", "").startswith("popup"):
+        continue
+    for rect in item.get("bounding_rects", {}).values():
+        (ox, oy), (w, h) = rect["origin"], rect["size"]
+        if ox <= x < ox + w and oy <= y < oy + h:
+            print(name)
+            sys.exit()
+PY
+)"
+[ -n "$item" ] || exit 0
+mkdir -p "${LIST%/*}"
+echo "$item" >> "$LIST"
+sketchybar --set "$item" position=popup.bar_removed
