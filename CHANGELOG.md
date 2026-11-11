@@ -17,6 +17,11 @@ maintainer's Mac runs from a clone of it, the same as yours.
   borders; Theme and Rounded keep the round ones. The choice is saved and
   comes back after a restart. Ghostty shows a new transparency after you quit
   and reopen it.
+- The Quake console from Omarchy 4.5. ⌘` drops a Ghostty window onto the top
+  half of the screen over a dimmed desktop, and the first time it starts your
+  default agent. Press it again (or click away) and it tucks itself away with
+  the session still running. ⌘⇧` is a second console. Window cycling moves
+  from ⌘` and ⌘⇧` to ⌘⌥` and ⌘⌥⇧`.
 - Security hardening from a review before adoption (#45). The theme chooser
   passes the theme name to `theme` as an argument, never as shell text.
   `theme` refuses a theme name outside letters, digits, `.`, `_` and `-`,
