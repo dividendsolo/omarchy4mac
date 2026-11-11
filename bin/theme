@@ -260,6 +260,7 @@ sync_backgrounds() {
   mkdir -p "$WALLPAPERS"
   while IFS= read -r f; do
     [[ -n "$f" ]] || continue
+    valid_name "$f" || continue   # upstream file names are not trusted (#50)
     local base="$WALLPAPERS/${n}_$f"
     [[ -f "$base" ]] && continue
     src_file "themes/$n/backgrounds/$f" > "$base.part" && mv "$base.part" "$base" && got=$((got+1))
@@ -618,7 +619,8 @@ apply_wallpaper() {
   fi
 
   local pick="${files[$((RANDOM % ${#files[@]}))]}"
-  osascript -e "tell application \"System Events\" to set picture of every desktop to \"$pick\"" >/dev/null 2>&1
+  # the path goes in as argv, never inside script text (#50)
+  osascript -e 'on run argv' -e 'tell application "System Events" to set picture of every desktop to item 1 of argv' -e 'end run' "$pick" >/dev/null 2>&1
   # keep the cycler's index in step so ⌘⌃P starts from this picture
   local idx=0 i=0
   for f in "${files[@]}"; do [[ "$f" == "$pick" ]] && idx=$i; i=$((i+1)); done
