@@ -121,7 +121,9 @@ check "--reset reloads the bar" "sketchybar --reload" "$(log)"
 echo "drag off the bar (hammerspoon/init.lua):"
 if ! command -v luajit >/dev/null; then echo "  FAIL  luajit is not installed (brew install luajit)"; fails=$((fails + 1))
 else
-out="$(luajit - "$ROOT/hammerspoon/init.lua" <<'LUAEOF'
+# The Lua goes to a file first: macOS bash 3.2 cannot parse a here-document
+# inside $(...) when its text holds a quote or a paren.
+cat > "$TMP/drag.lua" <<'LUAEOF'
 local function stub()
   return setmetatable({}, { __index = function() return stub() end, __call = function() return stub() end })
 end
@@ -175,7 +177,7 @@ print("menu=" .. drag(30, 10, 30, 120))
 onScreen = { hiddenMenubar, bars[1], bars[2] }
 print("hiddenmenu=" .. drag(800, 10, 820, 200))
 LUAEOF
-)"
+out="$(luajit "$TMP/drag.lua" "$ROOT/hammerspoon/init.lua")"
 check "init.lua watches mouse down and up" "taps=1" "$out"
 check "a drag well below the bar removes the item it started on" "off=$HOME/.local/bin/omarchy-bar-remove 800 10" "$out"
 check "a short pull removes nothing" "short=nothing" "$out"
