@@ -11,6 +11,8 @@ require("hs.ipc")
 local bindings = {
   -- Launching
   { "SUPER + SPACE",            "Raycast" },
+  { "ALT + SPACE",              "Dictation on / off (Hex)" },
+  { "hold RIGHT ALT",           "Dictate while held (Hex)" },
   { "ALT + RETURN",             "Ghostty (terminal)" },
   { "SUPER + ALT + RETURN",     "Ghostty + tmux (Work)" },
   { "SUPER + CTRL + RETURN",    "Ghostty + herdr" },
@@ -179,6 +181,13 @@ hs.hotkey.bind({"cmd", "ctrl", "shift"}, "q", function()
   hs.task.new("/bin/bash", nil, { "-lc", "~/.local/bin/quit-all" }):start()
 end)
 
+-- Dictation (Omarchy 4.5, #28): Hex. Holding Right Option is Hex's own shortcut
+-- (install.sh sets it); Hex can't also take ⌥Space, so the toggle goes through its CLI.
+-- dictation: begin
+local HEX = "/Applications/Hex.app/Contents/MacOS/hex"
+hs.hotkey.bind({"alt"}, "space", function() hs.task.new(HEX, nil, { "dictation", "toggle" }):start() end)
+-- dictation: end
+
 -- Reminder (v4: Super+Ctrl+R): "20m stand up", "1h30 call back", "45s tea".
 -- A notification fires when the time is up. Timers live for this session.
 local reminders = {}
@@ -274,6 +283,17 @@ local function look(what, value, text, sub)
   return { text = text, action = function() hs.alert.show((hs.execute(APPEARANCE .. " " .. what .. " " .. value):gsub("%s+$", "")), 4) end,
     sub = function() return (hs.execute(APPEARANCE .. " " .. what):gsub("%s+$", "") == value and "✓ " or "") .. sub end }
 end
+-- Install > Service > Microsoft (Omarchy 4.5): Microsoft 365 as web apps, each in
+-- its own app window of the default browser. The Apps launcher lists them too.
+local function webapp(u) return sh("~/.local/bin/omarchy-launch-browser --app=" .. u) end
+local MICROSOFT = {
+  { text = "Outlook",    sub = "Microsoft 365 web app", action = webapp("https://outlook.cloud.microsoft/mail/") },
+  { text = "Word",       sub = "Microsoft 365 web app", action = webapp("https://word.cloud.microsoft/") },
+  { text = "Excel",      sub = "Microsoft 365 web app", action = webapp("https://excel.cloud.microsoft/") },
+  { text = "PowerPoint", sub = "Microsoft 365 web app", action = webapp("https://powerpoint.cloud.microsoft/") },
+  { text = "Teams",      sub = "Microsoft 365 web app", action = webapp("https://teams.cloud.microsoft/") },
+  { text = "OneDrive",   sub = "Microsoft 365 web app", action = webapp("https://onedrive.cloud.microsoft/") },
+}
 -- The repo this init.lua lives in (dotfiles here, omarchy4mac for adopters):
 -- resolve the symlink ~/.hammerspoon/init.lua and go two directories up.
 local D = (function()
@@ -393,7 +413,8 @@ local MENU = {
   { text = "Install", sub = "Add software", children = {
     { text = "Package", sub = "brew search in Ghostty", action = ghostty("read -p \"brew search: \" q && brew search \"$q\"") },
     -- Omarchy 4.5 (omacom/omarchy#14434): Slack opens if it is there, else installs, then opens.
-    { text = "Service", sub = "Install and open an app", children = {
+    { text = "Service", sub = "Apps and web services", children = {
+      { text = "Microsoft", sub = "Outlook, Word, Excel, PowerPoint, Teams, OneDrive", children = MICROSOFT },
       { text = "Slack", sub = "brew install --cask slack", action = function()
         if not hs.application.launchOrFocus("Slack") then ghostty("brew install --cask slack && open -a Slack")() end
       end },
@@ -593,6 +614,9 @@ local apps = {
   { name = "X (Twitter)",      sub = "Brave web app",     action = function() hs.application.launchOrFocusByBundleID("com.brave.Browser.app.lodlkdfmihgonocnmddehnfgiljnadcf") end },
   { name = "YouTube",          sub = "Brave web app",     action = function() hs.application.launchOrFocusByBundleID("com.brave.Browser.app.agimnkijcaahngcdmfeangaknmldooml") end },
 }
+
+for _, m in ipairs(MICROSOFT) do table.insert(apps, { name = m.text, sub = m.sub, action = m.action }) end
+table.sort(apps, function(x, y) return x.name:lower() < y.name:lower() end)
 
 showAppsMenu = function()
   local choices = {}

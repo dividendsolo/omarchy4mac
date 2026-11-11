@@ -23,7 +23,7 @@
 # Later runs leave that snapshot alone, so it always holds your pre-omarchy
 # setup. uninstall.sh puts those values back.
 #
-# Env: SKIP_APPS=1 skips Brave, Raycast, FluidVoice. OMARCHY4MAC_DIR overrides
+# Env: SKIP_APPS=1 skips Brave, Raycast, Hex. OMARCHY4MAC_DIR overrides
 # the clone location (default ~/code/omarchy4mac).
 set -euo pipefail
 
@@ -372,6 +372,22 @@ if [ "$DRY" = 1 ]; then
   echo "    would: reload AeroSpace if it is running, otherwise launch it"
 else
   pgrep -x AeroSpace >/dev/null && aerospace reload-config || open -a AeroSpace
+fi
+
+# ---- 8b. Dictation: Hex (Omarchy 4.5 ships Superwhisper) -------------------
+# Hex's own shortcut is hold Right Option (Omarchy's push-to-talk); ⌥Space, the
+# toggle, is Hammerspoon's. Option alone would also catch every ⌥ key AeroSpace binds.
+HEX="/Applications/Hex.app/Contents/MacOS/hex"
+if [ -x "$HEX" ] || { [ "$DRY" = 1 ] && [ -z "${SKIP_APPS:-}" ]; }; then
+  say "Dictation: hold Right Option in Hex, ⌥Space toggles"
+  if [ "$DRY" = 1 ]; then
+    echo "    would: start Hex and set its shortcut to hold Right Option"
+  else
+    { "$HEX" start >/dev/null &&
+      "$HEX" settings set dictation_hotkey right-option >/dev/null &&
+      "$HEX" settings set shortcut_mode hold >/dev/null; } ||
+      warn "Hex did not take its shortcut; set it in Hex > Settings: hold Right Option"
+  fi
 fi
 
 if [ "$DRY" = 1 ]; then

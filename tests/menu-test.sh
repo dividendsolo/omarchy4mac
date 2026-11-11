@@ -207,6 +207,37 @@ check("theme chooser script holds no theme name",
 check("theme chooser passes the name as one argument ($1)",
   #t.args == 4 and t.args[4] == evil, table.concat(t.args, " | "))
 
+-- ---- Microsoft 365 web apps (Omarchy 4.5, #32) ----------------------------
+-- Install > Service > Microsoft holds the six; each opens its own app window.
+local M365 = {
+  { "Outlook",    "omarchy-launch-browser --app=https://outlook.cloud.microsoft/mail/" },
+  { "Word",       "omarchy-launch-browser --app=https://word.cloud.microsoft/" },
+  { "Excel",      "omarchy-launch-browser --app=https://excel.cloud.microsoft/" },
+  { "PowerPoint", "omarchy-launch-browser --app=https://powerpoint.cloud.microsoft/" },
+  { "Teams",      "omarchy-launch-browser --app=https://teams.cloud.microsoft/" },
+  { "OneDrive",   "omarchy-launch-browser --app=https://onedrive.cloud.microsoft/" },
+}
+omarchyMenu("Install")
+local inst = texts(choosers[#choosers].shown)
+check("Install has Service", (", " .. inst .. ","):find(", Service,", 1, true) ~= nil, inst)
+walk({ { "Microsoft", "chooser:Install › Service › Microsoft › ", M365 } }, { "Install", "Service" })
+searchAll(M365, "Install › Service › Microsoft")
+-- the Apps launcher (⌘⇧Space) has an entry for each
+omarchyMenu()
+for _, r in ipairs(choosers[#choosers].shown) do if r.text == "Apps" then pick(choosers[#choosers], r); break end end
+local appsChooser = choosers[#choosers]
+for _, e in ipairs(M365) do
+  local row
+  for _, r in ipairs(appsChooser.shown) do if r.text == e[1] then row = r end end
+  check("Apps launcher has " .. e[1], row ~= nil)
+  if row then
+    local nRan = #ran
+    appsChooser.cb(row)
+    local did = ran[nRan + 1] or "nothing"
+    check("Apps launcher " .. e[1] .. " opens " .. e[2], did:find(e[2], 1, true) ~= nil, did)
+  end
+end
+
 if fails > 0 then print(fails .. " failed"); os.exit(1) end
 print("all passed")
 LUAEOF
