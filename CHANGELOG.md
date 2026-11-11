@@ -7,7 +7,6 @@ maintainer's Mac runs from a clone of it, the same as yours.
 
 ## 2026-11-11
 
-<<<<<<< ours
 - Video backgrounds, theme intros and a quiet screensaver exit (Omarchy 4.5).
   A background can be a video: it loops behind your windows, muted, and its
   still frame becomes the desktop picture, so the lock screen shows that
@@ -17,7 +16,6 @@ maintainer's Mac runs from a clone of it, the same as yours.
   off. `install.sh` builds the player, `omarchy-video-wallpaper`, with
   `swiftc`; rerun it after the pull. The key that ends the screensaver no
   longer shows in the corner.
-=======
 - Menu fixes from Omarchy 4.5. An installed item stays in the menu, dimmed
   and marked "✓ installed" (Install > Service > Slack), instead of looking
   like one more thing to install. Setup > Defaults > Agent installs a missing
@@ -28,7 +26,6 @@ maintainer's Mac runs from a clone of it, the same as yours.
   Each menu level is tall enough to show all its rows. The same key (or the
   bar logo) a second time closes the menu, the ⌥K overlay, Apps and the theme
   chooser, and the ⌥K overlay starts no process.
->>>>>>> theirs
 - Install > Service > Slack (Omarchy 4.5). The menu item installs Slack
   with Homebrew in a Ghostty window and opens it when the install ends. When
   Slack is already there, the item just opens it.
