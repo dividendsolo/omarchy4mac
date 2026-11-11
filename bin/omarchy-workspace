@@ -1,0 +1,56 @@
+#!/bin/bash
+# Per-monitor workspaces (Omarchy 4.5): the number keys work on the workspaces
+# of the monitor you are on, never on another monitor's.
+#   omarchy-workspace <n>                focus this monitor's n-th workspace
+#   omarchy-workspace --move <n>         send the focused window there
+#   omarchy-workspace --move-follow <n>  send it there and follow
+# A monitor's own workspaces (the first pattern of their entry in
+# [workspace-to-monitor-force-assignment]) come first, and guests from an
+# unplugged monitor after them, so unplugging a monitor renumbers nothing.
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+
+mode=focus
+case ${1:-} in
+  --move) mode=move; shift ;;
+  --move-follow) mode=follow; shift ;;
+esac
+n=${1:-}
+[[ $n =~ ^[0-9]+$ ]] || { echo "usage: omarchy-workspace [--move|--move-follow] <n>" >&2; exit 2; }
+
+config=$(aerospace config --config-path)
+monitor=$(aerospace list-monitors --focused --format '%{monitor-name}')
+
+# First monitor pattern of a workspace's force-assignment entry.
+# shortcut: regex patterns only (not main/secondary/<number>), which is all
+# aerospace.toml uses; extend if the table ever uses those.
+# shortcut: twin monitors lose their (1)/(2) suffix once one is unplugged, so
+# the remaining twin cannot tell its own workspaces from the guests and they
+# keep alphabetical order; fix with a saved monitor map if that bites.
+home_pattern() {
+  awk -v ws="$1" -v q="'" '
+    /^\[/ { inside = ($0 == "[workspace-to-monitor-force-assignment]"); next }
+    inside && $1 == ws && $2 == "=" && match($0, q "[^" q "]*" q) {
+      print substr($0, RSTART + 1, RLENGTH - 2); exit
+    }' "$config"
+}
+
+homes="" guests=""
+for ws in $(aerospace list-workspaces --monitor focused); do
+  pattern=$(home_pattern "$ws")
+  if [[ -z $pattern ]] || grep -qiE -- "$pattern" <<<"$monitor"; then
+    homes="$homes $ws"
+  else
+    guests="$guests $ws"
+  fi
+done
+
+set -f  # split the names, never glob them
+set -- $homes $guests
+(( n >= 1 && n <= $# )) || exit 0
+target=${!n}
+
+case $mode in
+  focus) aerospace workspace "$target" ;;
+  move) aerospace move-node-to-workspace "$target" ;;
+  follow) aerospace move-node-to-workspace "$target" && aerospace workspace "$target" ;;
+esac
