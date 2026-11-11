@@ -315,7 +315,7 @@ what changed and when is in [`CHANGELOG.md`](CHANGELOG.md).
 | Window transparency (opaque, transparent, glassy) and corners (theme, sharp, rounded), from Appearance > Window Transparency / Window Corners | `omarchy-appearance`: Ghostty opacity and blur, SketchyBar background, JankyBorders style | ✅ | macOS draws other apps solid and rounds every window itself, so the choices reach the terminal, the bar and the borders. |
 | All 22 v4 themes, generated from Omarchy's own templates | `theme --sync`, renders Ghostty, Neovim, btop from the v4 `.tpl` files | ✅ |  |
 | Theme chooser (Super+Ctrl+Shift+Space) | Hammerspoon chooser on ⌘⌃⇧Space | ✅ |  |
-| Menu tree: Apps, Learn, Appearance, Trigger, Setup, Install, Update, System, nested search (4.5: Appearance replaces Style) | Hammerspoon on ⌘⌥Space, ⌘Esc to System | ✅ |  |
+| Menu tree: Apps, Learn, Appearance, Trigger, Setup, Install, Update, System, nested search (4.5: Appearance replaces Style; Install > Service > Slack) | Hammerspoon on ⌘⌥Space, ⌘Esc to System | ✅ |  |
 | Keybinding overlay (Super+K) | ⌥K, every binding listed | ✅ |  |
 | Web apps as app windows (Super+Shift+letter) | `--app=` windows of the default browser on the same keys (HEY, Photos, YouTube, Grok, Google Chat) | ✅ |  |
 | Screensaver: ttfx ASCII art per monitor after 150 s | Hammerspoon idle timer, Ghostty + ttfx per display | ✅ |  |

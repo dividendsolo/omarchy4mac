@@ -169,6 +169,24 @@ check("Window Transparency checks only the saved Glassy Windows", tm == "Glassy 
 local cm = marks({ "Appearance", "Window Corners" })
 check("Window Corners checks only the saved Sharp Corners", cm == "Sharp Corners", cm)
 
+-- ---- Install › Service › Slack (Omarchy 4.5, omacom/omarchy#14434) ---------
+-- Not installed: installs the cask in Ghostty, then opens Slack.
+local slackThere = false
+hs.application = stub()
+hs.application.launchOrFocus = function(name)
+  if name == "Slack" and slackThere then ran[#ran + 1] = "launchOrFocus Slack"; return true end
+  return false
+end
+local SLACK = "brew install --cask slack && open -a Slack"
+omarchyMenu("Install")
+local inst = texts(choosers[#choosers].shown)
+check("Install lists Service", (", " .. inst .. ","):find(", Service,", 1, true) ~= nil, inst)
+walk({ { "Slack", SLACK } }, { "Install", "Service" })
+searchAll({ { "Slack", SLACK } }, "Install › Service")
+-- Installed: the item opens Slack and installs nothing.
+slackThere = true
+walk({ { "Slack", "ran:launchOrFocus Slack" } }, { "Install", "Service" })
+
 -- ---- Trigger has no second Appearance --------------------------------------
 omarchyMenu("Trigger")
 local trig = texts(choosers[#choosers].shown)

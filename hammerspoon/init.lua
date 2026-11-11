@@ -392,6 +392,12 @@ local MENU = {
   }},
   { text = "Install", sub = "Add software", children = {
     { text = "Package", sub = "brew search in Ghostty", action = ghostty("read -p \"brew search: \" q && brew search \"$q\"") },
+    -- Omarchy 4.5 (omacom/omarchy#14434): Slack opens if it is there, else installs, then opens.
+    { text = "Service", sub = "Install and open an app", children = {
+      { text = "Slack", sub = "brew install --cask slack", action = function()
+        if not hs.application.launchOrFocus("Slack") then ghostty("brew install --cask slack && open -a Slack")() end
+      end },
+    }},
     { text = "Homebrew", sub = "brew.sh", action = url("https://brew.sh") },
     { text = "Omarchy themes", sub = "Community themes", action = url("https://omarchy.org/themes/") },
   }},

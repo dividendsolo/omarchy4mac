@@ -7,6 +7,9 @@ maintainer's Mac runs from a clone of it, the same as yours.
 
 ## 2026-11-11
 
+- Install > Service > Slack (Omarchy 4.5). The menu item installs Slack
+  with Homebrew in a Ghostty window and opens it when the install ends. When
+  Slack is already there, the item just opens it.
 - Window transparency and corners (Omarchy 4.5), in the menu under
   Appearance > Window Transparency and Appearance > Window Corners, or with
   `omarchy-appearance transparency opaque|transparent|glassy` and
