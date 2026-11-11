@@ -19,6 +19,11 @@ maintainer's Mac runs from a clone of it, the same as yours.
   every Mac app, terminals included, so 4.5's Super+A/C/V change needs
   nothing here; push-to-talk on Right Alt belongs to your dictation app.
   The ⌥K overlay and the README tables list the new keys.
+- Microsoft 365 as web apps (Omarchy 4.5). Install > Service > Microsoft
+  lists Outlook, Word, Excel, PowerPoint, Teams and OneDrive, and the Apps
+  launcher (⌘⌥Space) has an entry for each. Each opens in its own app window
+  of your default browser (a tab in Safari or Firefox). Nothing installs:
+  pick one and sign in.
 - Window transparency and corners (Omarchy 4.5), in the menu under
   Appearance > Window Transparency and Appearance > Window Corners, or with
   `omarchy-appearance transparency opaque|transparent|glassy` and
