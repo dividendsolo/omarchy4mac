@@ -512,9 +512,11 @@ showThemeChooser = function()
 
   local chooser = hs.chooser.new(function(choice)
     if choice then
+      -- a login shell for Homebrew's PATH (theme reloads sketchybar, nvim, hs), but the
+      -- name is $1, one argv element, never shell text: it comes from upstream folder names
       hs.task.new("/bin/bash", function()
         hs.notify.new({title="Theme", informativeText="Switched to " .. choice.themeName, withdrawAfter=3}):send()
-      end, { "-lc", "~/.local/bin/theme " .. choice.themeName }):start()
+      end, { "-lc", '~/.local/bin/theme "$1"', "theme", choice.themeName }):start()
     end
   end)
   chooser:choices(choices)
