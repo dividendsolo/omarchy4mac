@@ -318,6 +318,7 @@ what changed and when is in [`CHANGELOG.md`](CHANGELOG.md).
 | Menu tree: Apps, Learn, Appearance, Trigger, Setup, Install, Update, System, nested search (4.5: Appearance replaces Style) | Hammerspoon on ⌘⌥Space, ⌘Esc to System | ✅ |  |
 | Keybinding overlay (Super+K) | ⌥K, every binding listed | ✅ |  |
 | Web apps as app windows (Super+Shift+letter) | `--app=` windows of the default browser on the same keys (HEY, Photos, YouTube, Grok, Google Chat) | ✅ |  |
+| Microsoft 365 web apps (4.5: Install > Service > Microsoft) | Outlook, Word, Excel, PowerPoint, Teams and OneDrive under Install > Service > Microsoft and in the Apps launcher, each a `--app=` window of the default browser | ✅ |  |
 | Screensaver: ttfx ASCII art per monitor after 150 s | Hammerspoon idle timer, Ghostty + ttfx per display | ✅ |  |
 | Shell defaults: eza, bat, fzf, zoxide, git and tool aliases | `zsh/omarchy.zsh` | ✅ |  |
 | Wallpaper per theme, cycle key | `omarchy-cycle-wallpaper` on ⌘⌃P | ✅ |  |
