@@ -181,11 +181,13 @@ local SLACK = "brew install --cask slack && open -a Slack"
 omarchyMenu("Install")
 local inst = texts(choosers[#choosers].shown)
 check("Install lists Service", (", " .. inst .. ","):find(", Service,", 1, true) ~= nil, inst)
-walk({ { "Slack", SLACK } }, { "Install", "Service" })
+-- Service holds Microsoft (#32) and Slack, in that order.
+local MS = { "Microsoft", "chooser:Install › Service › Microsoft › " }
+walk({ MS, { "Slack", SLACK } }, { "Install", "Service" })
 searchAll({ { "Slack", SLACK } }, "Install › Service")
 -- Installed: the item opens Slack and installs nothing.
 slackThere = true
-walk({ { "Slack", "ran:launchOrFocus Slack" } }, { "Install", "Service" })
+walk({ MS, { "Slack", "ran:launchOrFocus Slack" } }, { "Install", "Service" })
 
 -- ---- Trigger has no second Appearance --------------------------------------
 omarchyMenu("Trigger")
@@ -220,7 +222,8 @@ local M365 = {
 omarchyMenu("Install")
 local inst = texts(choosers[#choosers].shown)
 check("Install has Service", (", " .. inst .. ","):find(", Service,", 1, true) ~= nil, inst)
-walk({ { "Microsoft", "chooser:Install › Service › Microsoft › ", M365 } }, { "Install", "Service" })
+walk({ { "Microsoft", "chooser:Install › Service › Microsoft › ", M365 }, { "Slack", "ran:launchOrFocus Slack" } },
+  { "Install", "Service" })
 searchAll(M365, "Install › Service › Microsoft")
 -- the Apps launcher (⌘⇧Space) has an entry for each
 omarchyMenu()

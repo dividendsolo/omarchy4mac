@@ -7,17 +7,14 @@ maintainer's Mac runs from a clone of it, the same as yours.
 
 ## 2026-11-11
 
-<<<<<<< ours
 - Install > Service > Slack (Omarchy 4.5). The menu item installs Slack
   with Homebrew in a Ghostty window and opens it when the install ends. When
   Slack is already there, the item just opens it.
-=======
 - Wallpaper file names can no longer run AppleScript (#50). `theme` and the
   ⌘⌃P wallpaper cycler hand the picture path to `osascript` as an argument
   instead of pasting it into the script, and `theme --sync` skips an
   upstream background whose file name has anything but letters, digits,
   dot, underscore or dash.
->>>>>>> theirs
 - Hex is the dictation app (Omarchy 4.5 ships Superwhisper). `install.sh`
   installs it from `anomalyco/tap` in place of FluidVoice and sets its
   shortcut: hold Right Option to dictate, let go to type the words. ⌥Space
