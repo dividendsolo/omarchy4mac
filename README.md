@@ -349,7 +349,7 @@ what changed and when is in [`CHANGELOG.md`](CHANGELOG.md).
 | Theme reaches tmux, lazygit, VS Code | Terminal, editor, btop, Claude Code, Obsidian | ⚠️ | Planned when tmux is daily: render v4's tmux template and reload live sessions. lazygit and VS Code only if asked. |
 | Night light toggle | None | ⚠️ | Planned: Night Shift via osascript in the menu under Trigger > Toggle (Omarchy 4.5 dropped its key; ⌘⌃N is Network now). Small. |
 | OCR capture-text (Super+Ctrl+Print) | macOS Live Text, by hand | ⚠️ | Planned: region screenshot, Vision text extraction, clipboard, one script. |
-| Bar hide/show key | None | ⚠️ | Planned: `sketchybar --bar hidden=toggle` on ⌘⇧Space. One line. |
+| Bar hide/show key (4.5: Super+Ctrl+Alt+F, full screen desktop) | `sketchybar --bar hidden=toggle` on ⌘⌃⌥F | ⚠️ | The bar hides and shows. The gaps stay: AeroSpace cannot drop them at runtime. |
 | Theme colors on the volume / brightness indicator (the box when you press a volume key) | Apple's, unthemed | ❌ | The theme cannot reach it. Apple owns it. |
 | Control panels: audio, bluetooth, network, display, power, calendar (Quickshell) | System Settings deep links | ❌ | Quickshell is one process on Wayland layer-shell. macOS has no way to draw an equivalent panel. Not portable. |
 | Themed lock screen | macOS lock screen | ❌ | Not portable. The macOS lock screen cannot be restyled. |
