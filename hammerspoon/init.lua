@@ -283,6 +283,17 @@ local function look(what, value, text, sub)
   return { text = text, action = function() hs.alert.show((hs.execute(APPEARANCE .. " " .. what .. " " .. value):gsub("%s+$", "")), 4) end,
     sub = function() return (hs.execute(APPEARANCE .. " " .. what):gsub("%s+$", "") == value and "✓ " or "") .. sub end }
 end
+-- Install > Service > Microsoft (Omarchy 4.5): Microsoft 365 as web apps, each in
+-- its own app window of the default browser. The Apps launcher lists them too.
+local function webapp(u) return sh("~/.local/bin/omarchy-launch-browser --app=" .. u) end
+local MICROSOFT = {
+  { text = "Outlook",    sub = "Microsoft 365 web app", action = webapp("https://outlook.cloud.microsoft/mail/") },
+  { text = "Word",       sub = "Microsoft 365 web app", action = webapp("https://word.cloud.microsoft/") },
+  { text = "Excel",      sub = "Microsoft 365 web app", action = webapp("https://excel.cloud.microsoft/") },
+  { text = "PowerPoint", sub = "Microsoft 365 web app", action = webapp("https://powerpoint.cloud.microsoft/") },
+  { text = "Teams",      sub = "Microsoft 365 web app", action = webapp("https://teams.cloud.microsoft/") },
+  { text = "OneDrive",   sub = "Microsoft 365 web app", action = webapp("https://onedrive.cloud.microsoft/") },
+}
 -- The repo this init.lua lives in (dotfiles here, omarchy4mac for adopters):
 -- resolve the symlink ~/.hammerspoon/init.lua and go two directories up.
 local D = (function()
@@ -403,6 +414,9 @@ local MENU = {
     { text = "Package", sub = "brew search in Ghostty", action = ghostty("read -p \"brew search: \" q && brew search \"$q\"") },
     { text = "Homebrew", sub = "brew.sh", action = url("https://brew.sh") },
     { text = "Omarchy themes", sub = "Community themes", action = url("https://omarchy.org/themes/") },
+    { text = "Service", sub = "Web services", children = {
+      { text = "Microsoft", sub = "Outlook, Word, Excel, PowerPoint, Teams, OneDrive", children = MICROSOFT },
+    }},
   }},
   { text = "Remove", sub = "Remove software", children = {
     { text = "Package", sub = "brew uninstall in Ghostty", action = ghostty("brew list --cask; brew list --formula | column; read -p \"brew uninstall: \" q && brew uninstall \"$q\"") },
@@ -596,6 +610,9 @@ local apps = {
   { name = "X (Twitter)",      sub = "Brave web app",     action = function() hs.application.launchOrFocusByBundleID("com.brave.Browser.app.lodlkdfmihgonocnmddehnfgiljnadcf") end },
   { name = "YouTube",          sub = "Brave web app",     action = function() hs.application.launchOrFocusByBundleID("com.brave.Browser.app.agimnkijcaahngcdmfeangaknmldooml") end },
 }
+
+for _, m in ipairs(MICROSOFT) do table.insert(apps, { name = m.text, sub = m.sub, action = m.action }) end
+table.sort(apps, function(x, y) return x.name:lower() < y.name:lower() end)
 
 showAppsMenu = function()
   local choices = {}
