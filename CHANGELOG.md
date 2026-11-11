@@ -7,6 +7,19 @@ maintainer's Mac runs from a clone of it, the same as yours.
 
 ## 2026-11-11
 
+- The theme pipeline catches up with Omarchy 4.5 (#36). Each theme
+  reopens with the wallpaper it had when you left it; a remembered picture
+  that is gone falls back to another of the theme's wallpapers, and ⌘⌃W
+  cycles on from it. ⌘⌫ in the theme chooser deletes a theme after a
+  confirmation (not the current one); `theme --remove <name>` does the same
+  from a terminal, and `theme --sync` no longer brings a deleted theme back.
+  Trigger > Toggle > Herdr Theme Sync (or `theme --herdr-sync on`) mirrors
+  each theme switch over SSH to every enabled machine in `herdr machine
+  list`; a machine takes it only when its own sync is on, and an Omarchy
+  machine is reached the same way Omarchy does it. The log is
+  `~/.local/state/omarchy4mac/theme-herdr.log`. Catppuccin now starts Neovim
+  on `catppuccin-mocha`. Omarchy's font-size fix is for Foot; Ghostty keeps
+  `font-size` apart from `font-family`, so nothing changes here.
 - Install > Service > Slack (Omarchy 4.5). The menu item installs Slack
   with Homebrew in a Ghostty window and opens it when the install ends. When
   Slack is already there, the item just opens it.

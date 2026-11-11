@@ -84,7 +84,7 @@ hs.hotkey = { bind = function(mods, key, fn)
   table.sort(mods)
   binds[table.concat(mods, "+") .. "+" .. key] = fn
   return stub()
-end }
+end, new = function() return stub() end } -- new: the theme chooser's ⌘⌫, live only while it is open
 -- Notification Center: a window holding a stack of two banners, newest first.
 local pressed = {}
 local function el(name, subrole, children)
@@ -113,7 +113,7 @@ local function press(chord)
   return "ran:" .. (ran[nRan + 1] or "nothing")
 end
 
-check("⌘⌃T opens the theme chooser", press("cmd+ctrl+t") == "chooser:Pick a theme…", press("cmd+ctrl+t"))
+check("⌘⌃T opens the theme chooser", press("cmd+ctrl+t"):find("chooser:Pick a theme…", 1, true) == 1, press("cmd+ctrl+t"))
 local w = press("cmd+ctrl+w")
 check("⌘⌃W switches to the next background", w:find("omarchy-cycle-wallpaper", 1, true) ~= nil, w)
 check("⌘⌥Space opens Apps", press("alt+cmd+space") == "chooser:Launch…", press("alt+cmd+space"))

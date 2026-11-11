@@ -241,7 +241,7 @@ fi
 # ---- 5. State files -------------------------------------------------------
 say "Removing state"
 run rm -rf "$HOME/.local/state/omarchy"
-run rm -f "$HOME/.cache/omarchy-wallpaper-index"
+run rm -f "$HOME/.cache/omarchy-wallpaper-index" "$HOME/.cache/omarchy-wallpaper-index-"*
 
 if [ "$PURGE" = 1 ]; then
   say "Purging downloaded themes, wallpapers, screensaver, logs"
