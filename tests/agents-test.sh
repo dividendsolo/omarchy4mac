@@ -54,6 +54,8 @@ plugin() { # plugin <provider>: what the bar item was set to
   cat "$TMP/log"
 }
 
+# macOS's /bin/bash 3.2 brace-expands the commas of a "{..., ...}" argument
+# inside "$( )", so every JSON answer is built in $answer first.
 # In-process run with Claude's and Grok's HTTPS answered from ANSWERS:
 # url substring -> JSON body, or an HTTP status number.
 inproc() { # inproc <provider> <answers json>: the collector's line, or "exit 1"
@@ -97,12 +99,12 @@ check "grok sign-in past its 30 days hidden" "^exit 1$" "$(inproc grok '{}')"
 
 echo "claude"
 fresh_home; export CLAUDE_TEST_TOKEN=t
-check "5h and 7d meters with reset times" "^5h ▰▰▱▱▱ 42% ($TIME) · 7d ▰▱▱▱▱ 18% ($TIME)$" \
-  "$(inproc claude "{\"oauth/usage\": {\"five_hour\": {\"utilization\": 42, \"resets_at\": \"$(iso 2)\"}, \"seven_day\": {\"utilization\": 18, \"resets_at\": \"$(iso 72)\"}}}")"
+answer="{\"oauth/usage\": {\"five_hour\": {\"utilization\": 42, \"resets_at\": \"$(iso 2)\"}, \"seven_day\": {\"utilization\": 18, \"resets_at\": \"$(iso 72)\"}}}"
+check "5h and 7d meters with reset times" "^5h ▰▰▱▱▱ 42% ($TIME) · 7d ▰▱▱▱▱ 18% ($TIME)$" "$(inproc claude "$answer")"
 check "offline: the cached answer stands" "^5h ▰▰▱▱▱ 42% ($TIME) · 7d" "$(python3 -c '
 import json,sys,time; p=sys.argv[1]; d=json.load(open(p)); d["checkedAt"]=0; json.dump(d,open(p,"w"))' "$HOME/.cache/omarchy/agent-usage/claude-limits.json"; inproc claude '{}')"
-check "an ended window shows 0% and no time" "^5h ▱▱▱▱▱ 0%$" \
-  "$(rm -rf "$HOME/.cache"; inproc claude "{\"oauth/usage\": {\"five_hour\": {\"utilization\": 90, \"resets_at\": \"$(iso -1)\"}}}")"
+answer="{\"oauth/usage\": {\"five_hour\": {\"utilization\": 90, \"resets_at\": \"$(iso -1)\"}}}"
+check "an ended window shows 0% and no time" "^5h ▱▱▱▱▱ 0%$" "$(rm -rf "$HOME/.cache"; inproc claude "$answer")"
 check "logged out after an answer: hidden, cache ignored" "^exit 1$" "$(unset CLAUDE_TEST_TOKEN; inproc claude '{}')"
 
 echo "codex"
@@ -116,14 +118,14 @@ check "a Business spend cap alone" "^\\$ ▰▰▰▰▱ 75% ($TIME)$" "$("$USAG
 
 echo "grok"
 fresh_home; mkdir -p "$HOME/.grok"; echo "{\"https://x.ai\": {\"key\": \"k\", \"expires_at\": \"$(iso 5)\"}}" > "$HOME/.grok/auth.json"
-check "weekly credits meter with reset time" "^7d ▰▰▰▱▱ 60% ($TIME)$" \
-  "$(inproc grok "{\"format=credits\": {\"config\": {\"creditUsagePercent\": 60, \"currentPeriod\": {\"type\": \"BILLING_PERIOD_TYPE_WEEKLY\", \"end\": \"$(iso 50)\"}}}}")"
+answer="{\"format=credits\": {\"config\": {\"creditUsagePercent\": 60, \"currentPeriod\": {\"type\": \"BILLING_PERIOD_TYPE_WEEKLY\", \"end\": \"$(iso 50)\"}}}}"
+check "weekly credits meter with reset time" "^7d ▰▰▰▱▱ 60% ($TIME)$" "$(inproc grok "$answer")"
 rm -rf "$HOME/.cache"
-check "a fresh week (no percentage) reads 0%" "^7d ▱▱▱▱▱ 0% ($TIME)$" \
-  "$(inproc grok "{\"format=credits\": {\"config\": {\"currentPeriod\": {\"type\": \"BILLING_PERIOD_TYPE_WEEKLY\", \"end\": \"$(iso 50)\"}}}}")"
+answer="{\"format=credits\": {\"config\": {\"currentPeriod\": {\"type\": \"BILLING_PERIOD_TYPE_WEEKLY\", \"end\": \"$(iso 50)\"}}}}"
+check "a fresh week (no percentage) reads 0%" "^7d ▱▱▱▱▱ 0% ($TIME)$" "$(inproc grok "$answer")"
 rm -rf "$HOME/.cache"
-check "unified billing: the monthly quota" "^mo ▰▰▰▰▰ 100% ($TIME)$" \
-  "$(inproc grok "{\"format=credits\": {\"config\": {\"isUnifiedBillingUser\": true, \"currentPeriod\": {\"end\": \"$(iso 50)\"}}}, \"v1/billing\": {\"config\": {\"monthlyLimit\": {\"val\": 10}, \"used\": {\"val\": 10}, \"billingPeriodEnd\": \"$(iso 300)\"}}}")"
+answer="{\"format=credits\": {\"config\": {\"isUnifiedBillingUser\": true, \"currentPeriod\": {\"end\": \"$(iso 50)\"}}}, \"v1/billing\": {\"config\": {\"monthlyLimit\": {\"val\": 10}, \"used\": {\"val\": 10}, \"billingPeriodEnd\": \"$(iso 300)\"}}}"
+check "unified billing: the monthly quota" "^mo ▰▰▰▰▰ 100% ($TIME)$" "$(inproc grok "$answer")"
 rm -rf "$HOME/.cache"
 check "a refused sign-in is hidden" "^exit 1$" "$(inproc grok '{"format=credits": 401}')"
 
