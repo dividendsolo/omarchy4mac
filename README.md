@@ -166,8 +166,10 @@ is also available.
 | Keys | Action |
 |---|---|
 | ⌘←/↓/↑/→ | Focus window in direction |
-| ⌘` | Cycle next window in workspace |
-| ⌘⇧` | Cycle previous window in workspace |
+| ⌘` | Quake console: drops over a dimmed screen, starts the default agent the first time; again to tuck it away |
+| ⌘⇧` | Second Quake console |
+| ⌘⌥` | Cycle next window in workspace |
+| ⌘⌥⇧` | Cycle previous window in workspace |
 | ⌃⌥⇥ | Focus next monitor |
 | ⌃⌥⇧⇥ | Focus previous monitor |
 

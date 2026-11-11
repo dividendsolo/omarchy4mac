@@ -7,6 +7,11 @@ maintainer's Mac runs from a clone of it, the same as yours.
 
 ## 2026-11-11
 
+- The Quake console from Omarchy 4.5. ⌘` drops a Ghostty window onto the top
+  half of the screen over a dimmed desktop, and the first time it starts your
+  default agent. Press it again (or click away) and it tucks itself away with
+  the session still running. ⌘⇧` is a second console. Window cycling moves
+  from ⌘` and ⌘⇧` to ⌘⌥` and ⌘⌥⇧`.
 - This repo is now the source. Changes land here by pull request, and the
   maintainer's own Mac runs from a clone of it with `install.sh`, so what you
   install is exactly what runs there. `git pull` (or rerunning `install.sh`)

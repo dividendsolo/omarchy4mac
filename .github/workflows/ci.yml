@@ -16,6 +16,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
-      # tests/starship-test.sh renders the prompt with the real starship.
-      - run: brew install starship
+      # tests/starship-test.sh renders the prompt with the real starship;
+      # tests/console-test.sh runs the console geometry from init.lua under lua.
+      - run: brew install starship lua
       - run: for t in tests/*-test.sh; do echo "== $t"; bash "$t" || exit 1; done
