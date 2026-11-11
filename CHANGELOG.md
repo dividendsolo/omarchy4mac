@@ -7,6 +7,17 @@ maintainer's Mac runs from a clone of it, the same as yours.
 
 ## 2026-11-11
 
+- Omarchy 4.5's window fixes (#39). ⌥↩ opens the new Ghostty window in the
+  folder of the focused terminal's shell, and in your home folder when the
+  focused app is not a terminal (a browser's download helper no longer sends
+  it to Downloads). ⌘⌃⇧arrow centres a floating window on the monitor it
+  moves to, instead of keeping its offset from the old monitor's corner.
+  Bitwarden and 1Password 7 float like 1Password 8, and the head of the float
+  rules in `aerospace.toml` lists every app that floats. A floating workspace
+  (⌥L) never takes a window a float rule floats, and ⌘⌥⇧` already cycles back
+  through every window, floating ones too; tests now hold both. Rerun
+  `install.sh` once after the pull: it links the two new scripts,
+  `omarchy-terminal` and `omarchy-move-to-monitor`.
 - Menu fixes from Omarchy 4.5. An installed item stays in the menu, dimmed
   and marked "✓ installed" (Install > Service > Slack), instead of looking
   like one more thing to install. Setup > Defaults > Agent installs a missing

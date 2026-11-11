@@ -122,7 +122,7 @@ is also available.
 
 | Keys | Action |
 |---|---|
-| ⌥↩ | Ghostty (terminal) |
+| ⌥↩ | Ghostty (terminal), in the focused terminal's folder, else in your home folder |
 | ⌘⌥↩ | Ghostty + tmux (attaches to the session "Work", or makes it) |
 | ⌘⌃↩ | Ghostty + herdr (agent multiplexer) |
 | ⌘⇧↩ | Browser (macOS default) |
@@ -186,7 +186,7 @@ is also available.
 |---|---|
 | ⌘⇧←/↓/↑/→ | Swap window in direction |
 | ⌘⇧⌥←/→/↑/↓ | Move workspace to prev / next monitor |
-| ⌘⌃⇧←/↓/↑/→ | Move focused window across monitors |
+| ⌘⌃⇧←/↓/↑/→ | Move focused window across monitors (a floating one lands centred) |
 
 ### Workspaces
 
