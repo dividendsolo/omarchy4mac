@@ -10,6 +10,14 @@ maintainer's Mac runs from a clone of it, the same as yours.
 - Install > Service > Slack (Omarchy 4.5). The menu item installs Slack
   with Homebrew in a Ghostty window and opens it when the install ends. When
   Slack is already there, the item just opens it.
+- The agents in the bar follow Omarchy 4.5's agents panel: Claude, Codex and
+  Grok each get an item, and every limit shows a meter, its percentage and
+  when it resets (a time today, else the day). Codex reads its limits from
+  `codex app-server` for a ChatGPT login in `~/.codex`, Grok from xAI's
+  billing endpoint for the login in `~/.grok`. A provider you are not signed
+  in to stays off the bar. The collector is now one script,
+  `omarchy-agent-usage claude|codex|grok`; the bar runs it from the clone, so
+  a `git pull` is enough. Omarchy's other 20 providers are not ported.
 - Omarchy 4.5's changed hotkeys (#31). ⌘⇧Q opens Calculator. Activity stays
   on ⌥⇧T, and ⌘⌃T now opens the theme chooser. Network moves to ⌘⌃N, and
   ⌘⌃W now switches to the next background. ⌘⌥Space opens Apps, and the
