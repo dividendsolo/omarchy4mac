@@ -116,6 +116,8 @@ cp "$FIXTURE/colors.toml" "$UP/themes/bad;name/colors.toml"
 mkdir -p "$UP/themes/pinned/backgrounds"
 echo ok > "$UP/themes/pinned/backgrounds/1-ok.jpg"
 echo bad > "$UP/themes/pinned/backgrounds/bad 'name' & \$(id).jpg"
+mkdir -p "$UP/themes/pinned/backgrounds/intros"
+echo video > "$UP/themes/pinned/backgrounds/intros/1-ok.mp4"
 g() { git -C "$UP" -c user.name=t -c user.email=t@t -c commit.gpgsign=false "$@" >/dev/null 2>&1; }
 g init -q -b quattro; g add -A; g commit -qm pinned
 PIN="$(git -C "$UP" rev-parse HEAD)"
@@ -138,6 +140,8 @@ check "does not take the branch head" test ! -e "$H/.config/theme-switcher/cache
 check "skips an upstream theme with an invalid name" test ! -e "$H/.config/theme-switcher/cache/bad;name"
 check "syncs a background with a valid name" test -f "$H/Pictures/Wallpapers/pinned_1-ok.jpg"
 check "skips a background with an invalid name (#50)" bash -c "! ls '$H/Pictures/Wallpapers' | grep -q bad"
+check "syncs the theme intro (Omarchy 4.5)" test -f "$H/Pictures/Wallpapers/intros/pinned_1-ok.mp4"
+check "an intro is not a wallpaper of its own" test ! -e "$H/Pictures/Wallpapers/pinned_1-ok.mp4"
 [[ "$CODE" -eq 0 ]] || cat "$T/sync.txt"
 rm "$T/repo/OMARCHY_COMMIT"
 env -i HOME="$H" PATH="$STUBS:/usr/bin:/bin" TMPDIR="$T" \

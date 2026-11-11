@@ -281,6 +281,11 @@ hs.timer.doEvery(15, function()
   if hs.host.idleTime() >= SCREENSAVER_IDLE then startScreensaver(false) end
 end)
 
+-- Backgrounds (Omarchy 4.5): restart a video background, and play the theme
+-- intro once per login. Hammerspoon's pid survives a config reload, so a
+-- reload does not replay the intro.
+hs.task.new("/bin/bash", nil, { "-lc", "~/.local/bin/omarchy-bg-set --login " .. tostring(hs.processInfo.processID) }):start()
+
 ----------------------------------------------------------------------
 -- Forward declarations so mutually-referenced choosers can find each other
 ----------------------------------------------------------------------
@@ -346,7 +351,7 @@ local MENU = {
   -- Omarchy 4.5 (omacom/omarchy#15973): Appearance replaces Style, right before Trigger.
   { text = "Appearance", sub = "Theme, background, windows, dock", children = {
     { text = "Theme", sub = "Pick a theme", action = function() showThemeChooser() end },
-    { text = "Background", sub = "Next wallpaper for this theme", action = toast("omarchy-cycle-wallpaper") },
+    { text = "Background", sub = "Next image or video for this theme", action = toast("omarchy-cycle-wallpaper") },
     { text = "Font", sub = "Terminal font (Ghostty config)", action = nvimEdit(os.getenv("HOME") .. "/Library/Application Support/com.mitchellh.ghostty/config") },
     { text = "Menu Bar", sub = "SketchyBar and the macOS menu bar", children = {
       { text = "Hide or Show", sub = "Hide or show SketchyBar", action = sh("/opt/homebrew/bin/sketchybar --bar hidden=toggle") },
@@ -377,7 +382,10 @@ local MENU = {
       { text = "Split Direction", sub = "alt-j", action = sh("/opt/homebrew/bin/aerospace layout tiles horizontal vertical") },
       { text = "Float / Tile", sub = "alt-s", action = sh("/opt/homebrew/bin/aerospace layout floating tiling") },
     }},
-    { text = "Animations", sub = "Reduce motion (Accessibility > Display)", action = settings("com.apple.Accessibility-Settings.extension") },
+    { text = "Animations", sub = "Theme intros and reduce motion", children = {
+      { text = "Theme Intros", sub = "Play or skip a theme's intro video", action = toast("omarchy-toggle-intros") },
+      { text = "Reduce Motion", sub = "Accessibility > Display (also skips intros)", action = settings("com.apple.Accessibility-Settings.extension") },
+    }},
     { text = "Unlock", sub = "Lock Screen settings", action = settings("com.apple.Lock-Screen-Settings.extension") },
     { text = "Light / Dark", sub = "macOS appearance", action = settings("com.apple.Appearance-Settings.extension") },
     { text = "Random Theme", sub = "Shuffle within light/dark", action = sh("~/.local/bin/theme random") },

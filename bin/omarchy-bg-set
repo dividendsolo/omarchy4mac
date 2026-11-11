@@ -1,0 +1,99 @@
+#!/bin/bash
+# Set the desktop background to an image or a video (Omarchy 4.5's
+# omarchy-theme-bg-set, which takes both).
+#
+#   omarchy-bg-set <file>        an image, or a video (mp4, mov, m4v) that loops
+#   omarchy-bg-set --login <id>  from Hammerspoon at load: restart a video
+#                                background, and play the current background's
+#                                intro once per <id> (Hammerspoon's pid)
+#
+# A video's still frame becomes the macOS desktop picture, which the lock
+# screen shows, and omarchy-video-wallpaper loops the video over it, muted.
+# An image with a theme intro (intros/<same name>.mp4 next to it, from
+# `theme --sync`) plays the intro once over the desktop, unless Appearance >
+# Animations > Theme intros is off or macOS Reduce motion is on.
+export PATH="$PATH:/usr/bin:/bin:/usr/sbin"
+STATE="$HOME/.local/state/omarchy"
+VIDEO_STATE="$STATE/background-video"   # holds the video's path while the background is a video
+PID_FILE="$STATE/background-video.pid"
+INTROS_OFF="$STATE/toggles/background-intros-off"
+STILLS="$HOME/.cache/omarchy/background-stills"
+PLAYER="$HOME/.local/bin/omarchy-video-wallpaper"   # built by install.sh
+
+is_video() { case "$(tr '[:upper:]' '[:lower:]' <<< "${1##*.}")" in mp4|mov|m4v) return 0 ;; esac; return 1; }
+
+# the path goes in as argv, never inside script text (#50)
+set_picture() {
+  osascript -e 'on run argv' -e 'tell application "System Events" to set picture of every desktop to item 1 of argv' -e 'end run' "$1" >/dev/null 2>&1
+}
+
+# The pid file's process, only if it is still the player (a pid can be reused).
+video_pid() {
+  local pid; pid="$(cat "$PID_FILE" 2>/dev/null)"
+  [[ "$pid" =~ ^[0-9]+$ ]] && [[ "$(ps -p "$pid" -o command= 2>/dev/null)" == *omarchy-video-wallpaper* ]] && echo "$pid"
+}
+
+stop_video() {
+  local pid; pid="$(video_pid)"
+  [[ -n "$pid" ]] && kill "$pid" 2>/dev/null
+  rm -f "$PID_FILE"
+}
+
+start_video() {
+  [[ -x "$PLAYER" ]] || { echo "omarchy-video-wallpaper is not built: rerun install.sh" >&2; return 1; }
+  mkdir -p "$STATE"
+  nohup "$PLAYER" "$1" >/dev/null 2>&1 &
+  echo $! > "$PID_FILE"
+}
+
+intro_for() { # intro_for <image> -> the intro to play, if intros are on
+  [[ -f "$INTROS_OFF" ]] && return 1
+  [[ "$(defaults read com.apple.universalaccess reduceMotion 2>/dev/null)" == 1 ]] && return 1
+  local name="${1##*/}" ext
+  for ext in mp4 mov m4v; do
+    [[ -f "${1%/*}/intros/${name%.*}.$ext" ]] && { echo "${1%/*}/intros/${name%.*}.$ext"; return 0; }
+  done
+  return 1
+}
+
+play_intro() { [[ -x "$PLAYER" ]] && nohup "$PLAYER" --once "$1" >/dev/null 2>&1 & }
+
+set_background() {
+  local file="$1" still intro
+  if is_video "$file"; then
+    mkdir -p "$STILLS" "$STATE"
+    still="$STILLS/${file##*/}.png"   # qlmanage names it <file name>.png
+    [[ "$still" -nt "$file" ]] || qlmanage -t -s 3840 -o "$STILLS" "$file" >/dev/null 2>&1
+    stop_video
+    [[ -f "$still" ]] && set_picture "$still"
+    echo "$file" > "$VIDEO_STATE"
+    start_video "$file"
+  else
+    stop_video
+    rm -f "$VIDEO_STATE"
+    # the intro starts first, so it covers the desktop before the picture changes
+    intro="$(intro_for "$file")" && play_intro "$intro"
+    set_picture "$file"
+  fi
+}
+
+login() { # login <session id>
+  local marker="$STATE/background-intro.session-id" file intro
+  if [[ -f "$VIDEO_STATE" ]]; then
+    file="$(cat "$VIDEO_STATE")"
+    if [[ ! -f "$file" ]]; then rm -f "$VIDEO_STATE"
+    elif [[ -z "$(video_pid)" ]]; then start_video "$file"; fi
+    return 0
+  fi
+  [[ "$(cat "$marker" 2>/dev/null)" == "$1" ]] && return 0   # a config reload, not a login
+  mkdir -p "$STATE"; echo "$1" > "$marker"
+  file="$(osascript -e 'tell application "System Events" to tell current desktop to get picture' 2>/dev/null)"
+  [[ -n "$file" ]] && intro="$(intro_for "$file")" && play_intro "$intro"
+  return 0
+}
+
+case "${1:-}" in
+  --login) [[ -n "${2:-}" ]] || { echo "usage: omarchy-bg-set --login <id>" >&2; exit 1; }; login "$2" ;;
+  ""|-*)   echo "usage: omarchy-bg-set <image or video> | --login <id>" >&2; exit 1 ;;
+  *)       [[ -f "$1" ]] || { echo "no such file: $1" >&2; exit 1; }; set_background "$1" ;;
+esac

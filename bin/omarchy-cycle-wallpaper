@@ -7,7 +7,7 @@ THEME_FILE="$HOME/.config/theme-switcher/current"
 mkdir -p "$(dirname "$STATE_FILE")"
 
 if [ ! -d "$DIR" ] || [ -z "$(ls -A "$DIR" 2>/dev/null)" ]; then
-  echo "Wallpaper|||Drop .jpg/.png/.heic files in $DIR"
+  echo "Wallpaper|||Drop .jpg/.png/.heic or .mp4/.mov files in $DIR"
   exit 0
 fi
 
@@ -15,14 +15,14 @@ THEME="$(cat "$THEME_FILE" 2>/dev/null)"
 
 shopt -s nullglob nocaseglob
 if [ -n "$THEME" ]; then
-  files=("$DIR/${THEME}_"*.{jpg,jpeg,png,heic,webp})
+  files=("$DIR/${THEME}_"*.{jpg,jpeg,png,heic,webp,mp4,mov,m4v})
 fi
 # Fall back to all wallpapers if the theme has none
 if [ ${#files[@]} -eq 0 ]; then
-  files=("$DIR"/*.{jpg,jpeg,png,heic,webp})
+  files=("$DIR"/*.{jpg,jpeg,png,heic,webp,mp4,mov,m4v})
 fi
 shopt -u nocaseglob
-[ ${#files[@]} -eq 0 ] && { echo "Wallpaper|||No image files in $DIR"; exit 0; }
+[ ${#files[@]} -eq 0 ] && { echo "Wallpaper|||No image or video files in $DIR"; exit 0; }
 
 # Use a per-theme index so cycling stays inside the theme without resetting
 STATE="${STATE_FILE}-${THEME:-all}"
@@ -32,6 +32,6 @@ idx=$(( (idx + 1) % ${#files[@]} ))
 echo "$idx" > "$STATE"
 
 next="${files[$idx]}"
-# the path goes in as argv, never inside script text (#50)
-osascript -e 'on run argv' -e 'tell application "System Events" to set picture of every desktop to item 1 of argv' -e 'end run' "$next" 2>/dev/null
+# an image, or a video that loops (Omarchy 4.5)
+"$(dirname "$0")/omarchy-bg-set" "$next"
 echo "Wallpaper|||$(basename "$next")"

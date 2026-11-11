@@ -1,0 +1,7 @@
+#!/bin/bash
+# Toggle theme intros (Omarchy 4.5's omarchy-theme-bg-intro: the same flag
+# file, named for the off state). Prints TITLE|||BODY for Hammerspoon.
+FLAG="$HOME/.local/state/omarchy/toggles/background-intros-off"
+mkdir -p "$(dirname "$FLAG")"
+if [[ -f "$FLAG" ]]; then rm -f "$FLAG"; echo "Theme intros|||Enabled"
+else touch "$FLAG"; echo "Theme intros|||Disabled"; fi

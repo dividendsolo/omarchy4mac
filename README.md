@@ -88,6 +88,7 @@ echo "source $D/zsh/omarchy.zsh" >> ~/.zshrc
 
 # Light/dark listener + AeroSpace crash watchdog (macOS 26 can kill AeroSpace)
 swiftc -O -o ~/.local/bin/theme-appearance-listener "$D/bin/theme-appearance-listener.swift"
+swiftc -O -o ~/.local/bin/omarchy-video-wallpaper "$D/bin/omarchy-video-wallpaper.swift"   # video backgrounds, theme intros
 for p in "$D"/launchd/*.plist; do
   sed "s|/Users/YOU|$HOME|g" "$p" > ~/Library/LaunchAgents/"${p##*/}"
   launchctl load ~/Library/LaunchAgents/"${p##*/}"
@@ -110,6 +111,14 @@ own "start at login" if you use the watchdog.
 into `~/Pictures/Wallpapers` as `<theme>_<file>`. `omarchy-cycle-wallpaper`
 (⌘⌃P) cycles the ones for the current theme; unprefixed files you add act as
 a shared pool.
+
+A background can be a video (`.mp4`, `.mov`, `.m4v`): drop it in the folder
+and cycle to it, or run `omarchy-bg-set <file>`. It loops behind your windows,
+muted, and its still frame becomes the desktop picture, so the lock screen
+shows that frame. Themes that ship an intro (`backgrounds/intros/` upstream,
+`~/Pictures/Wallpapers/intros/` here) play it once, silent, when you switch
+to that background and when you log in. Appearance > Animations > Theme
+Intros turns intros off; macOS Reduce Motion does too.
 
 ## Keybindings
 
@@ -330,9 +339,11 @@ what changed and when is in [`CHANGELOG.md`](CHANGELOG.md).
 | Keybinding overlay (Super+K) | ⌥K, every binding listed | ✅ |  |
 | Web apps as app windows (Super+Shift+letter) | `--app=` windows of the default browser on the same keys (HEY, Photos, YouTube, Grok, Google Chat) | ✅ |  |
 | Microsoft 365 web apps (4.5: Install > Service > Microsoft) | Outlook, Word, Excel, PowerPoint, Teams and OneDrive under Install > Service > Microsoft and in the Apps launcher, each a `--app=` window of the default browser | ✅ |  |
-| Screensaver: ttfx ASCII art per monitor after 150 s | Hammerspoon idle timer, Ghostty + ttfx per display | ✅ |  |
+| Screensaver: ttfx ASCII art per monitor after 150 s (4.5: the exit key does not flash) | Hammerspoon idle timer, Ghostty + ttfx per display | ✅ |  |
 | Shell defaults: eza, bat, fzf, zoxide, git and tool aliases | `zsh/omarchy.zsh` | ✅ |  |
 | Wallpaper per theme, cycle key | `omarchy-cycle-wallpaper` on ⌘⌃P | ✅ |  |
+| Video backgrounds, with a still frame on the lock screen (4.5) | `omarchy-bg-set`: AVPlayer behind the windows (`omarchy-video-wallpaper`), the still as the macOS desktop picture | ✅ |  |
+| Theme intros on login or switch, off under Appearance > Animations (4.5) | `omarchy-video-wallpaper --once`, Hammerspoon at login, `omarchy-toggle-intros` | ✅ | The intros come with `theme --sync` once the pinned Omarchy commit has them. |
 | Emoji picker key | Raycast emoji on ⌘⌃E | ✅ |  |
 | Clipboard history key | Raycast clipboard on ⌘⌃V | ✅ |  |
 | Idle inhibit (keep awake) with bar indicator | caffeinate on ⌘⌃I, bar indicator | ✅ |  |

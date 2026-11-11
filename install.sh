@@ -274,8 +274,11 @@ LISTENER=0
 if command -v swiftc >/dev/null 2>&1; then
   say "Compiling the light/dark listener"
   run swiftc -O -o "$HOME/.local/bin/theme-appearance-listener" "$DIR/bin/theme-appearance-listener.swift" && LISTENER=1
+  say "Compiling the video background player"
+  run swiftc -O -o "$HOME/.local/bin/omarchy-video-wallpaper" "$DIR/bin/omarchy-video-wallpaper.swift" \
+    || warn "video backgrounds and theme intros are off until omarchy-video-wallpaper builds"
 else
-  say "swiftc not found; skipping the light/dark listener and its launchd agent"
+  say "swiftc not found; skipping the light/dark listener, its launchd agent, and video backgrounds"
 fi
 say "Loading launchd agents"
 run mkdir -p "$HOME/Library/LaunchAgents" "$HOME/Library/Logs"
