@@ -143,25 +143,35 @@ local COLORS = {
 ----------------------------------------------------------------------
 -- Build chooser
 ----------------------------------------------------------------------
-local function showKeybindings()
-  local choices = {}
-  for _, b in ipairs(bindings) do
-    table.insert(choices, {
-      text    = b[1],
-      subText = b[2],
-    })
-  end
+-- A second press of a chooser's key closes it (Omarchy 4.5, omacom/omarchy#6725).
+local function closeIfOpen(chooser)
+  if chooser and chooser:isVisible() then chooser:hide(); return true end
+end
 
-  local chooser = hs.chooser.new(function(_) end)
-  chooser:choices(choices)
-  chooser:searchSubText(true)
-  chooser:width(35)
-  chooser:rows(12)
-  chooser:bgDark(true)
-  chooser:fgColor(COLORS.blue)
-  chooser:subTextColor(COLORS.fg)
-  chooser:placeholderText("Filter keybindings…")
-  chooser:show()
+-- One overlay, built once and shown again: it runs nothing, so closing it
+-- leaves no process behind (omacom/omarchy#7564).
+local keysChooser
+local function showKeybindings()
+  if closeIfOpen(keysChooser) then return end
+  if not keysChooser then
+    local choices = {}
+    for _, b in ipairs(bindings) do
+      table.insert(choices, {
+        text    = b[1],
+        subText = b[2],
+      })
+    end
+    keysChooser = hs.chooser.new(function(_) end)
+    keysChooser:choices(choices)
+    keysChooser:searchSubText(true)
+    keysChooser:width(35)
+    keysChooser:rows(12)
+    keysChooser:bgDark(true)
+    keysChooser:fgColor(COLORS.blue)
+    keysChooser:subTextColor(COLORS.fg)
+    keysChooser:placeholderText("Filter keybindings…")
+  end
+  keysChooser:show()
 end
 
 ----------------------------------------------------------------------
@@ -289,7 +299,7 @@ hs.task.new("/bin/bash", nil, { "-lc", "~/.local/bin/omarchy-bg-set --login " ..
 ----------------------------------------------------------------------
 -- Forward declarations so mutually-referenced choosers can find each other
 ----------------------------------------------------------------------
-local showAppsMenu, showThemeChooser, showOmarchyMenu
+local showAppsMenu, showThemeChooser, showOmarchyMenu, reloadIfWhole
 
 ----------------------------------------------------------------------
 -- Omarchy menu (SUPER+ALT+SPACE) — the v4 (Quattro) tree, nested search
@@ -453,9 +463,11 @@ local MENU = {
     -- Omarchy 4.5 (omacom/omarchy#14434): Slack opens if it is there, else installs, then opens.
     { text = "Service", sub = "Apps and web services", children = {
       { text = "Microsoft", sub = "Outlook, Word, Excel, PowerPoint, Teams, OneDrive", children = MICROSOFT },
-      { text = "Slack", sub = "brew install --cask slack", action = function()
-        if not hs.application.launchOrFocus("Slack") then ghostty("brew install --cask slack && open -a Slack")() end
-      end },
+      { text = "Slack", sub = "brew install --cask slack",
+        present = function() return hs.application.pathForBundleID("com.tinyspeck.slackmacgap") ~= nil end,
+        action = function()
+          if not hs.application.launchOrFocus("Slack") then ghostty("brew install --cask slack && open -a Slack")() end
+        end },
     }},
   }},
   { text = "Remove", sub = "Remove software", children = {
@@ -468,7 +480,7 @@ local MENU = {
     { text = "Config", sub = "Reload a service", children = {
       { text = "AeroSpace", sub = "reload-config", action = sh("/opt/homebrew/bin/aerospace reload-config") },
       { text = "SketchyBar", sub = "--reload", action = sh("/opt/homebrew/bin/sketchybar --reload") },
-      { text = "Hammerspoon", sub = "hs.reload()", action = function() hs.reload() end },
+      { text = "Hammerspoon", sub = "hs.reload()", action = function() reloadIfWhole() end },
       { text = "Borders", sub = "brew services restart", action = sh("/opt/homebrew/bin/brew services restart borders") },
     }},
   }},
@@ -489,23 +501,34 @@ local function flatten(items, path, out)
   for _, item in ipairs(items) do
     local here = path and (path .. " › " .. item.text) or item.text
     if item.children then flatten(item.children, here, out)
-    else table.insert(out, { text = item.text, path = here, action = item.action }) end
+    else table.insert(out, { item = item, path = here, action = item.action }) end
   end
   return out
+end
+
+-- Row text, styled per row: an installed item is dimmed and marked, never
+-- hidden (Omarchy 4.5, omacom/omarchy#6955). Per-row colour replaces the
+-- chooser's fgColor, which would paint over it.
+local function rowText(item)
+  local installed = item.present and item.present()
+  return hs.styledtext.new(item.text, { color = installed and COLORS.comment or COLORS.blue, font = { size = 20 } }), installed
 end
 
 local menuChooser
 local function showMenuLevel(items, parents)
   parents = parents or {}
   local level = {}
-  if #parents > 0 then table.insert(level, { text = "‹ Back", subText = parents[#parents].text, back = true }) end
+  if #parents > 0 then table.insert(level, { text = (rowText({ text = "‹ Back" })), subText = parents[#parents].text, back = true }) end
   for i, item in ipairs(items) do
+    local text, installed = rowText(item)
     local sub = type(item.sub) == "function" and item.sub() or item.sub
-    table.insert(level, { text = item.text, subText = sub or "", idx = i })
+    table.insert(level, { text = text, subText = installed and "✓ installed" or sub or "", idx = i })
   end
   local leaves = flatten(items, nil, {})
   local leafRows = {}
-  for i, leaf in ipairs(leaves) do leafRows[i] = { text = leaf.text, subText = leaf.path, leaf = i } end
+  for i, leaf in ipairs(leaves) do
+    leafRows[i] = { text = rowText(leaf.item), subText = leaf.path, leaf = i, name = leaf.item.text }
+  end
 
   menuChooser = hs.chooser.new(function(choice)
     if not choice then return end
@@ -530,15 +553,15 @@ local function showMenuLevel(items, parents)
     local q = query:lower()
     local hits = {}
     for _, row in ipairs(leafRows) do
-      if (row.text .. " " .. row.subText):lower():find(q, 1, true) then table.insert(hits, row) end
+      if (row.name .. " " .. row.subText):lower():find(q, 1, true) then table.insert(hits, row) end
     end
     menuChooser:choices(hits)
   end)
   menuChooser:choices(level)
   menuChooser:width(28)
-  menuChooser:rows(12)
+  -- Room for every row of the level, so the last one is never cut off (omacom/omarchy#13916).
+  menuChooser:rows(#level)
   menuChooser:bgDark(true)
-  menuChooser:fgColor(COLORS.blue)
   menuChooser:subTextColor(COLORS.fg)
   local crumbs = ""
   for _, p in ipairs(parents) do crumbs = crumbs .. p.text .. " › " end
@@ -547,6 +570,7 @@ local function showMenuLevel(items, parents)
 end
 
 showOmarchyMenu = function(section)
+  if closeIfOpen(menuChooser) then return end
   if section then
     for _, item in ipairs(MENU) do
       if item.text == section and item.children then
@@ -559,6 +583,18 @@ end
 -- `hs -c 'omarchyMenu("System")'` from AeroSpace (cmd-esc) opens a section.
 omarchyMenu = showOmarchyMenu
 
+-- Update > Config > Hammerspoon: reload only a whole init.lua. One read
+-- mid-write (git pull, an editor's save) would load half a file, and the menu
+-- with it would be gone until the next reload (omacom/omarchy#16268).
+reloadIfWhole = function()
+  local path = os.getenv("HOME") .. "/.hammerspoon/init.lua"
+  local f = io.open(path, "r")
+  local text = f and f:read("*a") or ""
+  if f then f:close() end
+  if text:find("omarchyMenu = showOmarchyMenu", 1, true) and load(text) then return hs.reload() end
+  hs.alert.show("init.lua is not whole yet: kept the running menu", 4)
+end
+
 -- Omarchy 4.5: Super+Alt+Space opens Apps; the menu (Omarchy's Super+Space,
 -- which is Raycast here) moves to cmd-shift-space, the key Apps had.
 hs.hotkey.bind({"cmd", "shift"}, "space", function() showOmarchyMenu() end)
@@ -566,7 +602,9 @@ hs.hotkey.bind({"cmd", "shift"}, "space", function() showOmarchyMenu() end)
 ----------------------------------------------------------------------
 -- Theme chooser (SUPER+CTRL+SHIFT+SPACE)
 ----------------------------------------------------------------------
+local themeChooser
 showThemeChooser = function()
+  if closeIfOpen(themeChooser) then return end
   local cache = os.getenv("HOME") .. "/.config/theme-switcher/cache"
   local themes = {}
   local handle = io.popen("ls -1 " .. cache .. " 2>/dev/null | sort")
@@ -592,7 +630,7 @@ showThemeChooser = function()
     })
   end
 
-  local chooser = hs.chooser.new(function(choice)
+  themeChooser = hs.chooser.new(function(choice)
     if choice then
       -- a login shell for Homebrew's PATH (theme reloads sketchybar, nvim, hs), but the
       -- name is $1, one argv element, never shell text: it comes from upstream folder names
@@ -601,14 +639,14 @@ showThemeChooser = function()
       end, { "-lc", '~/.local/bin/theme "$1"', "theme", choice.themeName }):start()
     end
   end)
-  chooser:choices(choices)
-  chooser:width(20)
-  chooser:rows(10)
-  chooser:bgDark(true)
-  chooser:fgColor(COLORS.blue)
-  chooser:subTextColor(COLORS.fg)
-  chooser:placeholderText("Pick a theme…")
-  chooser:show()
+  themeChooser:choices(choices)
+  themeChooser:width(20)
+  themeChooser:rows(10)
+  themeChooser:bgDark(true)
+  themeChooser:fgColor(COLORS.blue)
+  themeChooser:subTextColor(COLORS.fg)
+  themeChooser:placeholderText("Pick a theme…")
+  themeChooser:show()
 end
 
 hs.hotkey.bind({"cmd", "ctrl", "shift"}, "space", showThemeChooser)
@@ -657,22 +695,24 @@ local apps = {
 for _, m in ipairs(MICROSOFT) do table.insert(apps, { name = m.text, sub = m.sub, action = m.action }) end
 table.sort(apps, function(x, y) return x.name:lower() < y.name:lower() end)
 
+local appsChooser
 showAppsMenu = function()
+  if closeIfOpen(appsChooser) then return end
   local choices = {}
   for i, app in ipairs(apps) do
     table.insert(choices, { text = app.name, subText = app.sub, idx = i })
   end
-  local chooser = hs.chooser.new(function(choice)
+  appsChooser = hs.chooser.new(function(choice)
     if choice and apps[choice.idx] then apps[choice.idx].action() end
   end)
-  chooser:choices(choices)
-  chooser:width(25)
-  chooser:rows(12)
-  chooser:bgDark(true)
-  chooser:fgColor(COLORS.blue)
-  chooser:subTextColor(COLORS.fg)
-  chooser:placeholderText("Launch…")
-  chooser:show()
+  appsChooser:choices(choices)
+  appsChooser:width(25)
+  appsChooser:rows(12)
+  appsChooser:bgDark(true)
+  appsChooser:fgColor(COLORS.blue)
+  appsChooser:subTextColor(COLORS.fg)
+  appsChooser:placeholderText("Launch…")
+  appsChooser:show()
 end
 
 -- Let scripts reload us: osascript -e 'tell application "Hammerspoon" to execute lua code "hs.reload()"'
