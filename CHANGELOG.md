@@ -7,6 +7,16 @@ maintainer's Mac runs from a clone of it, the same as yours.
 
 ## 2026-11-11
 
+- Window transparency and corners (Omarchy 4.5), in the menu under
+  Appearance > Window Transparency and Appearance > Window Corners, or with
+  `omarchy-appearance transparency opaque|transparent|glassy` and
+  `omarchy-appearance corners theme|sharp|rounded`. Opaque makes the
+  terminal and the bar solid, Transparent is the look you had, and Glassy
+  frosts the terminal (Ghostty blur) and the bar. Other apps stay opaque, so
+  only terminals are see-through, as in Omarchy. Sharp gives square window
+  borders; Theme and Rounded keep the round ones. The choice is saved and
+  comes back after a restart. Ghostty shows a new transparency after you quit
+  and reopen it.
 - The Quake console from Omarchy 4.5. ⌘` drops a Ghostty window onto the top
   half of the screen over a dimmed desktop, and the first time it starts your
   default agent. Press it again (or click away) and it tucks itself away with

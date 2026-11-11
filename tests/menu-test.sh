@@ -1,8 +1,9 @@
 #!/bin/bash
 # Checks the Omarchy menu's Appearance branch (hammerspoon/init.lua, Omarchy 4.5,
 # omacom/omarchy#15973): the root shows Appearance in place of Style, each
-# Appearance item opens its chooser, submenu or System Settings pane, and the
-# menu search finds every item. init.lua runs in LuaJIT with a stub `hs` that
+# Appearance item opens its chooser, submenu or System Settings pane (Window
+# Transparency and Window Corners run omarchy-appearance and check the saved
+# choice), Trigger has no second Appearance, and the menu search finds every item. init.lua runs in LuaJIT with a stub `hs` that
 # records what an item would run, so nothing on the Mac is touched.
 #
 #   tests/menu-test.sh
@@ -28,7 +29,14 @@ local function stub()
 end
 hs = stub()
 require = function() return stub() end
-hs.execute = function(cmd) ran[#ran + 1] = cmd; return "" end
+-- A saved Appearance choice: `omarchy-appearance <what>` (a read) prints it
+-- and is not recorded; every other command is recorded as what an item ran.
+local SAVED = { transparency = "glassy", corners = "sharp" }
+hs.execute = function(cmd)
+  local what = cmd:match("omarchy%-appearance (%a+)$")
+  if what then return (SAVED[what] or "") .. "\n" end
+  ran[#ran + 1] = cmd; return ""
+end
 local tasks = {}
 hs.task = { new = function(path, _, args)
   ran[#ran + 1] = args[#args]; tasks[#tasks + 1] = { path = path, args = args }
@@ -76,6 +84,14 @@ local EXPECT = {
   { "Windows",          "chooser:Appearance › Windows › ", {
       { "Gaps",           "aerospace/aerospace.toml" },
       { "Borders",        "borders/bordersrc" } } },
+  { "Window Transparency", "chooser:Appearance › Window Transparency › ", {
+      { "Opaque Windows",      "omarchy-appearance transparency opaque" },
+      { "Transparent Windows", "omarchy-appearance transparency transparent" },
+      { "Glassy Windows",      "omarchy-appearance transparency glassy" } } },
+  { "Window Corners",   "chooser:Appearance › Window Corners › ", {
+      { "Theme Corners",       "omarchy-appearance corners theme" },
+      { "Sharp Corners",       "omarchy-appearance corners sharp" },
+      { "Rounded Corners",     "omarchy-appearance corners rounded" } } },
   { "Branding",         "chooser:Appearance › Branding › ", {
       { "Screensaver",    "branding/screensaver.txt" },
       { "About",          "fastfetch" } } },
@@ -136,6 +152,27 @@ local function searchAll(items, path)
   end
 end
 searchAll(EXPECT, "Appearance")
+
+-- ---- the saved Appearance choice carries the check mark --------------------
+local function marks(path)
+  omarchyMenu(path[1])
+  local c = choosers[#choosers]
+  for _, r in ipairs(c.shown) do if r.text == path[2] then pick(c, r); break end end
+  local m = {}
+  for _, r in ipairs(choosers[#choosers].shown) do
+    if not r.back and r.subText:sub(1, #"✓ ") == "✓ " then m[#m + 1] = r.text end
+  end
+  return table.concat(m, ", ")
+end
+local tm = marks({ "Appearance", "Window Transparency" })
+check("Window Transparency checks only the saved Glassy Windows", tm == "Glassy Windows", tm)
+local cm = marks({ "Appearance", "Window Corners" })
+check("Window Corners checks only the saved Sharp Corners", cm == "Sharp Corners", cm)
+
+-- ---- Trigger has no second Appearance --------------------------------------
+omarchyMenu("Trigger")
+local trig = texts(choosers[#choosers].shown)
+check("Trigger has no Appearance", (", " .. trig .. ","):find(", Appearance,", 1, true) == nil, trig)
 
 -- ---- theme chooser: the name is one argv element, never shell text (#45) --
 omarchyMenu("Appearance")

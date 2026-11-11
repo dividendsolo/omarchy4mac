@@ -268,6 +268,12 @@ local function keystroke(code, mods)
   return sh([[osascript -e 'tell application "System Events" to key code ]] .. code .. [[ using {]] .. mods .. [[}']])
 end
 local function toast(scriptName) return function() notifyFromScript("~/.local/bin/" .. scriptName) end end
+-- Appearance > Window Transparency / Window Corners (Omarchy 4.5): one choice row, checked when it is the saved one.
+local APPEARANCE = os.getenv("HOME") .. "/.local/bin/omarchy-appearance"
+local function look(what, value, text, sub)
+  return { text = text, action = function() hs.alert.show((hs.execute(APPEARANCE .. " " .. what .. " " .. value):gsub("%s+$", "")), 4) end,
+    sub = function() return (hs.execute(APPEARANCE .. " " .. what):gsub("%s+$", "") == value and "✓ " or "") .. sub end }
+end
 -- The repo this init.lua lives in (dotfiles here, omarchy4mac for adopters):
 -- resolve the symlink ~/.hammerspoon/init.lua and go two directories up.
 local D = (function()
@@ -302,6 +308,16 @@ local MENU = {
     { text = "Windows", sub = "Gaps and borders", children = {
       { text = "Gaps", sub = "Edit [gaps] in aerospace.toml", action = nvimEdit(D .. "/aerospace/aerospace.toml") },
       { text = "Borders", sub = "Edit bordersrc (width, colour, corners)", action = nvimEdit(D .. "/borders/bordersrc") },
+    }},
+    { text = "Window Transparency", sub = "Terminal and bar", children = {
+      look("transparency", "opaque", "Opaque Windows", "Solid terminal and bar"),
+      look("transparency", "transparent", "Transparent Windows", "See-through terminal (default)"),
+      look("transparency", "glassy", "Glassy Windows", "Frosted terminal and bar"),
+    }},
+    { text = "Window Corners", sub = "Window borders", children = {
+      look("corners", "theme", "Theme Corners", "The default round border"),
+      look("corners", "sharp", "Sharp Corners", "Square borders"),
+      look("corners", "rounded", "Rounded Corners", "Round borders"),
     }},
     { text = "Branding", sub = "Screensaver and About", children = {
       { text = "Screensaver", sub = "Edit the ASCII art", action = nvimEdit(os.getenv("HOME") .. "/.config/omarchy/branding/screensaver.txt") },
@@ -421,7 +437,8 @@ local function showMenuLevel(items, parents)
   local level = {}
   if #parents > 0 then table.insert(level, { text = "‹ Back", subText = parents[#parents].text, back = true }) end
   for i, item in ipairs(items) do
-    table.insert(level, { text = item.text, subText = item.sub or "", idx = i })
+    local sub = type(item.sub) == "function" and item.sub() or item.sub
+    table.insert(level, { text = item.text, subText = sub or "", idx = i })
   end
   local leaves = flatten(items, nil, {})
   local leafRows = {}
