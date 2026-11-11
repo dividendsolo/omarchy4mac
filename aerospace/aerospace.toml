@@ -141,10 +141,12 @@ cmd-shift-alt-down = 'move-workspace-to-monitor --wrap-around next'
 
 # ---------- Move just the focused window across monitors ----------
 # (swap within workspace = cmd-shift-arrow; whole workspace = cmd-shift-alt-arrow)
-cmd-ctrl-shift-left = 'move-node-to-monitor --wrap-around --focus-follows-window left'
-cmd-ctrl-shift-right = 'move-node-to-monitor --wrap-around --focus-follows-window right'
-cmd-ctrl-shift-up = 'move-node-to-monitor --wrap-around --focus-follows-window up'
-cmd-ctrl-shift-down = 'move-node-to-monitor --wrap-around --focus-follows-window down'
+# A floating window is centred on the monitor it lands on (Omarchy 4.5), see
+# bin/omarchy-move-to-monitor.
+cmd-ctrl-shift-left = 'exec-and-forget $HOME/.local/bin/omarchy-move-to-monitor left'
+cmd-ctrl-shift-right = 'exec-and-forget $HOME/.local/bin/omarchy-move-to-monitor right'
+cmd-ctrl-shift-up = 'exec-and-forget $HOME/.local/bin/omarchy-move-to-monitor up'
+cmd-ctrl-shift-down = 'exec-and-forget $HOME/.local/bin/omarchy-move-to-monitor down'
 
 # ---------- Resize ----------
 alt-equal = 'resize smart +50'
@@ -158,6 +160,8 @@ ctrl-alt-shift-tab = 'focus-monitor --wrap-around prev'
 
 # ---------- Cycle windows within workspace ----------
 # cmd-backtick and cmd-shift-backtick are the Quake consoles (hammerspoon/init.lua).
+# Omarchy's Alt+Tab / Alt+Shift+Tab. The DFS order counts floating windows too,
+# so both ways reach every window (no z-order to ping-pong on, as Hyprland's had).
 cmd-alt-backtick = 'focus --boundaries-action wrap-around-the-workspace dfs-next'
 cmd-alt-shift-backtick = 'focus --boundaries-action wrap-around-the-workspace dfs-prev'
 
@@ -165,7 +169,9 @@ cmd-alt-shift-backtick = 'focus --boundaries-action wrap-around-the-workspace df
 # The browser and web apps follow the macOS default browser (v4.0.5), through
 # bin/omarchy-launch-browser. Web apps are app windows (`--app=<url>`) in a
 # Chromium browser: a window of their own that tiles, not a tab.
-alt-enter = 'exec-and-forget open -na Ghostty'
+# A new terminal opens in the focused terminal's folder, else in $HOME (Omarchy
+# 4.5), see bin/omarchy-terminal.
+alt-enter = 'exec-and-forget $HOME/.local/bin/omarchy-terminal'
 cmd-alt-enter = 'exec-and-forget open -na Ghostty --args -e /bin/zsh -lc "tmux attach -t Work || tmux new -s Work"'
 cmd-ctrl-enter = 'exec-and-forget open -na Ghostty --args -e herdr'
 cmd-shift-enter = 'exec-and-forget $HOME/.local/bin/omarchy-launch-browser'
@@ -266,6 +272,22 @@ cmd-shift-down = ['join-with down', 'mode main']
 cmd-shift-up = ['join-with up', 'mode main']
 cmd-shift-right = ['join-with right', 'mode main']
 
+# Float rules: every app whose windows open floating. A workspace in floating
+# mode (alt-l) never claims these, so they stay floating when it ends.
+#   System Settings    com.apple.systempreferences
+#   Finder             com.apple.finder
+#   1Password 8 and 7  com.1password.1password, com.agilebits.onepassword7
+#   Bitwarden          com.bitwarden.desktop
+#   Raycast            com.raycast.macos
+#   Activity Monitor   com.apple.ActivityMonitor
+#   Calculator         com.apple.calculator
+#   Preview            com.apple.Preview
+#   VLC                org.videolan.vlc
+#   Steam              com.valvesoftware.steam
+#   LocalSend          org.localsend.localsendApp
+#   Picture in Picture (any app, by window title)
+#   The screensaver    com.mitchellh.ghostty, title org.omarchy.screensaver
+
 [[on-window-detected]]
 if.app-id = 'com.apple.systempreferences'
 run = 'layout floating'
@@ -274,8 +296,18 @@ run = 'layout floating'
 if.app-id = 'com.apple.finder'
 run = 'layout floating'
 
+# Password managers float, like Omarchy's 1password.lua (omacom/omarchy#11704)
+# and bitwarden.lua.
 [[on-window-detected]]
 if.app-id = 'com.1password.1password'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.app-id = 'com.agilebits.onepassword7'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.app-id = 'com.bitwarden.desktop'
 run = 'layout floating'
 
 [[on-window-detected]]

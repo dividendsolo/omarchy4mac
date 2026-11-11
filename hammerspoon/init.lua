@@ -13,7 +13,7 @@ local bindings = {
   { "SUPER + SPACE",            "Raycast" },
   { "ALT + SPACE",              "Dictation on / off (Hex)" },
   { "hold RIGHT ALT",           "Dictate while held (Hex)" },
-  { "ALT + RETURN",             "Ghostty (terminal)" },
+  { "ALT + RETURN",             "Ghostty (terminal) in the focused folder" },
   { "SUPER + ALT + RETURN",     "Ghostty + tmux (Work)" },
   { "SUPER + CTRL + RETURN",    "Ghostty + herdr" },
   { "SUPER + SHIFT + RETURN",   "Browser (macOS default)" },
@@ -73,7 +73,7 @@ local bindings = {
   { "ALT + TAB",                "Next workspace on this monitor" },
   { "SUPER + CTRL + TAB",       "Back-and-forth between workspaces" },
   { "SUPER + SHIFT + ALT + ←/→/↑/↓", "Move workspace to prev/next monitor" },
-  { "SUPER + CTRL + SHIFT + ←/↓/↑/→", "Move focused window across monitors" },
+  { "SUPER + CTRL + SHIFT + ←/↓/↑/→", "Move focused window across monitors (floats centre)" },
 
   -- Resize
   { "ALT + =",                  "Grow focused window" },
@@ -866,6 +866,45 @@ ConsoleWatcher = hs.application.watcher.new(function(_, event, app)
   for n, c in ipairs(consoles) do
     if c.shown and app and app:pid() == c.pid then hideConsole(n) end
   end
+end):start()
+
+-- Drag a widget off the bar to remove it (Omarchy 4.5, omacom/omarchy#6782): a
+-- drag that starts on SketchyBar and ends 48 px or more below it runs
+-- omarchy-bar-remove on the point where it started. `omarchy-bar-remove --reset`
+-- brings every removed widget back. The press must land on a SketchyBar window:
+-- the auto-hidden macOS menu bar slides down over the bar, and a press-drag-release
+-- on its menus is a menu pick, not a drag off the bar.
+local BAR_HEIGHT, REMOVE_PULL = 32, 48 -- sketchybarrc height=32; Omarchy's pull to arm removal
+local barDragStart
+local function screenTop(p)
+  for _, s in ipairs(hs.screen.allScreens()) do
+    local f = s:fullFrame()
+    if p.x >= f.x and p.x < f.x + f.w and p.y >= f.y and p.y < f.y + f.h then return f.y end
+  end
+end
+local function onSketchyBar(p) -- the frontmost visible window under p is SketchyBar's
+  for _, w in ipairs(hs.window.list(true) or {}) do -- on-screen windows, front to back
+    local b = w.kCGWindowBounds
+    if b and (w.kCGWindowAlpha or 1) > 0 and p.x >= b.X and p.x < b.X + b.Width and p.y >= b.Y and p.y < b.Y + b.Height then
+      return w.kCGWindowOwnerName == "sketchybar"
+    end
+  end
+  return false
+end
+BarDragTap = hs.eventtap.new({ hs.eventtap.event.types.leftMouseDown, hs.eventtap.event.types.leftMouseUp }, function(e)
+  local p = e:location()
+  if e:getType() == hs.eventtap.event.types.leftMouseDown then
+    local top = screenTop(p)
+    barDragStart = (top and p.y - top < BAR_HEIGHT and onSketchyBar(p)) and { x = p.x, y = p.y, top = top } or nil
+  elseif barDragStart then
+    local start = barDragStart
+    barDragStart = nil
+    if p.y - start.top >= BAR_HEIGHT + REMOVE_PULL then
+      hs.task.new(os.getenv("HOME") .. "/.local/bin/omarchy-bar-remove", nil,
+        { tostring(math.floor(start.x)), tostring(math.floor(start.y)) }):start()
+    end
+  end
+  return false
 end):start()
 
 -- Gaming mode hides SketchyBar; show it again when Steam quits.
