@@ -8,13 +8,14 @@ on:
 
 jobs:
   check:
-    # A GitHub runner: the Jog runners take private repos only, and this repo is public.
-    runs-on: ubuntu-latest
+    # A GitHub macOS runner: this is a Mac desktop, and its scripts use the Mac's own tools (BSD date). The Jog
+    # runners take private repos only, and this repo is public.
+    runs-on: macos-latest
     permissions:
       contents: read
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
       # tests/starship-test.sh renders the prompt with the real starship.
-      - run: curl -sS https://starship.rs/install.sh | sh -s -- -y
+      - run: brew install starship
       - run: for t in tests/*-test.sh; do echo "== $t"; bash "$t" || exit 1; done
