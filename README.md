@@ -156,6 +156,8 @@ is also available.
 | ⌃⌥⌫ | Close all windows but current |
 | ⌥S | Toggle floating / tiling |
 | ⌥A | Toggle accordion / tiles (workspace) |
+| ⌥L | Cycle workspace: tiles / accordion / floating (kept across restarts) |
+| ⌥M | Minimize window (to the Dock) |
 | ⌥J | Toggle tiles horizontal / vertical |
 | ⌥F | Fullscreen (tile) |
 | ⌘⌥F | Fullscreen (tile) |

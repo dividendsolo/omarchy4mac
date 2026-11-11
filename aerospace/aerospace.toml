@@ -5,6 +5,10 @@
 # ~/Library/LaunchAgents/com.omarchy-mac.aerospace-keepalive.plist
 start-at-login = false
 
+# Super+L saves each workspace's layout (tiles, accordion, floating); put it
+# back whenever AeroSpace starts (bin/omarchy-workspace-layout, omarchy4mac#23).
+after-startup-command = ['exec-and-forget $HOME/.local/bin/omarchy-workspace-layout restore']
+
 # config-version 2 stops guessing persistent workspaces from the key bindings,
 # so the five bound workspaces are listed here (omarchy4mac#19).
 config-version = 2
@@ -73,6 +77,11 @@ alt-j = 'layout tiles horizontal vertical'
 # Accordion: every window full width, inactive ones collapse to edge strips.
 # Toggle it per workspace; cycle windows with the normal focus keys.
 alt-a = 'layout accordion tiles'
+# Omarchy 4.5 Super+L: cycle the workspace through tiles, accordion and
+# floating; the choice survives an AeroSpace restart.
+alt-l = 'exec-and-forget $HOME/.local/bin/omarchy-workspace-layout cycle'
+# Omarchy 4.5 Super+M: minimize to the dock (the macOS Dock, same as Cmd+M).
+alt-m = 'macos-native-minimize'
 
 # Fullscreen never covers SketchyBar: AeroSpace fullscreen keeps outer.top.
 # Ctrl+Cmd+F (the macOS fullscreen key) does the same as Alt+F; only the green
