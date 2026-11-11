@@ -645,7 +645,7 @@ end
 
 local GHOSTTY = "com.mitchellh.ghostty"
 local BOOT = hs.execute("/usr/sbin/sysctl -n kern.boottime")
-local consoles = { {}, {} } -- [n] = { pid, shown, dim, timer }
+local consoles = { {}, {} } -- [n] = { pid, shown, dim, timer, launching }
 local showConsole
 
 -- The console's Ghostty, kept in hs.settings so a Hammerspoon reload keeps
@@ -663,18 +663,21 @@ local function launchConsole(n)
   hs.execute("open -na Ghostty --args -e $HOME/.local/bin/omarchy-agent")
   local tries = 0
   if c.timer then c.timer:stop() end
+  -- Until the window shows up, another press must not start a second Ghostty.
+  c.launching = true
   c.timer = hs.timer.doEvery(0.1, function()
     tries = tries + 1
     for _, a in ipairs(hs.application.applicationsForBundleID(GHOSTTY)) do
       if not before[a:pid()] and a:mainWindow() then
         c.timer:stop()
+        c.launching = false
         hs.settings.set("omarchy.console." .. n, { pid = a:pid(), boot = BOOT })
         -- Let AeroSpace see the new window first, or it tiles it after the float.
         hs.timer.doAfter(0.5, function() showConsole(n, a) end)
         return
       end
     end
-    if tries >= 100 then c.timer:stop() end -- 10 s: Ghostty did not start
+    if tries >= 100 then c.timer:stop(); c.launching = false end -- 10 s: Ghostty did not start
   end)
 end
 
@@ -718,11 +721,14 @@ showConsole = function(n, app)
   end)
 end
 
+-- console-toggle: begin
 local function toggleConsole(n)
+  if consoles[n].launching then return end
   if consoles[n].shown then return hideConsole(n) end
   local app = consoleApp(n)
   if app then showConsole(n, app) else launchConsole(n) end
 end
+-- console-toggle: end
 
 hs.hotkey.bind({"cmd"}, "`", function() toggleConsole(1) end)
 hs.hotkey.bind({"cmd", "shift"}, "`", function() toggleConsole(2) end)

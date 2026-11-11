@@ -33,6 +33,24 @@ check "wide screen: centered 2:1 panel on the top half" "500 0 1000 500" "$(fram
 check "narrow screen: full width, top half" "0 0 800 600" "$(frame 0 0 800 1200)"
 check "second screen: placed in that screen's frame" "2060 25 1000 500" "$(frame 1560 25 2000 1000)"
 
+# toggleConsole between its markers, run with stubs for what it calls.
+TOGGLE="$(sed -n '/^-- console-toggle: begin/,/^-- console-toggle: end/p' "$LUA_FILE")"
+launches() { # launches <console state> -> how many Ghosttys one press starts
+  printf '%s\n' "consoles = { $1 }
+local n = 0
+function launchConsole() n = n + 1 end
+function consoleApp() return nil end
+function hideConsole() end
+function showConsole() end
+$TOGGLE
+toggleConsole(1)
+print(n)" | "$LUA_BIN" - 2>&1
+}
+
+echo "console toggle:"
+check "first press starts one console" 1 "$(launches '{}')"
+check "press while the console still starts: no second console" 0 "$(launches '{ launching = true }')"
+
 echo "wiring:"
 binds() { grep -cE "hs\.hotkey\.bind\(\{ *$1 *\}, *\"\`\"" "$LUA_FILE"; }
 check "Hammerspoon binds ⌘\`" 1 "$(binds '"cmd"')"
