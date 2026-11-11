@@ -22,9 +22,10 @@ LUA_BIN="$(command -v lua || command -v luajit || command -v lua5.4)" ||
 # consoleFrame is a pure function between two marker lines; run that exact code.
 FN="$(sed -n '/^-- console-frame: begin/,/^-- console-frame: end/p' "$LUA_FILE")"
 frame() { # frame <x> <y> <w> <h> -> "x y w h" of the console panel
-  "$LUA_BIN" -e "$FN
+  # On stdin, not -e: PUC Lua reads an -e chunk that starts with "--" as an option.
+  printf '%s\n' "$FN
 local f = consoleFrame({ x = $1, y = $2, w = $3, h = $4 })
-print(string.format('%d %d %d %d', f.x, f.y, f.w, f.h))" 2>&1
+print(string.format('%d %d %d %d', f.x, f.y, f.w, f.h))" | "$LUA_BIN" - 2>&1
 }
 
 echo "console geometry:"
