@@ -420,6 +420,6 @@ else
 fi
 
 say "Done. ⌥Return opens Ghostty. ⌥T switches to a random theme."
-say "⌥K shows every keybinding. ⌘⌥Space opens the menu. Rerun this script to update."
+say "⌥K shows every keybinding. ⌘⇧Space opens the menu. Rerun this script to update."
 say "Your previous Ghostty/btop/Neovim/Claude/Obsidian settings are saved in $ORIG."
 }

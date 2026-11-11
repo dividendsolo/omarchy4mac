@@ -24,6 +24,7 @@ local bindings = {
   { "SUPER + SHIFT + N",        "Ghostty + nvim" },
   { "SUPER + SHIFT + D",        "Ghostty + lazydocker" },
   { "SUPER + SHIFT + M",        "Spotify" },
+  { "SUPER + SHIFT + Q",        "Calculator" },
   { "SUPER + SHIFT + A",        "Claude" },
   { "SUPER + SHIFT + ALT + A",  "Grok (app window)" },
   { "SUPER + SHIFT + O",        "Obsidian" },
@@ -41,10 +42,12 @@ local bindings = {
 
   -- Window / layout
   { "ALT + W",                  "Quit app (sends ⌘Q)" },
+  { "ALT + Q",                  "Quit app (sends ⌘Q)" },
   { "CTRL + ALT + BACKSPACE",   "Close all windows but current" },
   { "ALT + S",                  "Toggle floating / tiling" },
   { "ALT + A",                  "Toggle accordion / tiles (workspace)" },
   { "ALT + L",                  "Cycle workspace: tiles / accordion / floating" },
+  { "SUPER + ALT + L",          "Cycle workspace layout back" },
   { "ALT + M",                  "Minimize window (to the Dock)" },
   { "ALT + J",                  "Toggle tiles horizontal / vertical" },
   { "ALT + F",                  "Fullscreen (tile)" },
@@ -81,23 +84,27 @@ local bindings = {
   -- System
   { "SUPER + CTRL + A",         "Sound settings" },
   { "SUPER + CTRL + B",         "Bluetooth settings" },
-  { "SUPER + CTRL + W",         "Wi-Fi settings" },
+  { "SUPER + CTRL + N",         "Network (Wi-Fi settings)" },
   { "SUPER + CTRL + S",         "Share (LocalSend)" },
   { "SUPER + CTRL + E",         "Emoji picker" },
   { "SUPER + CTRL + SHIFT + Q", "Quit every Dock app (keeps Finder)" },
   { "SUPER + CTRL + R",         "Set a reminder (20m message)" },
   { "SUPER + CTRL + Z",         "Zoom (macOS accessibility)" },
   { "SUPER + SHIFT + CTRL + A", "Coding agent (default: Setup > Defaults > Agent)" },
-  { "SUPER + CTRL + T",         "Activity (Ghostty + btop)" },
   { "ALT + SHIFT + T",          "Activity (Ghostty + btop)" },
+  { "SUPER + CTRL + ALT + E",   "World clock (Clock)" },
+  { "SUPER + CTRL + ALT + F",   "Full screen desktop (hide or show the bar)" },
   { "SUPER + CTRL + H",         "System Information" },
   { "SUPER + CTRL + .",         "HandBrake (transcoding)" },
   { "SUPER + CTRL + L",         "Lock screen" },
   { "SUPER + CTRL + I",         "Toggle caffeinate" },
-  { "SUPER + CTRL + ,",         "Toggle Do Not Disturb" },
+  { "ALT + ,",                  "Open the newest notification" },
+  { "SUPER + CTRL + ALT + ,",   "Toggle Do Not Disturb" },
   { "SUPER + CTRL + C",         "Screenshot picker" },
+  { "SUPER + CTRL + ALT + C",   "Screenshot (region)" },
   { "SUPER + CTRL + V",         "Raycast clipboard history" },
   { "SUPER + CTRL + P",         "Cycle wallpaper (~/Pictures/Wallpapers)" },
+  { "SUPER + CTRL + W",         "Next background (cycle wallpaper)" },
   { "SUPER + CTRL + G",         "Gaming mode (quit all Dock apps, launch Steam)" },
   { "SUPER + CTRL + ALT + T",   "Date & time toast" },
   { "SUPER + CTRL + ALT + W",   "Weather toast" },
@@ -105,9 +112,10 @@ local bindings = {
   { "SUPER + ESC",              "System menu (Lock/Sleep/Restart/…)" },
 
   -- Appearance
-  { "SUPER + ALT + SPACE",      "Omarchy control menu" },
-  { "SUPER + SHIFT + SPACE",    "Apps launcher (curated)" },
+  { "SUPER + ALT + SPACE",      "Apps launcher (curated)" },
+  { "SUPER + SHIFT + SPACE",    "Omarchy control menu" },
   { "SUPER + CTRL + SHIFT + SPACE", "Theme chooser" },
+  { "SUPER + CTRL + T",         "Theme chooser" },
   { "OPT + T",                  "Random theme (matches system light/dark)" },
 
   -- Service mode
@@ -175,6 +183,8 @@ hs.hotkey.bind({"cmd", "ctrl", "alt"}, "t", function() notifyFromScript("~/.loca
 hs.hotkey.bind({"cmd", "ctrl", "alt"}, "w", function() notifyFromScript("~/.local/bin/omarchy-notice weather") end)
 hs.hotkey.bind({"cmd", "ctrl", "alt"}, "b", function() notifyFromScript("~/.local/bin/omarchy-notice battery") end)
 hs.hotkey.bind({"cmd", "ctrl"},        "p", function() notifyFromScript("~/.local/bin/omarchy-cycle-wallpaper") end)
+-- Omarchy 4.5: Super+Ctrl+W is the background switcher (Network moved to Super+Ctrl+N).
+hs.hotkey.bind({"cmd", "ctrl"},        "w", function() notifyFromScript("~/.local/bin/omarchy-cycle-wallpaper") end)
 hs.hotkey.bind({"cmd", "ctrl"},        "g", function() notifyFromScript("~/.local/bin/gaming-mode") end)
 hs.hotkey.bind({"cmd", "ctrl", "shift"}, "q", function()
   hs.alert.show("Quitting all apps")
@@ -209,6 +219,24 @@ local function setReminder()
   hs.alert.show("Reminder in " .. delay:gsub("^%s+", ""):gsub("%s+$", "") .. ": " .. message)
 end
 hs.hotkey.bind({"cmd", "ctrl"}, "r", setReminder)
+
+-- Super+Comma (Omarchy 4.5): act on the newest notification. macOS draws the
+-- banners in Notification Center's window, newest first; press the top one,
+-- which opens it like a click. No banner on screen: nothing happens.
+local function newestNotification(root)
+  local queue, i = { root }, 1
+  while queue[i] do
+    local el = queue[i]; i = i + 1
+    local sub = el:attributeValue("AXSubrole") or ""
+    if sub == "AXNotificationCenterBanner" or sub == "AXNotificationCenterAlert" then return el end
+    for _, child in ipairs(el:attributeValue("AXChildren") or {}) do queue[#queue + 1] = child end
+  end
+end
+hs.hotkey.bind({"alt"}, ",", function()
+  local nc = hs.application.get("com.apple.notificationcenterui")
+  local banner = nc and newestNotification(hs.axuielement.applicationElement(nc))
+  if banner then banner:performAction("AXPress") end
+end)
 
 ----------------------------------------------------------------------
 -- Screensaver (v4: ttfx ASCII art after 150 s idle, in a fullscreen
@@ -519,7 +547,9 @@ end
 -- `hs -c 'omarchyMenu("System")'` from AeroSpace (cmd-esc) opens a section.
 omarchyMenu = showOmarchyMenu
 
-hs.hotkey.bind({"cmd", "alt"}, "space", function() showOmarchyMenu() end)
+-- Omarchy 4.5: Super+Alt+Space opens Apps; the menu (Omarchy's Super+Space,
+-- which is Raycast here) moves to cmd-shift-space, the key Apps had.
+hs.hotkey.bind({"cmd", "shift"}, "space", function() showOmarchyMenu() end)
 
 ----------------------------------------------------------------------
 -- Theme chooser (SUPER+CTRL+SHIFT+SPACE)
@@ -570,7 +600,8 @@ showThemeChooser = function()
 end
 
 hs.hotkey.bind({"cmd", "ctrl", "shift"}, "space", showThemeChooser)
-hs.hotkey.bind({"cmd", "shift"}, "space", function() showAppsMenu() end)
+hs.hotkey.bind({"cmd", "ctrl"}, "t", showThemeChooser) -- Omarchy 4.5: Super+Ctrl+T opens themes
+hs.hotkey.bind({"cmd", "alt"}, "space", function() showAppsMenu() end)
 
 ----------------------------------------------------------------------
 -- Apps chooser — curated launcher (called from Omarchy menu's "Apps")

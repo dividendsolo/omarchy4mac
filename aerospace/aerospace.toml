@@ -62,11 +62,14 @@ outer.right = 8
 
 # ---------- Navigating ----------
 cmd-space = 'exec-and-forget open -a Raycast'
-# cmd-alt-space → handled by Hammerspoon (Omarchy control menu)
+# cmd-alt-space → handled by Hammerspoon (Apps, Omarchy 4.5's Super+Alt+Space);
+# cmd-shift-space → Hammerspoon (Omarchy control menu)
 # theme switcher still available on cmd-ctrl-shift-space below
 cmd-ctrl-l = '''exec-and-forget osascript -e 'tell application "System Events" to keystroke "q" using {control down, command down}' '''
 
 alt-w = '''exec-and-forget osascript -e 'tell application "System Events" to keystroke "q" using {command down}' '''
+# Omarchy 4.5 Super+Q closes too, alongside Super+W.
+alt-q = '''exec-and-forget osascript -e 'tell application "System Events" to keystroke "q" using {command down}' '''
 ctrl-alt-backspace = 'close-all-windows-but-current'
 
 alt-s = 'layout floating tiling'
@@ -80,6 +83,8 @@ alt-a = 'layout accordion tiles'
 # Omarchy 4.5 Super+L: cycle the workspace through tiles, accordion and
 # floating; the choice survives an AeroSpace restart.
 alt-l = 'exec-and-forget $HOME/.local/bin/omarchy-workspace-layout cycle'
+# Omarchy 4.5 Super+Alt+L: the same cycle, the other way round.
+cmd-alt-l = 'exec-and-forget $HOME/.local/bin/omarchy-workspace-layout back'
 # Omarchy 4.5 Super+M: minimize to the dock (the macOS Dock, same as Cmd+M).
 alt-m = 'macos-native-minimize'
 
@@ -171,6 +176,8 @@ cmd-shift-f = 'exec-and-forget open -a Finder'
 cmd-shift-alt-f = 'exec-and-forget open -a Finder'
 
 cmd-shift-m = 'exec-and-forget open -a Spotify'
+# Omarchy 4.5 moved Calculator from Super+Ctrl+Q to Super+Shift+Q.
+cmd-shift-q = 'exec-and-forget open -a Calculator'
 cmd-shift-slash = 'exec-and-forget open -a 1Password'
 cmd-shift-n = 'exec-and-forget open -na Ghostty --args -e nvim'
 
@@ -198,27 +205,39 @@ cmd-shift-y = 'exec-and-forget $HOME/.local/bin/omarchy-launch-browser --app=htt
 
 # ---------- Capture (cmd+shift+5 picker) ----------
 cmd-ctrl-c = 'exec-and-forget /bin/sh -c "osascript -e \"tell application \\\"System Events\\\" to key code 23 using {command down, shift down}\""'
+# Omarchy 4.5 Super+Ctrl+Alt+C: a screenshot straight away (macOS ⇧⌘4, a region).
+cmd-ctrl-alt-c = '''exec-and-forget osascript -e 'tell application "System Events" to key code 21 using {command down, shift down}' '''
 
 # ---------- Toggles ----------
 cmd-ctrl-i = 'exec-and-forget /bin/sh -c "pgrep -x caffeinate >/dev/null && pkill -x caffeinate || caffeinate -dimsu &"'
 
 # ---------- Notifications: DND toggle ----------
-cmd-ctrl-comma = 'exec-and-forget shortcuts run "Toggle Do Not Disturb"'
+# Omarchy 4.5 moved silencing from Super+Ctrl+Comma to Super+Ctrl+Alt+Comma.
+# alt-comma (Super+Comma, the newest notification) is Hammerspoon's.
+cmd-ctrl-alt-comma = 'exec-and-forget shortcuts run "Toggle Do Not Disturb"'
 
 # ---------- System control (Omarchy Super+Ctrl family) ----------
 # Note: ALT+K is handled by Hammerspoon (~/.hammerspoon/init.lua) to show
 # the keybindings overlay. Left unbound here so it propagates.
 cmd-ctrl-a = 'exec-and-forget open "x-apple.systempreferences:com.apple.Sound-Settings.extension"'
 cmd-ctrl-b = 'exec-and-forget open "x-apple.systempreferences:com.apple.BluetoothSettings"'
-cmd-ctrl-w = 'exec-and-forget open "x-apple.systempreferences:com.apple.wifi-settings-extension"'
+# Omarchy 4.5: Network moved from Super+Ctrl+W to Super+Ctrl+N; cmd-ctrl-w
+# (backgrounds) and cmd-ctrl-t (themes) are Hammerspoon's.
+cmd-ctrl-n = 'exec-and-forget open "x-apple.systempreferences:com.apple.wifi-settings-extension"'
 cmd-ctrl-s = 'exec-and-forget open -a LocalSend'   # v4: share menu (LocalSend); Sharing settings live in the menu under Setup
-cmd-ctrl-t = 'exec-and-forget open -na Ghostty --args -e btop'
+# Activity is Super+Shift+T in Omarchy 4.5. Here it is alt-shift-t: cmd-shift-t
+# is every browser's reopen-closed-tab key.
 alt-shift-t = 'exec-and-forget open -na Ghostty --args -e btop'
 cmd-ctrl-h = 'exec-and-forget open -a "System Information"'
 cmd-ctrl-period = 'exec-and-forget open -a HandBrake'
 
 # ---------- Omarchy v4 utilities ----------
 cmd-ctrl-e = 'exec-and-forget open "raycast://extensions/raycast/emoji-symbols/search-emoji-symbols"'   # emoji picker
+# World clock (4.5: Super+Ctrl+Alt+E): the macOS Clock app.
+cmd-ctrl-alt-e = 'exec-and-forget open -a Clock'
+# Full screen desktop (4.5: Super+Ctrl+Alt+F): hide or show the bar. AeroSpace
+# cannot drop the gaps at runtime, so they stay.
+cmd-ctrl-alt-f = 'exec-and-forget /opt/homebrew/bin/sketchybar --bar hidden=toggle'
 # Coding agent in a fresh terminal (v4: Super+Shift+Ctrl+A), see bin/omarchy-agent.
 cmd-shift-ctrl-a = 'exec-and-forget open -na Ghostty --args -e $HOME/.local/bin/omarchy-agent'
 # Zoom (v4: Super+Ctrl+Z): fires macOS accessibility zoom (⌥⌘8). Needs
