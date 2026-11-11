@@ -75,4 +75,49 @@ check "Ghostty line says open windows reload through Hammerspoon" \
 check "no 'new windows only' line" bash -c "! grep -q 'new windows only' '$OUT'"
 rm -rf "$T"
 
+echo "theme name with shell, Lua or AppleScript metacharacters (#45):"
+for bad in 'bad]]os.exit()--' 'bad"name' 'bad;id' 'bad$(id)'; do
+  setup; mkdir -p "$H/.config/theme-switcher/cache/$bad"; run "$bad"
+  check "refuses '$bad'" test "$CODE" -ne 0
+  check "'$bad': says the name is invalid" grep -q 'invalid theme name' "$OUT"
+  check "'$bad': no alert or notification" bash -c "! grep -qE 'hs -c|osascript' '$LOG'"
+  check "'$bad': state file untouched" bash -c "! grep -q bad '$H/.config/theme-switcher/current' 2>/dev/null"
+  rm -rf "$T"
+done
+
+echo "theme --sync takes the commit pinned in OMARCHY_COMMIT (#45):"
+setup
+UP="$T/upstream"; mkdir -p "$UP/default/themed" "$UP/themes/pinned" "$UP/themes/bad;name"
+for t in btop.theme.tpl ghostty.conf.tpl neovim.lua.tpl claude.json.tpl obsidian.css.tpl; do
+  echo "# {{ background }}" > "$UP/default/themed/$t"
+done
+cp "$FIXTURE/colors.toml" "$UP/themes/pinned/colors.toml"
+cp "$FIXTURE/colors.toml" "$UP/themes/bad;name/colors.toml"
+g() { git -C "$UP" -c user.name=t -c user.email=t@t -c commit.gpgsign=false "$@" >/dev/null 2>&1; }
+g init -q -b quattro; g add -A; g commit -qm pinned
+PIN="$(git -C "$UP" rev-parse HEAD)"
+mkdir -p "$UP/themes/later"; cp "$FIXTURE/colors.toml" "$UP/themes/later/colors.toml"
+g add -A; g commit -qm later
+g config uploadpack.allowFilter true; g config uploadpack.allowAnySHA1InWant true
+# the installed layout: ~/.local/bin/theme is a symlink into the repo clone
+mkdir -p "$T/repo/bin" "$H/.local/bin"
+cp "$THEME_BIN" "$T/repo/bin/theme"; echo "$PIN" > "$T/repo/OMARCHY_COMMIT"
+ln -s "$T/repo/bin/theme" "$H/.local/bin/theme"
+env -i HOME="$H" USER="$USER" PATH="$STUBS:/usr/bin:/bin" TMPDIR="$T" \
+    XDG_CONFIG_HOME="$H/.config" CLAUDE_CONFIG_DIR="$H/.claude" \
+    GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0="url.file://$UP.insteadOf" \
+    GIT_CONFIG_VALUE_0="https://github.com/omacom/omarchy.git" \
+    /bin/bash "$H/.local/bin/theme" --sync > "$T/sync.txt" 2>&1 < /dev/null
+CODE=$?
+check "sync exits 0" test "$CODE" -eq 0
+check "syncs the theme at the pinned commit" test -f "$H/.config/theme-switcher/cache/pinned/colors.toml"
+check "does not take the branch head" test ! -e "$H/.config/theme-switcher/cache/later"
+check "skips an upstream theme with an invalid name" test ! -e "$H/.config/theme-switcher/cache/bad;name"
+[[ "$CODE" -eq 0 ]] || cat "$T/sync.txt"
+rm "$T/repo/OMARCHY_COMMIT"
+env -i HOME="$H" PATH="$STUBS:/usr/bin:/bin" TMPDIR="$T" \
+    /bin/bash "$H/.local/bin/theme" --sync > "$T/sync.txt" 2>&1 < /dev/null
+check "no OMARCHY_COMMIT: sync refuses" test "$?" -ne 0
+rm -rf "$T"
+
 [[ "$fails" -eq 0 ]] && echo "PASS" || { echo "FAIL: $fails check(s)"; exit 1; }

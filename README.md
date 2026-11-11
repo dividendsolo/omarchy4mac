@@ -17,7 +17,7 @@ parts that matter on macOS with native tools:
 | Prompt | [Starship](https://starship.rs), Omarchy 4's own config | `starship/` |
 
 The `theme` script is the centerpiece: `theme --sync` pulls every theme
-straight from the Omarchy repo and converts it for Ghostty, Neovim (LazyVim),
+from the Omarchy repo, at the commit pinned in `OMARCHY_COMMIT`, and converts it for Ghostty, Neovim (LazyVim),
 and btop. `theme random` respects macOS light/dark appearance, and a launchd
 listener re-themes everything the instant the system flips appearance.
 
@@ -94,7 +94,7 @@ for p in "$D"/launchd/*.plist; do
 done
 
 # Screensaver (optional)
-cargo install --git https://github.com/omacom/ttfx && ln -s ~/.cargo/bin/ttfx ~/.local/bin/ttfx
+cargo install --git https://github.com/omacom/ttfx --rev 14ed2742596f0056b13e25d14a83ea851adc2294 && ln -s ~/.cargo/bin/ttfx ~/.local/bin/ttfx
 
 theme --sync && theme tokyo-night
 brew services start sketchybar && brew services start borders && open -a Hammerspoon

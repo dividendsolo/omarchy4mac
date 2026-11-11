@@ -17,6 +17,15 @@ maintainer's Mac runs from a clone of it, the same as yours.
   borders; Theme and Rounded keep the round ones. The choice is saved and
   comes back after a restart. Ghostty shows a new transparency after you quit
   and reopen it.
+- Security hardening from a review before adoption (#45). The theme chooser
+  passes the theme name to `theme` as an argument, never as shell text.
+  `theme` refuses a theme name outside letters, digits, `.`, `_` and `-`,
+  and `theme --sync` skips upstream themes with such names. `theme --sync`
+  now takes the omacom/omarchy commit written in the new `OMARCHY_COMMIT`
+  file (v4.0.6) instead of the head of `quattro`: bump it together with
+  `OMARCHY_VERSION` (set `OMARCHY_REF` to a branch or SHA to override once).
+  `install.sh` builds ttfx at a fixed commit (`cargo install --rev`). The
+  weather, sunset and weather notice fetch `https://wttr.in`.
 - Each monitor has its own workspaces, like Omarchy 4.5. ⌥1–5 (and ⌘⇧1–5,
   ⌘⇧⌥1–5) work on the workspaces of the monitor you are on: ⌥1 is that
   monitor's first workspace, and the keys never jump to another monitor.

@@ -37,7 +37,11 @@ hs.execute = function(cmd)
   if what then return (SAVED[what] or "") .. "\n" end
   ran[#ran + 1] = cmd; return ""
 end
-hs.task = { new = function(_, _, args) ran[#ran + 1] = args[#args]; return stub() end }
+local tasks = {}
+hs.task = { new = function(path, _, args)
+  ran[#ran + 1] = args[#args]; tasks[#tasks + 1] = { path = path, args = args }
+  return stub()
+end }
 hs.chooser = { new = function(cb)
   local c = { cb = cb, shown = {} }
   function c:choices(list) self.shown = list end
@@ -169,6 +173,21 @@ check("Window Corners checks only the saved Sharp Corners", cm == "Sharp Corners
 omarchyMenu("Trigger")
 local trig = texts(choosers[#choosers].shown)
 check("Trigger has no Appearance", (", " .. trig .. ","):find(", Appearance,", 1, true) == nil, trig)
+
+-- ---- theme chooser: the name is one argv element, never shell text (#45) --
+omarchyMenu("Appearance")
+for _, r in ipairs(choosers[#choosers].shown) do if r.text == "Theme" then pick(choosers[#choosers], r); break end end
+local evil = "x; touch /tmp/pwned $(id)"
+choosers[#choosers].cb({ themeName = evil })
+local t = tasks[#tasks]
+-- a login shell, like every other menu command: theme needs Homebrew's PATH
+-- (sketchybar, nvim, hs) to reload the apps
+check("theme chooser runs in a login shell",
+  t.path == "/bin/bash" and t.args[1] == "-lc", t.path .. " " .. tostring(t.args[1]))
+check("theme chooser script holds no theme name",
+  t.args[2] == '~/.local/bin/theme "$1"', tostring(t.args[2]))
+check("theme chooser passes the name as one argument ($1)",
+  #t.args == 4 and t.args[4] == evil, table.concat(t.args, " | "))
 
 if fails > 0 then print(fails .. " failed"); os.exit(1) end
 print("all passed")

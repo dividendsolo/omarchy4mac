@@ -291,7 +291,7 @@ done
 # ---- 6. Screensaver (optional, needs cargo) -------------------------------
 if command -v cargo >/dev/null 2>&1 && ! command -v ttfx >/dev/null 2>&1; then
   say "Building ttfx for the screensaver"
-  run cargo install --git https://github.com/omacom/ttfx
+  run cargo install --git https://github.com/omacom/ttfx --rev 14ed2742596f0056b13e25d14a83ea851adc2294
   run ln -sf "$HOME/.cargo/bin/ttfx" "$HOME/.local/bin/ttfx"
 elif ! command -v ttfx >/dev/null 2>&1; then
   say "cargo not found; screensaver skipped (install rustup, rerun)"
