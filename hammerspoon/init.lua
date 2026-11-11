@@ -51,8 +51,10 @@ local bindings = {
 
   -- Focus
   { "SUPER + LEFT / DOWN / UP / RIGHT",  "Focus window in direction (crosses displays)" },
-  { "SUPER + `",                "Cycle next window in workspace" },
-  { "SUPER + SHIFT + `",        "Cycle prev window in workspace" },
+  { "SUPER + `",                "Quake console (default agent)" },
+  { "SUPER + SHIFT + `",        "Second Quake console" },
+  { "SUPER + ALT + `",          "Cycle next window in workspace" },
+  { "SUPER + ALT + SHIFT + `",  "Cycle prev window in workspace" },
   { "CTRL + ALT + TAB",         "Focus next monitor" },
   { "CTRL + ALT + SHIFT + TAB", "Focus prev monitor" },
 
@@ -625,6 +627,120 @@ for _, dir in ipairs(ghosttyConfigs) do
     end
   end):start()
 end
+
+----------------------------------------------------------------------
+-- Quake console (Omarchy 4.5: Super + Grave, default/hypr/qconsole.lua).
+-- ⌘` and ⌘⇧` each own one Ghostty process, started with the default agent
+-- the first time. Show: float it, bring it to the focused workspace, put it
+-- on the top half of the screen over a dimmed desktop. Hide: hide the app,
+-- so the session keeps running. Losing focus hides it too.
+----------------------------------------------------------------------
+-- console-frame: begin
+-- Top half of the screen; a wide screen gets a centered panel twice as wide
+-- as it is tall (qconsole.lua: share 0.5, box 2).
+local function consoleFrame(screen)
+  local h = math.floor(screen.h * 0.5)
+  local w = math.min(screen.w, h * 2)
+  return { x = screen.x + math.floor((screen.w - w) / 2), y = screen.y, w = w, h = h }
+end
+-- console-frame: end
+
+local GHOSTTY = "com.mitchellh.ghostty"
+local BOOT = hs.execute("/usr/sbin/sysctl -n kern.boottime")
+local consoles = { {}, {} } -- [n] = { pid, shown, dim, timer, launching }
+local showConsole
+
+-- The console's Ghostty, kept in hs.settings so a Hammerspoon reload keeps
+-- the session. The boot time guards against a reused PID after a restart.
+local function consoleApp(n)
+  local saved = hs.settings.get("omarchy.console." .. n)
+  if not saved or saved.boot ~= BOOT then return nil end
+  local app = hs.application.applicationForPID(saved.pid)
+  if app and app:bundleID() == GHOSTTY then return app end
+end
+
+local function launchConsole(n)
+  local c, before = consoles[n], {}
+  for _, a in ipairs(hs.application.applicationsForBundleID(GHOSTTY)) do before[a:pid()] = true end
+  hs.execute("open -na Ghostty --args -e $HOME/.local/bin/omarchy-agent")
+  local tries = 0
+  if c.timer then c.timer:stop() end
+  -- Until the window shows up, another press must not start a second Ghostty.
+  c.launching = true
+  c.timer = hs.timer.doEvery(0.1, function()
+    tries = tries + 1
+    for _, a in ipairs(hs.application.applicationsForBundleID(GHOSTTY)) do
+      if not before[a:pid()] and a:mainWindow() then
+        c.timer:stop()
+        c.launching = false
+        hs.settings.set("omarchy.console." .. n, { pid = a:pid(), boot = BOOT })
+        -- Let AeroSpace see the new window first, or it tiles it after the float.
+        hs.timer.doAfter(0.5, function() showConsole(n, a) end)
+        return
+      end
+    end
+    if tries >= 100 then c.timer:stop(); c.launching = false end -- 10 s: Ghostty did not start
+  end)
+end
+
+local function hideConsole(n)
+  local c = consoles[n]
+  if not c.shown then return end
+  c.shown = false
+  if c.dim then c.dim:hide() end
+  local app = consoleApp(n)
+  if app then app:hide() end
+end
+
+local function place(n, app, win)
+  local c, id = consoles[n], win:id()
+  hs.execute(string.format(
+    'A=/opt/homebrew/bin/aerospace; $A layout --window-id %d floating; $A move-node-to-workspace --window-id %d "$($A list-workspaces --focused)"',
+    id, id))
+  local screen = hs.screen.mainScreen()
+  if c.dim then c.dim:delete() end
+  c.dim = hs.canvas.new(screen:fullFrame())
+  c.dim:appendElements({ type = "rectangle", action = "fill", fillColor = { white = 0, alpha = 0.6 } })
+  c.dim:level(hs.canvas.windowLevels.normal)
+  c.dim:behavior(hs.canvas.windowBehaviors.canJoinAllSpaces)
+  c.dim:show()
+  app:unhide()
+  win:setFrame(consoleFrame(screen:frame()), 0)
+  win:focus()
+  c.pid, c.shown = app:pid(), true
+end
+
+showConsole = function(n, app)
+  local win = app:mainWindow() or app:allWindows()[1]
+  if win then return place(n, app, win) end
+  -- A hidden app may not list its window until it is shown.
+  app:unhide()
+  hs.timer.doAfter(0.3, function()
+    win = app:mainWindow() or app:allWindows()[1]
+    if win then return place(n, app, win) end
+    app:kill() -- the agent quit and closed its window: start a fresh console
+    launchConsole(n)
+  end)
+end
+
+-- console-toggle: begin
+local function toggleConsole(n)
+  if consoles[n].launching then return end
+  if consoles[n].shown then return hideConsole(n) end
+  local app = consoleApp(n)
+  if app then showConsole(n, app) else launchConsole(n) end
+end
+-- console-toggle: end
+
+hs.hotkey.bind({"cmd"}, "`", function() toggleConsole(1) end)
+hs.hotkey.bind({"cmd", "shift"}, "`", function() toggleConsole(2) end)
+
+ConsoleWatcher = hs.application.watcher.new(function(_, event, app)
+  if event ~= hs.application.watcher.deactivated and event ~= hs.application.watcher.terminated then return end
+  for n, c in ipairs(consoles) do
+    if c.shown and app and app:pid() == c.pid then hideConsole(n) end
+  end
+end):start()
 
 -- Gaming mode hides SketchyBar; show it again when Steam quits.
 SteamWatcher = hs.application.watcher.new(function(name, event, app)
