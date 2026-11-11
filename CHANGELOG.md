@@ -12,6 +12,14 @@ maintainer's Mac runs from a clone of it, the same as yours.
   default agent. Press it again (or click away) and it tucks itself away with
   the session still running. ⌘⇧` is a second console. Window cycling moves
   from ⌘` and ⌘⇧` to ⌘⌥` and ⌘⌥⇧`.
+- Each monitor has its own workspaces, like Omarchy 4.5. ⌥1–5 (and ⌘⇧1–5,
+  ⌘⇧⌥1–5) work on the workspaces of the monitor you are on: ⌥1 is that
+  monitor's first workspace, and the keys never jump to another monitor.
+  ⌘ plus an arrow moves focus on to the next display at the edge of the
+  screen, and ⌥⇥ goes to the next workspace on the same monitor (back and
+  forth stays on ⌘⌃⇥). When you unplug a monitor, its workspaces come after
+  the ones already on the screen they land on, so nothing is renumbered, and
+  the other screen of a matched pair keeps its own workspaces.
 - Omarchy 4.5's floating workspaces and dock keys. ⌥L cycles the focused
   workspace through tiles, accordion and floating, and the layout comes back
   after AeroSpace restarts. ⌥M minimizes the focused window to the Dock. Both

@@ -167,7 +167,7 @@ is also available.
 
 | Keys | Action |
 |---|---|
-| ⌘←/↓/↑/→ | Focus window in direction |
+| ⌘←/↓/↑/→ | Focus window in direction, on to the next display at the edge |
 | ⌘` | Quake console: drops over a dimmed screen, starts the default agent the first time; again to tuck it away |
 | ⌘⇧` | Second Quake console |
 | ⌘⌥` | Cycle next window in workspace |
@@ -187,11 +187,11 @@ is also available.
 
 | Keys | Action |
 |---|---|
-| ⌥1–5 | Switch to workspace 1–5 |
-| ⌥⇥ | Back and forth between last two workspaces |
+| ⌥1–5 | Switch to the focused monitor's workspace 1–5 |
+| ⌥⇥ | Next workspace on the focused monitor |
 | ⌘⌃⇥ | Back and forth between last two workspaces |
-| ⌘⇧1–5 | Move window to workspace N and follow |
-| ⌘⇧⌥1–5 | Move window to workspace N (stay on current) |
+| ⌘⇧1–5 | Move window to the focused monitor's workspace N and follow |
+| ⌘⇧⌥1–5 | Move window to the focused monitor's workspace N (stay on current) |
 
 ### Resize
 

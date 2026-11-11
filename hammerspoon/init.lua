@@ -50,7 +50,7 @@ local bindings = {
   { "SUPER + CTRL + F",         "Fullscreen (tile)" },
 
   -- Focus
-  { "SUPER + LEFT / DOWN / UP / RIGHT",  "Focus window in direction" },
+  { "SUPER + LEFT / DOWN / UP / RIGHT",  "Focus window in direction (crosses displays)" },
   { "SUPER + `",                "Quake console (default agent)" },
   { "SUPER + SHIFT + `",        "Second Quake console" },
   { "SUPER + ALT + `",          "Cycle next window in workspace" },
@@ -62,10 +62,10 @@ local bindings = {
   { "SUPER + SHIFT + ←/↓/↑/→",  "Swap window in direction" },
 
   -- Workspaces
-  { "ALT + 1..5",               "Switch to workspace N" },
-  { "SUPER + SHIFT + 1..5",     "Move window to workspace N and follow" },
-  { "SUPER + SHIFT + ALT + 1..5", "Move window to workspace N (stay)" },
-  { "ALT + TAB",                "Back-and-forth between workspaces" },
+  { "ALT + 1..5",               "Switch to this monitor's workspace N" },
+  { "SUPER + SHIFT + 1..5",     "Move window to this monitor's workspace N and follow" },
+  { "SUPER + SHIFT + ALT + 1..5", "Move window to this monitor's workspace N (stay)" },
+  { "ALT + TAB",                "Next workspace on this monitor" },
   { "SUPER + CTRL + TAB",       "Back-and-forth between workspaces" },
   { "SUPER + SHIFT + ALT + ←/→/↑/↓", "Move workspace to prev/next monitor" },
   { "SUPER + CTRL + SHIFT + ←/↓/↑/→", "Move focused window across monitors" },

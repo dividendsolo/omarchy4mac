@@ -37,14 +37,18 @@ exec-on-workspace-change = ['/bin/bash', '-c',
 # VA2446 (2) sits on the right; VA2446 (1) sits on the left; laptop sits under
 # the right external. If the laptop isn't connected, workspaces 4/5 fall back
 # to the left external.
+# The first pattern is a workspace's own monitor: bin/omarchy-workspace numbers
+# a monitor's own workspaces first (alt-1 is its first one) and guests after.
 [workspace-to-monitor-force-assignment]
 # Each workspace prefers its primary monitor but falls back through the chain
 # so it always has somewhere to display, even when some monitors are unplugged.
-1 = ['\(1\)$', '\(2\)$', 'built-in']      # browser → left, else right, else laptop
-2 = ['\(2\)$', '\(1\)$', 'built-in']      # Claude + Ghostty → right, else left, else laptop
-3 = ['\(2\)$', '\(1\)$', 'built-in']      # spare   → right, else left, else laptop
-4 = ['built-in', '\(2\)$', '\(1\)$']      # comms   → laptop, else right, else left
-5 = ['built-in', '\(2\)$', '\(1\)$']      # music   → laptop, else right, else left
+# macOS drops the (1)/(2) suffix once one VA2446 is unplugged, so the bare
+# 'VA2446' keeps the other one's workspaces where they are.
+1 = ['\(1\)$', '\(2\)$', 'VA2446', 'built-in']      # browser → left, else right, else laptop
+2 = ['\(2\)$', '\(1\)$', 'VA2446', 'built-in']      # Claude + Ghostty → right, else left, else laptop
+3 = ['\(2\)$', '\(1\)$', 'VA2446', 'built-in']      # spare   → right, else left, else laptop
+4 = ['built-in', '\(2\)$', '\(1\)$', 'VA2446']      # comms   → laptop, else right, else left
+5 = ['built-in', '\(2\)$', '\(1\)$', 'VA2446']      # music   → laptop, else right, else left
 
 [gaps]
 inner.horizontal = 8
@@ -87,32 +91,36 @@ cmd-alt-f = 'fullscreen'
 cmd-ctrl-f = 'fullscreen'
 
 # ---------- Workspaces ----------
-alt-1 = 'workspace 1'
-alt-2 = 'workspace 2'
-alt-3 = 'workspace 3'
-alt-4 = 'workspace 4'
-alt-5 = 'workspace 5'
+# Per monitor (Omarchy 4.5): alt-N is the N-th workspace of the monitor you are
+# on, never another monitor's; see bin/omarchy-workspace.
+alt-1 = 'exec-and-forget $HOME/.local/bin/omarchy-workspace 1'
+alt-2 = 'exec-and-forget $HOME/.local/bin/omarchy-workspace 2'
+alt-3 = 'exec-and-forget $HOME/.local/bin/omarchy-workspace 3'
+alt-4 = 'exec-and-forget $HOME/.local/bin/omarchy-workspace 4'
+alt-5 = 'exec-and-forget $HOME/.local/bin/omarchy-workspace 5'
 
-alt-tab = 'workspace-back-and-forth'
+# alt-tab is Super+Tab: the next workspace on the focused monitor.
+alt-tab = 'workspace --wrap-around next'
 cmd-ctrl-tab = 'workspace-back-and-forth'
 
-cmd-shift-1 = ['move-node-to-workspace 1', 'workspace 1']
-cmd-shift-2 = ['move-node-to-workspace 2', 'workspace 2']
-cmd-shift-3 = ['move-node-to-workspace 3', 'workspace 3']
-cmd-shift-4 = ['move-node-to-workspace 4', 'workspace 4']
-cmd-shift-5 = ['move-node-to-workspace 5', 'workspace 5']
+cmd-shift-1 = 'exec-and-forget $HOME/.local/bin/omarchy-workspace --move-follow 1'
+cmd-shift-2 = 'exec-and-forget $HOME/.local/bin/omarchy-workspace --move-follow 2'
+cmd-shift-3 = 'exec-and-forget $HOME/.local/bin/omarchy-workspace --move-follow 3'
+cmd-shift-4 = 'exec-and-forget $HOME/.local/bin/omarchy-workspace --move-follow 4'
+cmd-shift-5 = 'exec-and-forget $HOME/.local/bin/omarchy-workspace --move-follow 5'
 
-cmd-shift-alt-1 = 'move-node-to-workspace 1'
-cmd-shift-alt-2 = 'move-node-to-workspace 2'
-cmd-shift-alt-3 = 'move-node-to-workspace 3'
-cmd-shift-alt-4 = 'move-node-to-workspace 4'
-cmd-shift-alt-5 = 'move-node-to-workspace 5'
+cmd-shift-alt-1 = 'exec-and-forget $HOME/.local/bin/omarchy-workspace --move 1'
+cmd-shift-alt-2 = 'exec-and-forget $HOME/.local/bin/omarchy-workspace --move 2'
+cmd-shift-alt-3 = 'exec-and-forget $HOME/.local/bin/omarchy-workspace --move 3'
+cmd-shift-alt-4 = 'exec-and-forget $HOME/.local/bin/omarchy-workspace --move 4'
+cmd-shift-alt-5 = 'exec-and-forget $HOME/.local/bin/omarchy-workspace --move 5'
 
 # ---------- Focus ----------
-cmd-left = 'focus left'
-cmd-down = 'focus down'
-cmd-up = 'focus up'
-cmd-right = 'focus right'
+# At the edge of the screen, focus goes on to the neighbouring display.
+cmd-left = 'focus --boundaries all-monitors-outer-frame left'
+cmd-down = 'focus --boundaries all-monitors-outer-frame down'
+cmd-up = 'focus --boundaries all-monitors-outer-frame up'
+cmd-right = 'focus --boundaries all-monitors-outer-frame right'
 
 # ---------- Swap ----------
 cmd-shift-left = 'move left'
