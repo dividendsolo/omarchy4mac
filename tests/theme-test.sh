@@ -26,6 +26,16 @@ setup() {
   for cmd in osascript hs sketchybar nvim pkill; do
     printf '#!/bin/bash\necho "%s $*" >> "%s"\nexit 0\n' "$cmd" "$LOG" > "$STUBS/$cmd"
   done
+  # osascript also logs its script text (-e) and its argv apart (#50).
+  cat > "$STUBS/osascript" <<EOF
+#!/bin/bash
+echo "osascript \$*" >> "$LOG"
+while [[ \$# -gt 0 ]]; do
+  if [[ "\$1" == -e ]]; then echo "\$2" >> "$T/script.log"; shift 2
+  else echo "\$1" >> "$T/argv.log"; shift; fi
+done
+exit 0
+EOF
   # pgrep: Hammerspoon is running, nothing else is.
   printf '#!/bin/bash\necho "pgrep $*" >> "%s"\n[[ "$*" == *Hammerspoon* ]]\n' "$LOG" > "$STUBS/pgrep"
   chmod +x "$STUBS"/*
@@ -63,7 +73,8 @@ setup; run withwall
 check "exits 0" test "$CODE" -eq 0
 check "runs to the end (prints done.)" grep -q '^done\.' "$OUT"
 check "writes the state file" grep -qx withwall "$H/.config/theme-switcher/current"
-check "sets the wallpaper" grep -q 'set picture of every desktop to ".*withwall_1.jpg"' "$LOG"
+check "sets the wallpaper" grep -q 'set picture of every desktop to item 1 of argv' "$T/script.log"
+check "passes the wallpaper path as an argument" grep -qx "$H/Pictures/Wallpapers/withwall_1.jpg" "$T/argv.log"
 check "shows no alert" bash -c "! grep -q 'hs.alert' '$LOG'"
 check "sends no macOS notification" bash -c "! grep -q 'display notification' '$LOG'"
 rm -rf "$T"
@@ -85,6 +96,15 @@ for bad in 'bad]]os.exit()--' 'bad"name' 'bad;id' 'bad$(id)'; do
   rm -rf "$T"
 done
 
+echo "wallpaper file name with a quote reaches osascript as an argument (#50):"
+setup; rm "$H/Pictures/Wallpapers/withwall_1.jpg"
+BADWALL="$H/Pictures/Wallpapers/withwall_x\" & (do shell script \"id\") & \".jpg"
+: > "$BADWALL"; run withwall
+check "exits 0" test "$CODE" -eq 0
+check "no wallpaper path in the script text" bash -c "[[ -s '$T/script.log' ]] && ! grep -q Wallpapers '$T/script.log'"
+check "passes the path as an argument" grep -qxF "$BADWALL" "$T/argv.log"
+rm -rf "$T"
+
 echo "theme --sync takes the commit pinned in OMARCHY_COMMIT (#45):"
 setup
 UP="$T/upstream"; mkdir -p "$UP/default/themed" "$UP/themes/pinned" "$UP/themes/bad;name"
@@ -93,6 +113,9 @@ for t in btop.theme.tpl ghostty.conf.tpl neovim.lua.tpl claude.json.tpl obsidian
 done
 cp "$FIXTURE/colors.toml" "$UP/themes/pinned/colors.toml"
 cp "$FIXTURE/colors.toml" "$UP/themes/bad;name/colors.toml"
+mkdir -p "$UP/themes/pinned/backgrounds"
+echo ok > "$UP/themes/pinned/backgrounds/1-ok.jpg"
+echo bad > "$UP/themes/pinned/backgrounds/bad 'name' & \$(id).jpg"
 g() { git -C "$UP" -c user.name=t -c user.email=t@t -c commit.gpgsign=false "$@" >/dev/null 2>&1; }
 g init -q -b quattro; g add -A; g commit -qm pinned
 PIN="$(git -C "$UP" rev-parse HEAD)"
@@ -113,6 +136,8 @@ check "sync exits 0" test "$CODE" -eq 0
 check "syncs the theme at the pinned commit" test -f "$H/.config/theme-switcher/cache/pinned/colors.toml"
 check "does not take the branch head" test ! -e "$H/.config/theme-switcher/cache/later"
 check "skips an upstream theme with an invalid name" test ! -e "$H/.config/theme-switcher/cache/bad;name"
+check "syncs a background with a valid name" test -f "$H/Pictures/Wallpapers/pinned_1-ok.jpg"
+check "skips a background with an invalid name (#50)" bash -c "! ls '$H/Pictures/Wallpapers' | grep -q bad"
 [[ "$CODE" -eq 0 ]] || cat "$T/sync.txt"
 rm "$T/repo/OMARCHY_COMMIT"
 env -i HOME="$H" PATH="$STUBS:/usr/bin:/bin" TMPDIR="$T" \
