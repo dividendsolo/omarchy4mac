@@ -230,19 +230,39 @@ theme_appearance() {
   (( lum > 128 )) && echo light || echo dark
 }
 
+# The last few themes, newest first: `theme random` skips them, so a shuffle never
+# lands on a theme just seen (James, 2026-11-12: "it switched to a new theme, but
+# it's the same theme").
+RECENT="$HOME/.config/theme-switcher/recent"
+RECENT_KEEP=3
+
 pick_random_theme() {
   # optional $1 forces the mode — used by theme-appearance-watch, which has
   # already detected the flip (re-detecting here races the OS transition)
-  local want cur t pool=()
+  local want cur t r pool=() fresh=() recent=" "
   want="${1:-$(system_appearance)}"
   cur="$(current_theme)"
+  [[ -f "$RECENT" ]] && while IFS= read -r r; do recent+="$r "; done < "$RECENT"
   while IFS= read -r t; do
-    [[ -n "$t" && "$t" != "$cur" && "$(theme_appearance "$t")" == "$want" ]] && pool+=("$t")
+    [[ -n "$t" && "$t" != "$cur" && "$(theme_appearance "$t")" == "$want" ]] || continue
+    pool+=("$t")
+    [[ "$recent" == *" $t "* ]] || fresh+=("$t")
   done < <(installed_themes)
+  # Skip recent themes only while others are left; a mode with few themes
+  # still never repeats the current one.
+  [[ ${#fresh[@]} -gt 0 ]] && pool=("${fresh[@]}")
   # only match is the current theme → keep it rather than switch appearance
   if [[ ${#pool[@]} -eq 0 && "$(theme_appearance "$cur")" == "$want" ]]; then pool=("$cur"); fi
   [[ ${#pool[@]} -gt 0 ]] || die "no $want themes cached (system is in $want mode)"
   echo "${pool[$((RANDOM % ${#pool[@]}))]}"
+}
+
+remember_theme() {
+  local r keep=("$1")
+  [[ -f "$RECENT" ]] && while IFS= read -r r; do
+    [[ -n "$r" && "$r" != "$1" && ${#keep[@]} -lt $RECENT_KEEP ]] && keep+=("$r")
+  done < "$RECENT"
+  printf '%s\n' "${keep[@]}" > "$RECENT"
 }
 
 # One file from the sync's clone; a blob not yet local is fetched on demand.
@@ -551,25 +571,53 @@ reload_sketchybar() {
 # terminal palette, so a dark-built skin is unreadable on a light Ghostty.
 # Light theme -> the `daylight` skin, dark -> `default`. New sessions pick it up.
 apply_hermes() {
-  # Resolve hermes by path too: launchd and app-launched shells often lack
-  # ~/.local/bin on PATH, and a silent skip here leaves every session stale.
-  local hermes
-  hermes="$(command -v hermes 2>/dev/null || true)"
-  [[ -z "$hermes" && -x "$HOME/.local/bin/hermes" ]] && hermes="$HOME/.local/bin/hermes"
-  [[ -n "$hermes" ]] || { echo "  ${c_dim}hermes${c_rst}   skipped (hermes not found)"; return 0; }
+  # Every Hermes profile keeps its own config, so each one gets the skin. A
+  # `hermes -p X skin use` per profile starts Python each time: 55 profiles took
+  # 24 of the switch's 25 seconds (2026-11-12). One python3 writes the one
+  # display.skin line in every config instead; running sessions still pick it
+  # up live, because Hermes watches its config file.
+  [[ -d "$HOME/.hermes" ]] || { echo "  ${c_dim}hermes${c_rst}   skipped (no ~/.hermes)"; return 0; }
   local skin=default
   [[ "$(theme_appearance "$1")" == light ]] && skin=daylight
-  if ! "$hermes" skin use "$skin" >/dev/null 2>&1; then
-    echo "  ${c_dim}hermes${c_rst}   skin use failed"; return 0
+  if ! SKIN="$skin" python3 - "$HOME/.hermes/config.yaml" "$HOME/.hermes/profiles"/*/config.yaml <<'PY'
+import os, re, sys
+skin = os.environ["SKIN"]
+for path in sys.argv[1:]:
+    if not os.path.isfile(path):
+        continue
+    text = open(path).read()
+    lines = text.split("\n")
+    out, in_display, done = [], False, False
+    for line in lines:
+        if re.match(r"^display:\s*$", line):
+            in_display = True
+            out.append(line)
+            continue
+        if in_display and line and not line.startswith(" "):
+            if not done:
+                out.append(f"  skin: {skin}")
+                done = True
+            in_display = False
+        if in_display and re.match(r"^  skin:", line):
+            line, done = f"  skin: {skin}", True
+        out.append(line)
+    if in_display and not done:
+        while out and out[-1] == "":
+            out.pop()
+        out += [f"  skin: {skin}", ""]
+        done = True
+    if not done:
+        out = (out[:-1] if out and out[-1] == "" else out) + ["display:", f"  skin: {skin}", ""]
+    new = "\n".join(out)
+    if new != text:
+        tmp = path + ".theme-tmp"
+        open(tmp, "w").write(new)
+        os.chmod(tmp, os.stat(path).st_mode & 0o777)
+        os.replace(tmp, path)
+PY
+  then
+    echo "  ${c_dim}hermes${c_rst}   skin write failed"; return 0
   fi
-  # Every profile keeps its own config, so each gets the skin too.
-  # Profiles run in parallel: each call starts Python (~1s), and serial took 7s+.
-  local pf
-  for pf in "$HOME/.hermes/profiles"/*/; do
-    [[ -d "$pf" ]] && "$hermes" -p "$(basename "$pf")" skin use "$skin" >/dev/null 2>&1 &
-  done
-  wait
-  # Running sessions pick the skin up live (Hermes watches the config).
   echo "  ${c_dim}hermes${c_rst}   → $skin"
 }
 
@@ -784,15 +832,11 @@ if [[ -z "$(installed_themes)" ]]; then
 fi
 
 name="${args[0]}"
-if [[ "$name" == "random" && ! -d "$CACHE/random" ]]; then
-  # `theme random [light|dark]` — mode arg wins, else detect once
-  want="${args[1]:-$(system_appearance)}"
-  name="$(pick_random_theme "$want")"
-  echo "${c_dim}random pick ($want mode):${c_rst} ${c_bold}$name${c_rst}"
-fi
-valid_name "$name" || die "invalid theme name: $name"
-if [[ ! -d "$CACHE/$name" ]]; then
-  echo "${c_red}unknown theme:${c_rst} $name" >&2; echo >&2; list_themes >&2; exit 1
+if [[ "$name" != "random" || -d "$CACHE/random" ]]; then
+  valid_name "$name" || die "invalid theme name: $name"
+  if [[ ! -d "$CACHE/$name" ]]; then
+    echo "${c_red}unknown theme:${c_rst} $name" >&2; echo >&2; list_themes >&2; exit 1
+  fi
 fi
 
 # Single-instance lock. alt-t fires one process per keypress (and key repeat),
@@ -815,13 +859,22 @@ if [[ "$lock_taken" -eq 0 ]]; then
 fi
 trap 'rm -rf "$LOCK" ${SRC:+"$SRC"}' EXIT   # SRC: a first-use sync's clone
 
+# The random pick comes after the lock: a press during a switch used to read the
+# old state, pick the theme being applied, and announce it (2026-11-12).
+if [[ "$name" == "random" && ! -d "$CACHE/random" ]]; then
+  # `theme random [light|dark]` — mode arg wins, else detect once
+  want="${args[1]:-$(system_appearance)}"
+  name="$(pick_random_theme "$want")"
+  echo "${c_dim}random pick ($want mode):${c_rst} ${c_bold}$name${c_rst}"
+fi
+
 echo "${c_bold}Switching to ${c_grn}$name${c_rst}${c_bold}:${c_rst}"
 apply_ghostty "$name"
 apply_nvim "$name"
 apply_btop "$name"
 apply_sketchybar "$name"
 apply_wallpaper "$name"
-mkdir -p "$(dirname "$STATE")"; echo "$name" > "$STATE"
+mkdir -p "$(dirname "$STATE")"; echo "$name" > "$STATE"; remember_theme "$name"
 # Detached and logged, so SSH never holds up a switch (or the hotkey's task).
 if [[ -f "$HERDR_SYNC" && -z "${THEME_SYNC_FROM:-}" ]]; then
   mkdir -p "$(dirname "$HERDR_LOG")"
