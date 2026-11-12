@@ -11,8 +11,9 @@ maintainer's Mac runs from a clone of it, the same as yours.
   which slides back down whenever the pointer reaches the top edge, and the
   bar was drawn above windows only (`topmost=window`), so the revealed menu
   bar covered it and took every click. The bar is now drawn above everything
-  (`topmost=on`). App menus stay under it, as on Omarchy; ⌘⇧/ still searches
-  an app's menus.
+  (`topmost=on`). The app menu titles are now under the bar; ⌘⇧/ still
+  searches an app's menus. Thanks to **[@douglas](https://github.com/douglas)**
+  (#68).
 
 ## 2026-11-11
 

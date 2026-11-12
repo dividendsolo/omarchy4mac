@@ -22,6 +22,10 @@ in_range() { # in_range <description> <min> <max> <actual>
 echo "sketchybarrc:"
 max="$(awk '/--add item media left/{f=1} f&&/label.max_chars=/{sub(/.*label.max_chars=/,""); print $1; exit}' "$RC")"
 check "music title is at most 23 characters" 23 "$max"
+# The install hides the macOS menu bar, which slides down over a bar drawn
+# above windows only and takes its clicks (#68). The bar sits above it.
+topmost="$(grep -o 'topmost=[a-z]*' "$RC" | head -1)"
+check "the bar is drawn above the menu bar" "topmost=on" "$topmost"
 
 if pgrep -xq sketchybar; then
   echo "running bar:"
