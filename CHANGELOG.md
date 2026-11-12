@@ -7,6 +7,14 @@ maintainer's Mac runs from a clone of it, the same as yours.
 
 ## 2026-11-12
 
+- Unplugging the monitors no longer shows an old theme's wallpaper on the
+  laptop screen. macOS keeps a wallpaper for every arrangement of screens and
+  shows that one when the screens change, so the laptop alone kept the picture
+  from the last time it was alone. Hammerspoon now sets the current background
+  (or a video background's still frame) again two seconds after the screens
+  change (#69). The fix starts with the next theme switch or ⌘⌃W, which
+  records the current background.
+
 - SketchyBar's items take clicks again. The install hides the macOS menu bar,
   which slides back down whenever the pointer reaches the top edge, and the
   bar was drawn above windows only (`topmost=window`), so the revealed menu
