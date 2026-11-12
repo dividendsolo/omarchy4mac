@@ -21,6 +21,8 @@ setup() {
 #!/bin/bash
 [[ "\$*" == *"get picture"* ]] && { cat "$T/current" 2>/dev/null; exit 0; }
 echo "\${@: -1}" >> "$T/picture.log"
+# macOS keeps one picture per screen arrangement (Index.plist): a set reaches only the connected one
+mkdir -p "$T/shown"; echo "\${@: -1}" > "$T/shown/\$(cat "$T/arrangement" 2>/dev/null || echo laptop)"
 EOF
   # qlmanage -t -s <n> -o <dir> <file> writes <dir>/<file name>.png
   cat > "$STUBS/qlmanage" <<EOF
@@ -83,6 +85,27 @@ check "a config reload does not play it again" test ! -e "$T/player.log"
 run --login 222
 check "a login restarts the video background" grep -qxF "$W/clip.mp4" "$T/player.log"
 check "the restarted player keeps running" player_alive
+teardown
+
+echo "a screen change (#69):"
+setup
+screens() { echo "$1" > "$T/arrangement"; }
+shown() { cat "$T/shown/$1" 2>/dev/null; }
+: > "$W/jade-horse.webp"; : > "$W/big-eye.webp"
+screens laptop; run "$W/jade-horse.webp"
+screens docked; run "$W/big-eye.webp"
+check "the theme switch reaches only the connected screens" test "$(shown laptop)" = "$W/jade-horse.webp"
+screens laptop; run --reapply
+check "unplugged: the laptop shows the current wallpaper" test "$(shown laptop)" = "$W/big-eye.webp"
+: > "$W/clip.mp4"
+screens docked; run "$W/clip.mp4"
+screens laptop; rm -f "$T/player.log"; run --reapply
+check "unplugged: the laptop shows the video's still frame" test "$(shown laptop)" = "$H/.cache/omarchy/background-stills/clip.mp4.png"
+check "the video player is not started twice" test ! -e "$T/player.log"
+screens docked; run "$W/big-eye.webp"; screens laptop; run --reapply
+check "after a video, an image is reapplied, not the old still" test "$(shown laptop)" = "$W/big-eye.webp"
+check "Hammerspoon reapplies the background when the screens change" \
+  bash -c "grep -q 'hs.screen.watcher.new' '$HERE/../hammerspoon/init.lua' && grep -q 'omarchy-bg-set --reapply' '$HERE/../hammerspoon/init.lua'"
 teardown
 
 [[ "$fails" -eq 0 ]] && echo "PASS" || { echo "FAIL: $fails check(s)"; exit 1; }
