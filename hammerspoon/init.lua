@@ -304,6 +304,15 @@ end)
 -- reload does not replay the intro.
 hs.task.new("/bin/bash", nil, { "-lc", "~/.local/bin/omarchy-bg-set --login " .. tostring(hs.processInfo.processID) }):start()
 
+-- macOS keeps a picture per screen arrangement, so after an unplug the laptop
+-- shows whatever it had when it was last alone (#69): set the current
+-- background again once the screens settle (one run per burst of events).
+local reapplyTimer = nil
+bgScreenWatcher = hs.screen.watcher.new(function() -- global: a local watcher is garbage-collected
+  if reapplyTimer then reapplyTimer:stop() end
+  reapplyTimer = hs.timer.doAfter(2, function() hs.task.new("/bin/bash", nil, { "-lc", "~/.local/bin/omarchy-bg-set --reapply" }):start() end)
+end):start()
+
 ----------------------------------------------------------------------
 -- Forward declarations so mutually-referenced choosers can find each other
 ----------------------------------------------------------------------

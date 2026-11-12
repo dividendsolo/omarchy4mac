@@ -6,6 +6,8 @@
 #   omarchy-bg-set --login <id>  from Hammerspoon at load: restart a video
 #                                background, and play the current background's
 #                                intro once per <id> (Hammerspoon's pid)
+#   omarchy-bg-set --reapply     from Hammerspoon when the screens change: set
+#                                the current background again (#69)
 #
 # A video's still frame becomes the macOS desktop picture, which the lock
 # screen shows, and omarchy-video-wallpaper loops the video over it, muted.
@@ -15,6 +17,7 @@
 export PATH="$PATH:/usr/bin:/bin:/usr/sbin"
 STATE="$HOME/.local/state/omarchy"
 VIDEO_STATE="$STATE/background-video"   # holds the video's path while the background is a video
+IMAGE_STATE="$STATE/background"         # holds the image's path while the background is an image
 PID_FILE="$STATE/background-video.pid"
 INTROS_OFF="$STATE/toggles/background-intros-off"
 STILLS="$HOME/.cache/omarchy/background-stills"
@@ -58,19 +61,27 @@ intro_for() { # intro_for <image> -> the intro to play, if intros are on
 
 play_intro() { [[ -x "$PLAYER" ]] && nohup "$PLAYER" --once "$1" >/dev/null 2>&1 & }
 
+still_for() { # still_for <video> -> its still frame, made once
+  local still="$STILLS/${1##*/}.png"   # qlmanage names it <file name>.png
+  mkdir -p "$STILLS"
+  [[ "$still" -nt "$1" ]] || qlmanage -t -s 3840 -o "$STILLS" "$1" >/dev/null 2>&1
+  [[ -f "$still" ]] && echo "$still"
+}
+
 set_background() {
   local file="$1" still intro
+  mkdir -p "$STATE"
   if is_video "$file"; then
-    mkdir -p "$STILLS" "$STATE"
-    still="$STILLS/${file##*/}.png"   # qlmanage names it <file name>.png
-    [[ "$still" -nt "$file" ]] || qlmanage -t -s 3840 -o "$STILLS" "$file" >/dev/null 2>&1
+    still="$(still_for "$file")"
     stop_video
-    [[ -f "$still" ]] && set_picture "$still"
+    [[ -n "$still" ]] && set_picture "$still"
+    rm -f "$IMAGE_STATE"
     echo "$file" > "$VIDEO_STATE"
     start_video "$file"
   else
     stop_video
     rm -f "$VIDEO_STATE"
+    echo "$file" > "$IMAGE_STATE"
     # the intro starts first, so it covers the desktop before the picture changes
     intro="$(intro_for "$file")" && play_intro "$intro"
     set_picture "$file"
@@ -92,8 +103,24 @@ login() { # login <session id>
   return 0
 }
 
+# macOS keeps a picture per screen arrangement and shows that one when the
+# screens change, so a screen arrangement that was not connected at the last
+# set shows an old theme's picture (#69). The video player follows the screens itself.
+reapply() {
+  local file
+  if [[ -f "$VIDEO_STATE" ]]; then
+    file="$(cat "$VIDEO_STATE")"
+    [[ -f "$file" ]] && file="$(still_for "$file")" || file=""
+  else
+    file="$(cat "$IMAGE_STATE" 2>/dev/null)"
+  fi
+  [[ -n "$file" && -f "$file" ]] && set_picture "$file"
+  return 0
+}
+
 case "${1:-}" in
+  --reapply) reapply ;;
   --login) [[ -n "${2:-}" ]] || { echo "usage: omarchy-bg-set --login <id>" >&2; exit 1; }; login "$2" ;;
-  ""|-*)   echo "usage: omarchy-bg-set <image or video> | --login <id>" >&2; exit 1 ;;
+  ""|-*)   echo "usage: omarchy-bg-set <image or video> | --login <id> | --reapply" >&2; exit 1 ;;
   *)       [[ -f "$1" ]] || { echo "no such file: $1" >&2; exit 1; }; set_background "$1" ;;
 esac
