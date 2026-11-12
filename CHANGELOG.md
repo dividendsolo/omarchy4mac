@@ -7,6 +7,7 @@ maintainer's Mac runs from a clone of it, the same as yours.
 
 ## 2026-11-12
 
+<<<<<<< ours
 - The README is one screen now, and the reading lives on a docs site:
   **https://omarchy4mac-docs.vercel.app** has the install steps, every
   keybinding, the theme pipeline, uninstall, troubleshooting, the changelog and
@@ -15,6 +16,17 @@ maintainer's Mac runs from a clone of it, the same as yours.
   two new tests keep the links working (`tests/docs-links-test.sh`, every link
   answers 200 or resolves) and the page in step with the files here
   (`tests/docs-content-test.sh`).
+=======
+- `theme` switches in about a second again. It gave every Hermes profile the
+  new skin with one `hermes skin use` per profile, and each one starts Python:
+  with 55 profiles that was 24 of 25 seconds. One script now writes the skin
+  line in every profile's config at once; open Hermes sessions still follow,
+  because Hermes watches its config.
+- `theme random` no longer lands on a theme you just saw. It skips the last
+  three themes while the mode has others left, and it picks only after it
+  takes the lock, so a second press during a switch no longer announces the
+  theme that is being applied.
+>>>>>>> theirs
 - Nothing on the bar runs under a MacBook's notch any more (#70). On the
   built-in screen the agents limits show the percentages only
   (`Claude 14% · 97%`); the external screens keep the meters and reset

@@ -257,4 +257,51 @@ env -i HOME="$H" PATH="$STUBS:/usr/bin:/bin" TMPDIR="$T" \
 check "no OMARCHY_COMMIT: sync refuses" test "$?" -ne 0
 rm -rf "$T"
 
+echo "hermes skin: one write for every profile, no hermes per profile (2026-11-12):"
+# 55 profiles took 24 of the switch's 25 seconds: one hermes call per profile, each a Python start.
+setup
+mkdir -p "$H/.local/bin"
+printf '#!/bin/bash\necho "hermes $*" >> "%s"\nexit 0\n' "$LOG" > "$H/.local/bin/hermes"; chmod +x "$H/.local/bin/hermes"
+printf 'model:\n  default: x\ndisplay:\n  compact: false\n  skin: daylight\n' > "$H/.hermes-config.yaml"
+mkdir -p "$H/.hermes/profiles/a" "$H/.hermes/profiles/b" "$H/.hermes/profiles/c"
+cp "$H/.hermes-config.yaml" "$H/.hermes/config.yaml"
+cp "$H/.hermes-config.yaml" "$H/.hermes/profiles/a/config.yaml"
+printf 'display:\n  compact: true\n' > "$H/.hermes/profiles/b/config.yaml"
+run withwall
+check "exits 0" test "$CODE" -eq 0
+check "calls hermes once, not once per profile" test "$(grep -c '^hermes ' "$LOG")" -le 1
+check "the main config gets the dark skin" grep -qx '  skin: default' "$H/.hermes/config.yaml"
+check "a profile with a skin gets it" grep -qx '  skin: default' "$H/.hermes/profiles/a/config.yaml"
+check "a profile with no skin line gets one under display" grep -qx '  skin: default' "$H/.hermes/profiles/b/config.yaml"
+check "the rest of a config stays" grep -qx '  compact: true' "$H/.hermes/profiles/b/config.yaml"
+check "a profile with no config gets none" test ! -e "$H/.hermes/profiles/c/config.yaml"
+check "says so" grep -q 'hermes   → default' "$OUT"
+rm -rf "$T"
+
+echo "theme random never repeats a recent theme (2026-11-12):"
+# James: "it'll say it switched to a new theme, but it's the same theme".
+setup
+for n in t1 t2 t3 t4 t5; do cp -R "$FIXTURE" "$H/.config/theme-switcher/cache/$n"; done
+rm -rf "$H/.config/theme-switcher/cache/withwall" "$H/.config/theme-switcher/cache/nowall"
+echo true > "$T/darkmode"
+cat > "$STUBS/osascript" <<EOF
+#!/bin/bash
+[[ "\$*" == *"dark mode"* ]] && cat "$T/darkmode"
+exit 0
+EOF
+chmod +x "$STUBS/osascript"
+repeats=0; prev=""; prev2=""
+for i in 1 2 3 4 5 6 7 8 9 10 11 12; do
+  run random
+  cur="$(cat "$H/.config/theme-switcher/current")"
+  [[ "$cur" == "$prev" || "$cur" == "$prev2" ]] && repeats=$((repeats + 1))
+  prev2="$prev"; prev="$cur"
+done
+check "twelve random switches never repeat one of the last two themes" test "$repeats" -eq 0
+# A press while a switch runs: the second run must not announce a pick at all.
+mkdir "$H/.config/theme-switcher/lock"; echo 1 > "$H/.config/theme-switcher/lock/pid"
+run random
+check "a press during a switch picks nothing" bash -c "! grep -q 'random pick' '$OUT'"
+rm -rf "$T"
+
 [[ "$fails" -eq 0 ]] && echo "PASS" || { echo "FAIL: $fails check(s)"; exit 1; }
