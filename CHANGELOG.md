@@ -5,6 +5,16 @@ dotfiles repo; entries before that date are those exports. Since then this
 repo is the only source: every change lands here by pull request, and the
 maintainer's Mac runs from a clone of it, the same as yours.
 
+## 2026-11-12
+
+- SketchyBar's items take clicks again. The install hides the macOS menu bar,
+  which slides back down whenever the pointer reaches the top edge, and the
+  bar was drawn above windows only (`topmost=window`), so the revealed menu
+  bar covered it and took every click. The bar is now drawn above everything
+  (`topmost=on`). The app menu titles are now under the bar; ⌘⇧/ still
+  searches an app's menus. Thanks to **[@douglas](https://github.com/douglas)**
+  (#68).
+
 ## 2026-11-11
 
 - Video backgrounds, theme intros and a quiet screensaver exit (Omarchy 4.5).

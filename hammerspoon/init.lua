@@ -913,9 +913,10 @@ end):start()
 -- Drag a widget off the bar to remove it (Omarchy 4.5, omacom/omarchy#6782): a
 -- drag that starts on SketchyBar and ends 48 px or more below it runs
 -- omarchy-bar-remove on the point where it started. `omarchy-bar-remove --reset`
--- brings every removed widget back. The press must land on a SketchyBar window:
--- the auto-hidden macOS menu bar slides down over the bar, and a press-drag-release
--- on its menus is a menu pick, not a drag off the bar.
+-- brings every removed widget back. The press must land on a SketchyBar window.
+-- The bar is drawn above the auto-hidden macOS menu bar (topmost=on, #68), but a
+-- press on any part of the menu bar the bar does not cover is a menu pick, not a
+-- drag off the bar.
 local BAR_HEIGHT, REMOVE_PULL = 32, 48 -- sketchybarrc height=32; Omarchy's pull to arm removal
 local barDragStart
 local function screenTop(p)

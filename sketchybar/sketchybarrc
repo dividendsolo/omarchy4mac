@@ -23,7 +23,7 @@ sketchybar --bar \
   margin=0 \
   notch_width=200 \
   display=all \
-  topmost=window
+  topmost=on # above the menu bar too: the hidden menu bar slides over a lower bar and takes its clicks
 
 # ---------- Defaults ----------
 default=(
