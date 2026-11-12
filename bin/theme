@@ -25,6 +25,16 @@
 # theme's backgrounds into ~/Pictures/Wallpapers. Switching is then offline.
 
 set -euo pipefail
+# The folder this script really lives in: ~/.local/bin/<name> is a link into the
+# clone, and a helper added to bin/ later has no link there until install.sh
+# runs again. A git pull must be enough (2026-11-12: every theme switch skipped
+# the wallpaper, because ~/.local/bin had no omarchy-bg-set).
+self="$0"
+while [[ -L "$self" ]]; do
+  link="$(readlink "$self")"
+  [[ "$link" == /* ]] && self="$link" || self="$(dirname "$self")/$link"
+done
+BIN_DIR="$(cd "$(dirname "$self")" && pwd)"
 
 # Omarchy 4 (Quattro): the repo moved to omacom/omarchy, default branch
 # quattro. A theme ships colors.toml (24 named colours, plus mode), an
@@ -82,14 +92,8 @@ die() { echo "${c_red}error:${c_rst} $*" >&2; exit 1; }
 valid_name() { [[ "$1" =~ ^[A-Za-z0-9._-]+$ ]]; }
 
 # The omacom/omarchy commit `--sync` takes, from OMARCHY_COMMIT in this repo.
-# ~/.local/bin/theme is a symlink into the clone, so follow it to the repo.
 pinned_commit() {
-  local self="$0" l
-  while [[ -L "$self" ]]; do
-    l="$(readlink "$self")"
-    if [[ "$l" == /* ]]; then self="$l"; else self="$(dirname "$self")/$l"; fi
-  done
-  local f; f="$(cd "$(dirname "$self")/.." && pwd)/OMARCHY_COMMIT"
+  local f; f="$(cd "$BIN_DIR/.." && pwd)/OMARCHY_COMMIT"
   local sha; sha="$(tr -d '[:space:]' < "$f" 2>/dev/null)" || sha=""
   [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || die "no pinned commit in $f (bump it with OMARCHY_VERSION)"
   echo "$sha"
@@ -711,7 +715,7 @@ apply_wallpaper() {
   local pick="$remembered"
   [[ -n "$pick" ]] || pick="${files[$((RANDOM % ${#files[@]}))]}"
   # an image (with its intro, if the theme has one) or a looping video (Omarchy 4.5)
-  "$(dirname "$0")/omarchy-bg-set" "$pick" || true
+  "$BIN_DIR/omarchy-bg-set" "$pick" || true
   # keep the cycler's index in step so ⌘⌃P starts from this picture
   local idx=0 i=0
   for f in "${files[@]-}"; do [[ "$f" == "$pick" ]] && idx=$i; i=$((i+1)); done
