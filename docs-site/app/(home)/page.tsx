@@ -14,6 +14,13 @@ export default function HomePage() {
         </p>
       </div>
 
+      <Link
+        href="/docs"
+        className="bg-fd-primary text-fd-primary-foreground inline-flex min-h-11 items-center justify-center self-start rounded-lg px-5 font-medium max-sm:self-stretch"
+      >
+        Read the docs
+      </Link>
+
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/omarchy4mac-desktop.webp"
@@ -30,14 +37,10 @@ export default function HomePage() {
         </pre>
       </div>
 
-      <p className="text-fd-muted-foreground text-sm">
+      <p className="text-fd-muted-foreground">
         It installs Homebrew if needed, links the configs, hides the Dock and
         the menu bar, pulls every Omarchy theme, and asks for one permission
-        macOS will not hand out by itself.{' '}
-        <Link href="/docs" className="font-medium underline">
-          Read the docs
-        </Link>
-        .
+        macOS will not hand out by itself.
       </p>
     </main>
   );
