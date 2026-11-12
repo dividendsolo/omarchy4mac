@@ -1,14 +1,18 @@
 #!/bin/bash
-# The docs site's front page has one job: get a reader into the docs. This
-# checks that the way in is easy to find (#73 review):
+# The docs site has no front page of its own: it only repeated the README, so
+# James had it deleted at Owner QA (#73). This checks what replaced it:
 #
-#   - no paragraph on the page is smaller than 16px (no text-xs or text-sm <p>)
-#   - the link to /docs is its own element, not a word inside a paragraph
+#   - there is no front page (docs-site/app/(home)/ is gone)
+#   - `/` redirects to /docs (docs-site/next.config.mjs)
+#   - the desktop screenshot is the first thing on the first docs page
+#   - the site's address is https://omarchy4mac.dividendsolo.com: no vercel.app
+#     address is left anywhere in the repo, and the README links to the domain
 #
 #   tests/docs-home-test.sh
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
-PAGE="${PAGE:-$HERE/../docs-site/app/(home)/page.tsx}"
+ROOT="$(cd "$HERE/.." && pwd)"
+SITE="$ROOT/docs-site"
 fails=0
 
 check() { # check <description> <expected> <actual>
@@ -16,16 +20,19 @@ check() { # check <description> <expected> <actual>
   else echo "  FAIL  $1 (expected '$2', got '$3')"; fails=$((fails + 1)); fi
 }
 
-echo "docs home page:"
-check "no paragraph is under 16px" 0 "$(grep -cE '<p [^>]*text-(xs|sm)\b' "$PAGE")"
-check "the docs link is not inside a paragraph" 0 \
-  "$(python3 - "$PAGE" <<'PY'
-import re, sys
-src = open(sys.argv[1]).read()
-print(sum('href="/docs"' in p for p in re.findall(r"<p\b.*?</p>", src, re.S)))
-PY
-)"
-check "the page links to /docs" 1 "$(grep -c 'href="/docs"' "$PAGE")"
+echo "docs front page:"
+check "there is no front page" no "$([[ -e "$SITE/app/(home)" ]] && echo yes || echo no)"
+check "/ redirects to /docs" 1 \
+  "$(grep -cE "source: '/', destination: '/docs'" "$SITE/next.config.mjs")"
+check "the first docs page opens on the desktop screenshot" "/omarchy4mac-desktop.webp" \
+  "$(awk '/^---$/ { fm++; next } fm >= 2 && NF { print; exit }' "$SITE/content/docs/index.mdx" |
+     sed -nE 's/^!\[[^]]*\]\(([^)]+)\).*/\1/p')"
+
+echo "docs address:"
+check "no vercel.app address in the repo" "" \
+  "$(git -C "$ROOT" grep -l 'vercel\.app' -- . ':!tests/docs-home-test.sh' | paste -sd' ' -)"
+check "the README links to the docs domain" 2 \
+  "$(grep -c 'https://omarchy4mac.dividendsolo.com' "$ROOT/README.md")"
 
 if (( fails )); then echo "FAIL: $fails check(s)"; exit 1; fi
 echo "PASS"

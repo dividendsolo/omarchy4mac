@@ -2,7 +2,7 @@
 
 Omarchy 4, for the Mac: AeroSpace tiles the windows, SketchyBar takes the bar,
 and one script recolours the terminal, the editor, the bar and the wallpaper at
-once. The full documentation is at https://omarchy4mac-docs.vercel.app
+once. The full documentation is at https://omarchy4mac.dividendsolo.com
 
 ![The finished omarchy4mac desktop: Omarchy's bar across the top with five workspaces, a clock, the weather and the gruvbox theme, and a Ghostty terminal below it](docs-site/public/omarchy4mac-desktop.webp)
 
@@ -33,7 +33,7 @@ The docs page carries the rest: the install steps and every option, all the
 keybindings and shell aliases, the theme pipeline and the wallpapers, uninstall,
 troubleshooting, the changelog, and the score against Omarchy v4.0.6.
 
-https://omarchy4mac-docs.vercel.app
+https://omarchy4mac.dividendsolo.com
 
 MIT. The reference for every behaviour is
 [omacom/omarchy](https://github.com/omacom/omarchy).
