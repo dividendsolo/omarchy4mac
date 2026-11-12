@@ -7,6 +7,18 @@ maintainer's Mac runs from a clone of it, the same as yours.
 
 ## 2026-11-12
 
+- The README is one screen now, and the reading lives on a docs site:
+  **https://omarchy4mac.dividendsolo.com** has the install steps, every
+  keybinding, the theme pipeline, uninstall, troubleshooting, the changelog and
+  the parity score. The keybinding tables left the README, so
+  `tests/readme-test.sh` reads `docs-site/content/docs/keybindings.md` now, and
+  two new tests keep the links working (`tests/docs-links-test.sh`, every link
+  answers 200 or resolves) and the page in step with the files here
+  (`tests/docs-content-test.sh`). The parity table and the manual install steps
+  moved out of the README with it, so `tests/dictation-test.sh`,
+  `tests/keys-test.sh` and `tests/pins-test.sh` read those rows on the pages
+  that hold them now. The site has no front page of its own: `/` opens the
+  docs, and the first page starts with the desktop screenshot.
 - A theme switch sets the wallpaper again after a `git pull`. `theme` and
   ⌘⌃P call `omarchy-bg-set`, and they looked for it next to the link in
   `~/.local/bin`. That helper came on 2026-11-11, and a pull adds no link for

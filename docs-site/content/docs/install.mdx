@@ -1,0 +1,89 @@
+---
+title: Install
+description: "One command installs Homebrew, the packages, the config links and the services; the same command updates it later."
+---
+
+One command. It installs Homebrew if needed, runs the `Brewfile`, links every
+config into place (anything already there is moved to `*.bak-<date>`), compiles
+the light/dark listener, loads the launchd agents, adds the shell file to
+`~/.zshrc`, pulls the Omarchy themes, hides the Dock, the menu bar and the
+desktop widgets (SketchyBar takes the menu bar's place), and starts the
+services:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/dividendsolo/omarchy4mac/main/install.sh | bash
+```
+
+Near the end, the script opens System Settings on Accessibility and waits.
+Turn on AeroSpace and Hammerspoon, press Return, and it restarts both. Then ⌥K
+for the keybindings, ⌘⇧Space for the menu. That permission step is the one
+thing a script cannot do for you; [Troubleshooting](/docs/troubleshooting)
+has the details.
+
+## Update
+
+Run the same script again. It pulls, relinks, resyncs themes, and restarts the
+services.
+
+## Look before you install
+
+`--dry-run` reports what the real run would do (packages, links, `~/.zshrc`
+lines, alias clashes, the settings the first theme would change) without
+touching anything. It works before you have a clone:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/dividendsolo/omarchy4mac/main/install.sh | bash -s -- --dry-run
+```
+
+With a clone, `~/code/omarchy4mac/install.sh --dry-run` does the same, and its
+warnings are the ones worth reading: a `~/code/omarchy4mac` that is not the
+clone, uncommitted changes that will stop `git pull --ff-only`, a package
+Homebrew will refuse, your own aliases that `omarchy.zsh` would replace.
+
+## What the installer changes
+
+The first install saves the settings `theme` rewrites in other apps (Ghostty,
+btop, Neovim, Claude Code, Obsidian, the desktop picture) plus `~/.zshrc` to
+`~/.local/state/omarchy4mac/originals`, so you can go back.
+[Uninstall](/docs/uninstall) puts them back.
+
+**Options:** `SKIP_APPS=1` skips Brave, Raycast, and Hex. Not in the
+Brewfile, install what you use: Steam (gaming mode), Claude Code and Obsidian
+(the theme reaches them), Signal, 1Password, Typora, LocalSend, HandBrake.
+Each has a key; the key does nothing until the app exists.
+`OMARCHY4MAC_DIR=/path` changes the clone location. The screensaver needs
+`cargo` (rustup); without it the script skips ttfx and says so.
+
+## By hand, if you would rather see every step
+
+```sh
+brew bundle --file=Brewfile          # or pick from it
+git clone https://github.com/dividendsolo/omarchy4mac.git ~/code/omarchy4mac
+D=~/code/omarchy4mac
+
+ln -s "$D/aerospace/aerospace.toml" ~/.aerospace.toml
+ln -s "$D/sketchybar" ~/.config/sketchybar
+ln -s "$D/borders" ~/.config/borders
+ln -s "$D/starship/starship.toml" ~/.config/starship.toml
+mkdir -p ~/.hammerspoon && ln -s "$D/hammerspoon/init.lua" ~/.hammerspoon/init.lua
+mkdir -p ~/.local/bin && for f in "$D"/bin/*; do [[ $f == *.swift ]] || ln -s "$f" ~/.local/bin/; done
+mkdir -p ~/.config/omarchy/branding && cp "$D/omarchy/screensaver.txt" ~/.config/omarchy/branding/
+echo "source $D/zsh/omarchy.zsh" >> ~/.zshrc
+
+# Light/dark listener + AeroSpace crash watchdog (macOS 26 can kill AeroSpace)
+swiftc -O -o ~/.local/bin/theme-appearance-listener "$D/bin/theme-appearance-listener.swift"
+swiftc -O -o ~/.local/bin/omarchy-video-wallpaper "$D/bin/omarchy-video-wallpaper.swift"   # video backgrounds, theme intros
+for p in "$D"/launchd/*.plist; do
+  sed "s|/Users/YOU|$HOME|g" "$p" > ~/Library/LaunchAgents/"${p##*/}"
+  launchctl load ~/Library/LaunchAgents/"${p##*/}"
+done
+
+# Screensaver (optional)
+cargo install --git https://github.com/omacom/ttfx --rev 14ed2742596f0056b13e25d14a83ea851adc2294 && ln -s ~/.cargo/bin/ttfx ~/.local/bin/ttfx
+
+theme --sync && theme tokyo-night
+brew services start sketchybar && brew services start borders && open -a Hammerspoon
+```
+
+Neovim theming assumes [LazyVim](https://www.lazyvim.org). Disable AeroSpace's
+own "start at login" if you use the watchdog.

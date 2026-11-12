@@ -1,0 +1,82 @@
+---
+title: Themes
+description: "One script recolours the terminal, the editor, the bar, btop, Claude Code, Obsidian and Hermes, and picks the wallpaper."
+---
+
+`theme` is the port's centerpiece. It uses Omarchy's own theme definitions, so
+every theme Omarchy ships is a theme here.
+
+`theme --sync` pulls every theme from `github.com/omacom/omarchy` at the commit
+pinned in `OMARCHY_COMMIT` (repo root, next to `OMARCHY_VERSION`), renders
+Ghostty, btop and Neovim from Omarchy's own templates, and fetches each theme's
+backgrounds into `~/Pictures/Wallpapers`. Switching after that is offline.
+
+```sh
+theme                 # the current theme, and the list of installed ones
+theme <name>          # switch to <name>
+theme random          # a random theme matching the current macOS appearance
+theme -l, --list      # list installed themes
+theme --mode          # the current macOS appearance: light or dark
+theme --appearance    # the appearance of the current theme (or of a named one)
+theme -s, --sync      # download or refresh every theme
+theme --remove <name> # delete a theme; --sync skips it from then on
+theme --no-reload <n> # switch without reloading nvim, btop and SketchyBar
+```
+
+`theme random` respects macOS light/dark appearance: a light system gets a
+light theme, a dark system a dark theme, and never the current one.
+
+A switch reaches Ghostty, Neovim (LazyVim), btop, SketchyBar's colours, the
+desktop picture, the Claude Code terminal theme, an "Omarchy" theme in every
+Obsidian vault the app knows about, and Hermes (the `daylight` or `default`
+skin). Claude Code picks the new theme up in new sessions.
+
+The themes themselves live in `~/.config/theme-switcher/cache/<name>/`, one
+folder per theme. `theme --remove` deletes a theme and remembers the name in
+`~/.config/theme-switcher/removed`, so a later `--sync` skips it.
+
+## Appearance: light and dark
+
+A launchd listener watches macOS appearance. Flip it and the whole desktop
+switches to a random theme from the matching bucket, at once.
+`theme-appearance-watch` is the helper it calls; it is installed by
+`install.sh` and needs `swiftc`.
+
+Omarchy has no equivalent, because Hyprland has no system appearance to follow.
+
+## Wallpapers
+
+`theme --sync` downloads every theme's own backgrounds from the Omarchy repo
+into `~/Pictures/Wallpapers` as `<theme>_<file>`. `omarchy-cycle-wallpaper`
+(⌘⌃P) cycles the ones for the current theme; unprefixed files you add act as a
+shared pool.
+
+A background can be a video (`.mp4`, `.mov`, `.m4v`): drop it in the folder and
+cycle to it, or run `omarchy-bg-set <file>`. It loops behind your windows,
+muted, and its still frame becomes the desktop picture, so the lock screen
+shows that frame.
+
+Themes that ship an intro (`backgrounds/intros/` upstream,
+`~/Pictures/Wallpapers/intros/` here) play it once, silent, when you switch to
+that background and when you log in. Appearance > Animations > Theme Intros
+turns intros off; macOS Reduce Motion does too. `omarchy-toggle-intros` is the
+same switch from a terminal, and needs the compiled `omarchy-video-wallpaper`.
+
+## Window transparency and corners
+
+Omarchy 4.5's Appearance > Window Transparency (opaque, transparent, glassy)
+and Window Corners (theme, sharp, rounded) are `omarchy-appearance`. macOS
+draws other apps solid and rounds every window itself, so the choices reach the
+terminal, the bar and the borders.
+
+## Theme state, in one place
+
+| Path | What is in it |
+|---|---|
+| `~/.config/theme-switcher/cache/<name>/` | One folder per theme: `colors.toml`, `neovim.lua`, `btop.theme`, `claude.json`, `obsidian.css`. |
+| `~/.config/theme-switcher/current` | The current theme's name. |
+| `~/.config/theme-switcher/removed` | Themes `theme --remove` deleted; `--sync` skips them. |
+| `~/.config/theme-switcher/backgrounds` | The last wallpaper used per theme. |
+| `~/.config/theme-switcher/herdr-sync` | Present when theme switches mirror to your herdr machines. |
+| `~/Pictures/Wallpapers` | Every theme's backgrounds, `<theme>_<file>`, plus your own. |
+| `~/.local/state/omarchy4mac/originals` | The settings the installer snapshotted before the theme touched them. |

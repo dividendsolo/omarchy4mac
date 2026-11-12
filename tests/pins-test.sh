@@ -14,12 +14,15 @@ check() { # check <description> <test command...>
   if "$@"; then echo "  ok    $d"; else echo "  FAIL  $d"; fails=$((fails + 1)); fi
 }
 
+# The manual install steps left the README for the docs page when the docs site
+# landed (#73).
+INSTALL_DOC="$ROOT/docs-site/content/docs/install.mdx"
 echo "pins:"
 check "OMARCHY_COMMIT holds one full commit SHA" grep -qxE '[0-9a-f]{40}' "$ROOT/OMARCHY_COMMIT"
-check "README's manual install pins ttfx too" \
-  grep -qE 'cargo install --git https://github.com/omacom/ttfx --rev [0-9a-f]{40}( |$)' "$ROOT/README.md"
+check "the docs install page pins ttfx too" \
+  grep -qE 'cargo install --git https://github.com/omacom/ttfx --rev [0-9a-f]{40}( |$)' "$INSTALL_DOC"
 check "no unpinned ttfx install anywhere" \
-  bash -c "! grep -rnE 'cargo install --git https://github.com/omacom/ttfx( *$| *&&)' '$ROOT/install.sh' '$ROOT/README.md'"
+  bash -c "! grep -rnE 'cargo install --git https://github.com/omacom/ttfx( *$| *&&)' '$ROOT/install.sh' '$ROOT/docs-site/content/docs'"
 check "install.sh pins ttfx with cargo install --rev <sha>" \
   grep -qE 'cargo install --git https://github.com/omacom/ttfx --rev [0-9a-f]{40}( |$)' "$ROOT/install.sh"
 

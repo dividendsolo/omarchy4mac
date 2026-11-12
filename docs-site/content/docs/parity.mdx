@@ -1,0 +1,69 @@
+---
+title: "How close is this to real Omarchy?"
+description: "73% of Omarchy v4.0.6, scored feature by feature: what matches, what is partial, what macOS cannot do."
+---
+
+## The score
+
+**73%** of Omarchy v4.0.6 (Quattro), scored feature by feature below: ✅ we
+have it, or the Mac stand-in does the same job (1 point). ⚠️ partly there,
+with a plan (half). ❌ missing, nothing planned, whatever the reason (0).
+Items with no macOS meaning are left out. That is 25 matched, 4 partial, 8
+not portable, out of 37 scored.
+
+The short version: the keybinding vocabulary, the workspace model, the menu
+tree, the bar, the theme pipeline, the screensaver, and the shell are here.
+What is not here is Omarchy's Quickshell layer (panels, themed lock screen,
+OSD) and the Hyprland dispatchers AeroSpace lacks (groups, scratchpad, pin,
+opacity, gap toggle). Those have no macOS equivalent and are not coming.
+
+The item-by-item checklist is the [parity checklist](/docs/parity-checklist);
+what changed and when is the [changelog](/docs/changelog).
+
+| Omarchy Quattro has | omarchy4mac uses | Match | Why not, and the plan |
+|---|---|---|---|
+| Tiling WM: focus, move, swap, resize, fullscreen, 5 workspaces, monitors | AeroSpace | ✅ |  |
+| Top bar: logo opens menu, workspaces, indicators, clock, weather, Friday sunset, updates badge, agents limits (Claude, Codex and Grok: a meter and reset time per limit, the percentages only beside a laptop notch, hidden when signed out), bluetooth, wifi, audio, battery | SketchyBar, v4 layout | ✅ |  |
+| 4.5 bar polish: scroll the workspaces, drag a widget off the bar to remove it, clock with live seconds (right-click), quiet across daylight saving | SketchyBar, plus a Hammerspoon drag watch; `omarchy-bar-remove --reset` brings removed widgets back | ⚠️ | No tray drawer, tooltips, hover reveal or wallpaper sampling: SketchyBar has none of those. A removed widget comes back only with `--reset`, not by dragging it back. |
+| Active-window borders | JankyBorders | ✅ |  |
+| Window transparency (opaque, transparent, glassy) and corners (theme, sharp, rounded), from Appearance > Window Transparency / Window Corners | `omarchy-appearance`: Ghostty opacity and blur, SketchyBar background, JankyBorders style | ✅ | macOS draws other apps solid and rounds every window itself, so the choices reach the terminal, the bar and the borders. |
+| All 22 v4 themes, generated from Omarchy's own templates | `theme --sync`, renders Ghostty, Neovim, btop from the v4 `.tpl` files | ✅ |  |
+| Theme chooser (Super+Ctrl+Shift+Space) | Hammerspoon chooser on ⌘⌃⇧Space | ✅ |  |
+| Menu tree: Apps, Learn, Appearance, Trigger, Setup, Install, Update, System, nested search (4.5: Appearance replaces Style; Install > Service > Slack; installed items dimmed; a missing default agent installs when chosen) | Hammerspoon on ⌘⇧Space, ⌘Esc to System; the same key again closes it | ✅ |  |
+| Keybinding overlay (Super+K) | ⌥K, every binding listed | ✅ |  |
+| Web apps as app windows (Super+Shift+letter) | `--app=` windows of the default browser on the same keys (HEY, Photos, YouTube, Grok, Google Chat) | ✅ |  |
+| Chromium fixes (4.5): browser key falls back when the default browser is gone, Copy URL (Alt+Shift+L) in every Brave profile, password-manager native messaging hosts, overlay scrollbars | ⌘⇧↩ opens Safari when the default browser is gone; ⌥⇧L copies the front tab's URL; `omarchy-chromium-setup` (run by `install.sh`) copies the 1Password and Bitwarden hosts to every Chromium browser and turns on overlay scrollbars | ✅ | Web notifications grouped by site (4.5) are not ported: macOS Notification Center groups by app. |
+| Microsoft 365 web apps (4.5: Install > Service > Microsoft) | Outlook, Word, Excel, PowerPoint, Teams and OneDrive under Install > Service > Microsoft and in the Apps launcher, each a `--app=` window of the default browser | ✅ |  |
+| Screensaver: ttfx ASCII art per monitor after 150 s (4.5: the exit key does not flash) | Hammerspoon idle timer, Ghostty + ttfx per display | ✅ |  |
+| Shell defaults: eza, bat, fzf, zoxide, git and tool aliases | `zsh/omarchy.zsh` | ✅ |  |
+| Wallpaper per theme, cycle key | `omarchy-cycle-wallpaper` on ⌘⌃P | ✅ |  |
+| Video backgrounds, with a still frame on the lock screen (4.5) | `omarchy-bg-set`: AVPlayer behind the windows (`omarchy-video-wallpaper`), the still as the macOS desktop picture | ✅ |  |
+| Theme intros on login or switch, off under Appearance > Animations (4.5) | `omarchy-video-wallpaper --once`, Hammerspoon at login, `omarchy-toggle-intros` | ✅ | The intros come with `theme --sync` once the pinned Omarchy commit has them. |
+| Emoji picker key | Raycast emoji on ⌘⌃E | ✅ |  |
+| Clipboard history key | Raycast clipboard on ⌘⌃V | ✅ |  |
+| Idle inhibit (keep awake) with bar indicator | caffeinate on ⌘⌃I, bar indicator | ✅ |  |
+| Coding agent in a fresh terminal (Super+Shift+Ctrl+A) | ⌘⇧⌃A, Ghostty + the default agent | ✅ |  |
+| Herdr agent multiplexer (Super+Ctrl+Return, `h`, `hdl`/`hds`/`hdlm`/`hsl`) | ⌘⌃↩ opens Ghostty + herdr; Omarchy's `config.toml` verbatim in `herdr/`; layouts in `zsh/omarchy.zsh` | ✅ | `brew install herdr jq`, symlink `herdr/config.toml` to `~/.config/herdr/config.toml`. Theme follows the terminal palette. |
+| Lock key | macOS lock on ⌘⌃L | ✅ |  |
+| Time / weather / battery notices | `omarchy-notice` on ⌘⌃⌥ T/W/B | ✅ |  |
+| Screenshots, screen recording | macOS ⌘⇧5 | ✅ | Matched by the OS, not by this repo. |
+| Notifications (mako) | macOS Notification Center | ✅ | Matched by the OS. |
+| App launcher (walker) | Raycast (free plan) on ⌘Space | ✅ | Works the same for launching. No walker port needed. |
+| Voice typing (Omarchy 4.5: Superwhisper on Alt+Space, hold Right Alt) | [Hex](https://github.com/anomalyco/hex) | ✅ | Free, open source (MIT), transcribes on the Mac. `install.sh` installs it and sets its shortcut to hold Right ⌥; ⌥⎵ toggles a dictation through Hammerspoon. |
+| Install in one command, update in one command | `install.sh`, rerun to update; `uninstall.sh` to back out | ✅ |  |
+| Theme backgrounds downloaded with the theme | `theme --sync` pulls each theme's `backgrounds/` into `~/Pictures/Wallpapers` | ✅ |  |
+| Theme reaches tmux, lazygit, VS Code | Terminal, editor, btop, Claude Code, Obsidian | ⚠️ | Planned when tmux is daily: render v4's tmux template and reload live sessions. lazygit and VS Code only if asked. |
+| Night light toggle | None | ⚠️ | Planned: Night Shift via osascript in the menu under Trigger > Toggle (Omarchy 4.5 dropped its key; ⌘⌃N is Network now). Small. |
+| OCR capture-text (Super+Ctrl+Print) | macOS Live Text, by hand | ⚠️ | Planned: region screenshot, Vision text extraction, clipboard, one script. |
+| Bar hide/show key (4.5: Super+Ctrl+Alt+F, full screen desktop) | `sketchybar --bar hidden=toggle` on ⌘⌃⌥F | ⚠️ | The bar hides and shows. The gaps stay: AeroSpace cannot drop them at runtime. |
+| Theme colors on the volume / brightness indicator (the box when you press a volume key) | Apple's, unthemed | ❌ | The theme cannot reach it. Apple owns it. |
+| Control panels: audio, bluetooth, network, display, power, calendar (Quickshell) | System Settings deep links | ❌ | Quickshell is one process on Wayland layer-shell. macOS has no way to draw an equivalent panel. Not portable. |
+| Themed lock screen | macOS lock screen | ❌ | Not portable. The macOS lock screen cannot be restyled. |
+| Window groups, pin, per-window opacity | None | ❌ | Hyprland dispatchers with no AeroSpace equivalent. Not portable. |
+| Scratchpad (Super+S) | None | ❌ | AeroSpace has no special workspace. Could emulate with a dedicated workspace and a toggle key; not planned unless adopters ask. |
+| Gap toggle, window width save/restore | None | ❌ | AeroSpace has no runtime gap or size dispatchers. Not portable. |
+| Chromium live theming | Brave, unthemed | ❌ | Needs Omarchy's Chromium micro-fork. Brave takes no theme colour from the command line. Not portable. |
+| Plugin system (QML) | None | ❌ | Quickshell-specific. Not portable. |
+| Installer ISO, pacman updates, Snapper snapshots, dual boot, factory reset, Plymouth, hardware and migration layer | n/a | — | No macOS meaning. Excluded from the score. |
+
+If a gap bothers you, open an issue.
