@@ -15,6 +15,10 @@ TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
 mkdir -p "$TMP/bin" "$TMP/repo/sketchybar" "$TMP/repo/bin"
 # colors.sh is written by bin/theme and is not in git, so the test brings its own.
 printf 'export ACCENT="0xff00ff00"\nexport FG="0xffffffff"\n' > "$TMP/repo/sketchybar/colors.sh"
+# One external screen, no built-in one: the full label only (tests/notch-test.sh
+# covers the built-in screen's short copy).
+mkdir -p "$TMP/repo/sketchybar/plugins"
+echo 'BUILTIN=-; OTHERS=1; DISPLAYS_OK=1' > "$TMP/repo/sketchybar/plugins/displays.sh"
 ln -s "$USAGE" "$TMP/repo/bin/omarchy-agent-usage"
 cat > "$TMP/bin/sketchybar" <<'STUB'
 #!/bin/bash
@@ -90,10 +94,10 @@ echo "no login: every provider hidden"
 fresh_home
 for p in claude codex grok; do
   check "$p collector exits 1" '^$' "$("$USAGE" "$p"; [ $? -eq 1 ] || echo "exit not 1")"
-  check "$p item hidden" "^--set agents.$p drawing=off$" "$(plugin "$p")"
+  check "$p item hidden" "^--set agents.$p drawing=off --set agents_notch.$p drawing=off$" "$(plugin "$p")"
 done
 mkdir -p "$HOME/.codex"; echo '{"auth_mode": "apikey", "OPENAI_API_KEY": "sk-test"}' > "$HOME/.codex/auth.json"
-check "codex API key login (no plan limits) hidden" "^--set agents.codex drawing=off$" "$(plugin codex)"
+check "codex API key login (no plan limits) hidden" "^--set agents.codex drawing=off --set agents_notch.codex drawing=off$" "$(plugin codex)"
 mkdir -p "$HOME/.grok"; echo "{\"x\": {\"key\": \"k\", \"expires_at\": \"$(iso -800)\", \"refresh_token\": \"r\"}}" > "$HOME/.grok/auth.json"
 check "grok sign-in past its 30 days hidden" "^exit 1$" "$(inproc grok '{}')"
 
@@ -111,7 +115,7 @@ echo "codex"
 fresh_home; mkdir -p "$HOME/.codex"; echo '{"tokens": {"access_token": "a"}}' > "$HOME/.codex/auth.json"
 export CODEX_TEST_LIMITS="{\"rateLimits\": {\"primary\": {\"usedPercent\": 42, \"windowDurationMins\": 300, \"resetsAt\": $(epoch 2)}, \"secondary\": {\"usedPercent\": 18, \"windowDurationMins\": 10080, \"resetsAt\": $(epoch 72)}}}"
 check "5h and 7d meters with reset times, from the app-server" "^5h ▰▰▱▱▱ 42% ($TIME) · 7d ▰▱▱▱▱ 18% ($TIME)$" "$("$USAGE" codex)"
-check "item shows them" "drawing=on icon.color=0xff00ff00 label=5h ▰▰▱▱▱ 42%" "$(plugin codex)"
+check "item shows them" "drawing=on associated_display=1 icon.color=0xff00ff00 label=5h ▰▰▱▱▱ 42%" "$(plugin codex)"
 rm -rf "$HOME/.cache"
 export CODEX_TEST_LIMITS="{\"rateLimitsByLimitId\": {\"codex\": {\"individualLimit\": {\"limit\": 200, \"used\": 150, \"resetsAt\": $(epoch 100)}}}}"
 check "a Business spend cap alone" "^\\$ ▰▰▰▰▱ 75% ($TIME)$" "$("$USAGE" codex)"

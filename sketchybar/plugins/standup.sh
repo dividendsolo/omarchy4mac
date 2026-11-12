@@ -6,7 +6,7 @@
 #
 # Two copies of the widget, one per display layout, following the same idiom as
 # clock.sh: the centre copy sits next to the centred theme name on the external
-# displays, the right copy sits next to theme_name_right on the built-in panel.
+# displays, the right copy sits in the right cluster on the built-in panel.
 #   NAME=standup         -> right cluster, built-in panel
 #   NAME=standup_center  -> centre cluster, external displays
 #

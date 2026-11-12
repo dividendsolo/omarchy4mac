@@ -80,9 +80,13 @@ sketchybar --add item space_sep left \
                  background.drawing=off
 
 # ---------- Front app (focused window) ----------
+# At most 20 characters, longer names scroll: with the music title, the left
+# side then ends before the notch of a MacBook's built-in screen (#70).
 sketchybar --add item front_app left \
            --set front_app \
                  label.color="$BLUE" \
+                 label.max_chars=20 \
+                 scroll_texts=on \
                  icon.padding_right=4 \
                  script="$PLUGIN_DIR/front_app.sh" \
            --subscribe front_app front_app_switched
@@ -211,25 +215,8 @@ sketchybar --add item battery right \
                  click_script='open "x-apple.systempreferences:com.apple.Battery-Settings.extension"' \
            --subscribe battery system_woke power_source_change
 
-# Right-side clock + theme name — the leftmost pair of the right cluster, i.e.
-# immediately in front of the battery. These are the built-in display's variant:
-# clock.sh pins them to the notched laptop panel and pins the centered pair to
-# the external displays, so both layouts are live at once on different screens.
-#
-# Right-side items are laid out right-to-left in the order they're added, so
-# theme_name_right must be added BEFORE clock_right to end up on its right —
-# preserving the same clock-then-theme reading order as the centered pair.
-sketchybar --add item theme_name_right right \
-           --set theme_name_right \
-                 drawing=off \
-                 icon="󰏘" \
-                 icon.color="$YELLOW" \
-                 label.color="$FG" \
-                 click_script="$HOME/.local/bin/theme random"
-
 # Stand-up / sit-down state of the interval timer (~/.hermes/standup_timer.sh).
-# Added straight after theme_name_right so it draws immediately to the LEFT of the
-# theme name (right items lay out right-to-left in add order). Icon only: a chair
+# Left of the battery (right items lay out right-to-left in add order). Icon only: a chair
 # while seated, a standing person while standing. Hidden when no timer runs.
 sketchybar --add item standup right \
            --set standup \
@@ -249,6 +236,11 @@ sketchybar --add item sunset right \
                  script="$PLUGIN_DIR/sunset.sh" \
            --subscribe sunset system_woke display_change
 
+# Right-side clock, the built-in display's variant: clock.sh pins it to the
+# notched laptop panel and the centred clock to the external displays, so both
+# layouts are live at once on different screens. The theme name shows on the
+# externals only: on the built-in screen it pushed the right side under the
+# notch (#70).
 sketchybar --add item clock_right right \
            --set clock_right \
                  drawing=off \
@@ -277,25 +269,35 @@ sketchybar --add item bluetooth right \
            --set bluetooth \
                  update_freq=60 \
                  script="$PLUGIN_DIR/bluetooth.sh" \
-                 click_script='open "x-apple.systempreferences:com.apple.BluetoothSettings"'
+                 click_script='open "x-apple.systempreferences:com.apple.BluetoothSettings"' \
+           --subscribe bluetooth display_change
 
 # Coding-agent limits (Omarchy 4.5 agents panel): Claude, Codex and Grok, one
 # item each, every limit a meter with its reset time; a provider with no login
 # stays hidden. The script checks every 5 minutes, so an ended window drops to
 # 0% soon; each provider is asked at most every 15 minutes
 # (omarchy-agent-usage caches the answer). Added right to left, so the bar
-# reads Claude · Codex · Grok.
+# reads Claude · Codex · Grok. agents.<provider> shows the full label on the
+# external screens; agents_notch.<provider>, the percentages only, on the
+# built-in screen, where the full label ran under the notch (#70).
 for provider in grok codex claude; do
   icon="$(printf '%s' "${provider:0:1}" | tr a-z A-Z)${provider:1}"
-  sketchybar --add item "agents.$provider" right \
+  sketchybar --add item "agents_notch.$provider" right \
+             --set "agents_notch.$provider" \
+                   drawing=off \
+                   icon="$icon" \
+             --add item "agents.$provider" right \
              --set "agents.$provider" \
                    drawing=off \
                    icon="$icon" \
                    update_freq=300 \
-                   script="$PLUGIN_DIR/agents.sh"
+                   script="$PLUGIN_DIR/agents.sh" \
+             --subscribe "agents.$provider" display_change
 done
-sketchybar --set agents.claude \
-                 click_script="open -na Ghostty --args -e $HOME/.local/bin/omarchy-tui bunx ccusage daily"
+for item in agents.claude agents_notch.claude; do
+  sketchybar --set "$item" \
+                   click_script="open -na Ghostty --args -e $HOME/.local/bin/omarchy-tui bunx ccusage daily"
+done
 
 # ---------- Widgets dragged off the bar ----------
 # bin/omarchy-bar-remove (a drag off the bar, from Hammerspoon) moves a widget into
