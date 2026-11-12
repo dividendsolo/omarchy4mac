@@ -257,6 +257,18 @@ env -i HOME="$H" PATH="$STUBS:/usr/bin:/bin" TMPDIR="$T" \
 check "no OMARCHY_COMMIT: sync refuses" test "$?" -ne 0
 rm -rf "$T"
 
+echo "theme run through its ~/.local/bin link finds its helpers in the repo (2026-11-12):"
+# The hotkey runs ~/.local/bin/theme, a link into the clone. omarchy-bg-set was
+# added to bin/ later, and a git pull adds no link for it, so every switch
+# skipped the wallpaper: "it's still got the Tokyo Night wallpaper".
+setup
+mkdir -p "$H/.local/bin"; ln -s "$(cd "$(dirname "$THEME_BIN")" && pwd)/$(basename "$THEME_BIN")" "$H/.local/bin/theme"
+THEME_BIN_SAVED="$THEME_BIN"; THEME_BIN="$H/.local/bin/theme"; run withwall; THEME_BIN="$THEME_BIN_SAVED"
+check "exits 0" test "$CODE" -eq 0
+check "no missing helper" bash -c "! grep -q 'No such file' '$OUT'"
+check "sets the wallpaper" grep -q 'set picture of every desktop to item 1 of argv' "$T/script.log"
+rm -rf "$T"
+
 echo "hermes skin: one write for every profile, no hermes per profile (2026-11-12):"
 # 55 profiles took 24 of the switch's 25 seconds: one hermes call per profile, each a Python start.
 setup

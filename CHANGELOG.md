@@ -7,6 +7,11 @@ maintainer's Mac runs from a clone of it, the same as yours.
 
 ## 2026-11-12
 
+- A theme switch sets the wallpaper again after a `git pull`. `theme` and
+  ⌘⌃P call `omarchy-bg-set`, and they looked for it next to the link in
+  `~/.local/bin`. That helper came on 2026-11-11, and a pull adds no link for
+  it, so every switch skipped the wallpaper until `install.sh` ran again. Both
+  now follow their own link into the clone and run the helper from there.
 - `theme` switches in about a second again. It gave every Hermes profile the
   new skin with one `hermes skin use` per profile, and each one starts Python:
   with 55 profiles that was 24 of 25 seconds. One script now writes the skin
