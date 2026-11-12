@@ -1,0 +1,29 @@
+---
+title: Uninstall
+description: "See what it would do first, then take the config, the agents, the shell hook and the theme hooks back out."
+---
+
+```sh
+~/code/omarchy4mac/uninstall.sh --dry-run   # see what it would do first
+~/code/omarchy4mac/uninstall.sh
+```
+
+It stops the services, unloads the launchd agents, removes the config links
+(restoring the newest `*.bak-<date>`), takes the shell hook out of `~/.zshrc`,
+and puts your saved app settings back.
+
+| Flag | What it adds |
+|---|---|
+| `--dry-run` | Prints what would happen and changes nothing. |
+| `--purge` | Also deletes the clone, the theme cache, the wallpapers, the logs and the snapshot. |
+| `--remove-packages` | Also brew-uninstalls AeroSpace, Hammerspoon, SketchyBar and borders. |
+
+Flags combine. The default mode is conservative: it removes only what
+`install.sh` or `theme` created, restores the newest `*.bak-<date>` where
+`install.sh` moved your own file aside, puts back the Ghostty, btop, Neovim,
+Claude, Obsidian and wallpaper settings the installer snapshotted, and leaves
+Homebrew packages alone. Shared tools from the Brewfile (Ghostty, Neovim,
+fzf…) are listed, not removed.
+
+`OMARCHY4MAC_DIR=/path` uninstalls a clone somewhere other than
+`~/code/omarchy4mac`.

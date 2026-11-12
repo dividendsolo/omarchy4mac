@@ -1,0 +1,113 @@
+---
+title: Troubleshooting
+description: "The manual step, the bar, the screensaver, the themes, and what the installer warns about."
+---
+
+Most of what goes wrong is one missing permission, one missing tool, or one key
+whose app is not installed. Each item below is a message the scripts themselves
+print.
+
+## AeroSpace or Hammerspoon does nothing
+
+Neither works until macOS gives it Accessibility. `install.sh` opens System
+Settings on Privacy & Security > Accessibility and waits: turn AeroSpace and
+Hammerspoon on, press Return, and it restarts both. If you clicked past it, add
+both by hand in the same pane and restart them.
+
+## A key does nothing
+
+Several keys front an app. Brave, Raycast and Hex only install when
+`SKIP_APPS` is unset, and Steam, Claude Code, Obsidian, Signal, 1Password,
+Typora, LocalSend and HandBrake are not in the Brewfile at all: install the app
+and the key starts working. The same for themes that reach an app: nothing
+happens in an app that is not there.
+
+## Hex does not take its shortcut
+
+`install.sh` prints that warning when it cannot set it. Set it by hand in Hex >
+Settings: hold Right Option.
+
+## The macOS menu bar slides back down
+
+The installer hides the macOS menu bar and SketchyBar takes its place. macOS
+brings its own bar back whenever the pointer reaches the top edge, and it is
+drawn above windows, so it is under the pointer at that moment. The bar is
+drawn above the menu bar now, and the app's menu titles are under the bar.
+Press ⌘⇧/ to search an app's menus, or ⌘⌃⌥F to hide the bar and use the menu
+bar itself.
+
+## The bar shows `:finder:` or boxes instead of icons
+
+The bar's app icons come from the `font-sketchybar-app-font` cask and its text
+from a Nerd Font, both installed by the `Brewfile`. Ghostty's font is
+JetBrainsMono Nerd Font Mono, installed separately by `install.sh` because many
+Macs already have it and `brew bundle` stops on that. Install the missing one
+and reload the bar.
+
+## The screensaver never starts
+
+`install.sh` prints `cargo not found; screensaver skipped (install rustup,
+rerun)` and moves on. Install rustup, build ttfx, and run `install.sh` again:
+
+```sh
+cargo install --git https://github.com/omacom/ttfx --rev 14ed2742596f0056b13e25d14a83ea851adc2294
+ln -s ~/.cargo/bin/ttfx ~/.local/bin/ttfx
+```
+
+## Video backgrounds and theme intros do nothing
+
+They need the compiled `omarchy-video-wallpaper`. `install.sh` warns with
+`video backgrounds and theme intros are off until omarchy-video-wallpaper
+builds`, or prints `swiftc not found; skipping the light/dark listener, its
+launchd agent, and video backgrounds`. Install Xcode's command line tools, then
+run `install.sh` again.
+
+## A theme is missing, or `theme` says it is not synced
+
+`theme` stops with `theme '<name>' not synced; run: theme --sync`. Run `theme
+--sync`; it pulls from the Omarchy repo at the pinned commit. A theme you
+removed stays skipped: `theme --remove` writes the name to
+`~/.config/theme-switcher/removed`, and `--sync` skips every name in that file.
+Delete the line to get the theme back.
+
+## The wallpaper is stale on one screen arrangement
+
+macOS keeps a wallpaper per arrangement of screens, and shows that one when the
+screens change, so unplugging the monitors can bring back the picture from the
+last time the Mac was alone. Switch the background once after the screens
+change: `theme random`, ⌘⌃W, or `omarchy-bg-set <file>`. That records the
+current background for the new arrangement.
+
+## A re-run of `install.sh` stops at the pull
+
+The dry run says it first: `$DIR has uncommitted changes; 'git pull --ff-only'
+may refuse and stop the install`, or `$DIR is a git repo for '<remote>', not
+omarchy4mac`. Commit or discard your changes in the clone, or point
+`OMARCHY4MAC_DIR` at a clean one.
+
+## Homebrew refuses a package and the install stops
+
+`brew bundle` stops on the first thing it cannot install. The dry run names it
+in advance, for example a cask whose font is already in `~/Library/Fonts`.
+Install that one by hand, or remove it from the `Brewfile` in your clone, and
+run `install.sh` again.
+
+## My own settings were replaced
+
+The first install snapshotted the settings `theme` rewrites in Ghostty, btop,
+Neovim, Claude Code, Obsidian and the desktop picture, plus `~/.zshrc`, into
+`~/.local/state/omarchy4mac/originals`. `uninstall.sh` puts them back. Every
+file `install.sh` moved aside is still beside it as `*.bak-<date>`.
+
+## The alias I already had changed
+
+`zsh/omarchy.zsh` loads last and replaces an alias of yours with the same name.
+The install's dry run lists the clashes. Edit the file, or take the `source`
+line out of `~/.zshrc`.
+
+## AeroSpace dies on its own
+
+macOS 26 can kill it. The launchd agent from `install.sh` relaunches it, and
+respects a clean quit. If it stops coming back, check that
+`~/Library/LaunchAgents/com.omarchy-mac.aerospace-keepalive.plist` is loaded,
+and turn off AeroSpace's own "start at login".

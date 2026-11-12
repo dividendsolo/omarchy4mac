@@ -7,6 +7,14 @@ maintainer's Mac runs from a clone of it, the same as yours.
 
 ## 2026-11-12
 
+- The README is one screen now, and the reading lives on a docs site:
+  **https://omarchy4mac-docs.vercel.app** has the install steps, every
+  keybinding, the theme pipeline, uninstall, troubleshooting, the changelog and
+  the parity score. The keybinding tables left the README, so
+  `tests/readme-test.sh` reads `docs-site/content/docs/keybindings.md` now, and
+  two new tests keep the links working (`tests/docs-links-test.sh`, every link
+  answers 200 or resolves) and the page in step with the files here
+  (`tests/docs-content-test.sh`).
 - Nothing on the bar runs under a MacBook's notch any more (#70). On the
   built-in screen the agents limits show the percentages only
   (`Claude 14% · 97%`); the external screens keep the meters and reset

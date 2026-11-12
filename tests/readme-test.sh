@@ -7,11 +7,15 @@
 # One direction only: the README may group bindings (⌥1–5), so this checks
 # what it prints, not that the config has nothing unprinted.
 #
+# The tables live on the docs page now (they moved out of the README when the
+# docs site landed, #73), so the default file is that page. Its "## Keybindings"
+# and "### Shell Aliases" headings are what this test reads.
+#
 #   tests/readme-test.sh
 #   README=/path/to/README.md tests/readme-test.sh
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
-README="${README:-$HERE/../README.md}"
+README="${README:-$HERE/../docs-site/content/docs/keybindings.md}"
 TOML="${AEROSPACE_TOML:-$HERE/../aerospace/aerospace.toml}"
 LUA="${HAMMERSPOON_LUA:-$HERE/../hammerspoon/init.lua}"
 ZSH="${ZSH_FILE:-$HERE/../zsh/omarchy.zsh}"
@@ -116,9 +120,9 @@ DOC_MISSING="$(printf '%s\n' "$OUT" | sed -n 3p)"
 SCRIPT_MISSING="$(printf '%s\n' "$OUT" | sed -n 4p)"
 
 echo "config: $BOUND"
-echo "README.md keybindings vs the config:"
+echo "docs site keybindings vs the config:"
 check "every chord a row prints is bound" "" "$UNKNOWN"
-echo "README.md shell alias table vs zsh/omarchy.zsh:"
+echo "docs site shell alias table vs zsh/omarchy.zsh:"
 check "every alias the table prints is set" "" "$DOC_MISSING"
 check "every alias omarchy.zsh sets is printed" "" "$SCRIPT_MISSING"
 

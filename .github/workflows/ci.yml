@@ -20,3 +20,27 @@ jobs:
       # tests/menu-test.sh and tests/console-test.sh run hammerspoon/init.lua in luajit.
       - run: brew install starship luajit
       - run: for t in tests/*-test.sh; do echo "== $t"; bash "$t" || exit 1; done
+
+  docs:
+    # The docs page (docs-site/) is a Next.js app that Vercel builds from this
+    # directory alone, so the build runs here too: a change that breaks the page
+    # fails before the merge. tests/docs-links-test.sh (the check job) covers the
+    # links, and tests/docs-content-test.sh covers the two pages that come from
+    # CHANGELOG.md and docs/parity-v4.md.
+    runs-on: macos-latest
+    permissions:
+      contents: read
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: docs-site/package-lock.json
+      - run: npm ci
+        working-directory: docs-site
+      - run: npm run check-content
+        working-directory: docs-site
+      - run: npm run build
+        working-directory: docs-site

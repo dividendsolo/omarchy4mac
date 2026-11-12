@@ -1,0 +1,119 @@
+---
+title: What you get
+description: "Tiling windows, the Omarchy bar, window borders, the menus and keys, the shell, and the omarchy-* commands."
+---
+
+## Tiling: AeroSpace
+
+Replaces Hyprland. Focus, move, swap, resize, fullscreen, five workspaces per
+monitor, and windows carried across monitors. The config is
+`aerospace/aerospace.toml`, linked to `~/.aerospace.toml`.
+
+AeroSpace has no groups, no scratchpad, no pin, no per-window opacity and no
+runtime gap toggle. Those Omarchy keys have no port.
+[How close is this to real Omarchy?](/docs/parity) counts them.
+
+A launchd agent relaunches AeroSpace if it crashes, and respects a clean quit.
+macOS 26 can kill it on its own; this is the answer.
+
+## The bar: SketchyBar
+
+Replaces Waybar, in Omarchy's layout: the logo (which opens the menu) and the
+workspaces on the left; the indicators, clock, weather, Friday sunset, update
+badge and the coding-agent limits in the middle; the tray, Bluetooth, network,
+audio, battery and power on the right.
+
+- Scroll the workspaces, and click one to go there.
+- Drag a widget off the bar to remove it; `omarchy-bar-remove --reset` puts
+  every removed widget back.
+- Right-click the clock for live seconds.
+- The theme name and the Bluetooth icon show on the external screens only when
+  a MacBook's notch is in the way, and the focused app's name stops at 20
+  characters and scrolls.
+
+The bar is drawn above everything, so it takes the clicks the hidden macOS menu
+bar used to take. Press ⌘⇧/ when you want to search an app's menus.
+
+## Window borders: JankyBorders
+
+The active window gets Omarchy's border, in the theme's colour. The config is
+`borders/`, linked to `~/.config/borders`.
+
+## Menus and keys: Hammerspoon
+
+⌘⇧Space is Omarchy's menu tree (Apps, Learn, Appearance, Trigger, Setup,
+Install, Update, System), with nested search and a System menu on ⌘⎋. ⌥K is the
+searchable keybinding overlay. Installed items dim; a missing default agent
+installs when you choose it. Web apps open as `--app=` windows in your default
+browser, on Omarchy's keys.
+
+[Keybindings](/docs/keybindings) lists every binding; ⌥K shows the same list
+from the desktop.
+
+## The shell: Starship and the aliases
+
+Omarchy 4's own `starship.toml`, plus `zsh/omarchy.zsh`: `ls` is eza, `ff` is
+fzf, `n` is nvim, `t` is tmux, `h` is herdr, and the herdr layout functions.
+The alias table is in [Keybindings](/docs/keybindings); `zsh/omarchy.zsh` loads
+last, so it replaces an alias of yours with the same name.
+
+## Themes
+
+One script recolours the terminal, the editor, the bar, btop, Claude Code,
+Obsidian and Hermes, and picks the wallpaper. It has its own page:
+[Themes](/docs/themes).
+
+## The `omarchy-*` commands
+
+The scripts in `bin/` are on your `PATH` (linked into `~/.local/bin`). Most are
+bound to a key too; the keys are in [Keybindings](/docs/keybindings).
+
+| Command | What it does |
+|---|---|
+| `theme` | Sync, list, switch, and randomise themes; remove one. See [Themes](/docs/themes). |
+| `omarchy-appearance` | Window transparency (opaque, transparent, glassy) and corners (theme, sharp, rounded), Omarchy 4.5's Appearance menu. |
+| `omarchy-cycle-wallpaper` | The next wallpaper for the active theme (⌘⌃P). |
+| `omarchy-bg-set` | Set the desktop background to an image or a video. |
+| `omarchy-toggle-intros` | Theme intros on or off (the same flag Omarchy 4.5 uses). |
+| `omarchy-bar-remove` | Takes the widget drawn at a screen point off the bar; `--reset` puts every removed widget back. |
+| `omarchy-workspace` | The number keys work on the focused monitor's workspaces, never another monitor's. |
+| `omarchy-workspace-layout` | Cycle the focused workspace through tiles, accordion and floating (⌥L). |
+| `omarchy-move-to-monitor` | Move the focused window to the next monitor; a floating window lands centred. |
+| `omarchy-terminal` | A new Ghostty window in the focused terminal's folder (⌥↩). |
+| `omarchy-agent` | The default coding agent in a fresh terminal (⌘⇧⌃A). |
+| `omarchy-default-agent` | Print, set or install the default agent (Setup > Defaults > Agent). |
+| `omarchy-launch-browser` | The browser, and web apps, in the default browser. |
+| `omarchy-copy-url` | Copies the front tab's URL (⌥⇧L); runs `install.sh` too, for the password-manager native messaging hosts and overlay scrollbars in every Chromium browser. |
+| `omarchy-notice` | The time, weather or battery toast (⌘⌃⌥ T/W/B). |
+| `omarchy-system-menu` | The system menu: Lock, Sleep, Restart (⌘⎋). |
+| `omarchy-agent-usage` | The coding-agent limits for the bar: `claude`, `codex` or `grok`. Prints nothing, and the bar hides it, when that provider has no login here. |
+| `omarchy-tui` | Runs a command in a fresh Ghostty window and holds it open at the end. |
+| `omarchy-screensaver`, `omarchy-launch-screensaver`, `omarchy-toggle-screensaver` | The ttfx ASCII screensaver: the loop, one window per monitor after 150 s idle, and its on/off toggle. |
+| `omarchy-chromium-setup` | Omarchy 4.5's Chromium fixes for every Chromium browser on the Mac. |
+| `gaming-mode` | Quits every Dock app, drops Tailscale, hides the bar, launches Steam (⌘⌃G). |
+| `quit-all` | Quits every Dock app except Finder (⌘⌃⇧Q). Nothing is force-killed. |
+
+## Bonus features
+
+A few pieces of this port go past parity. They exist because macOS made them
+easy, or because a Mac needed them.
+
+- **Auto re-theme on light/dark flip.** Switch macOS appearance and the whole
+  desktop switches to a random theme from the matching bucket: light system,
+  light theme; dark system, dark theme. Terminal, editor, bar, btop, Claude
+  Code, Obsidian, all at once. It is the optional listener above; set it up
+  once and forget it. Omarchy has no equivalent, since Hyprland has no system
+  appearance to follow.
+- **⌥T shuffles within the bucket.** Random theme, never the current one,
+  never a dark theme on a light system.
+- **Theme reaches Claude Code, Hermes, and Obsidian.** Omarchy stops at the
+  terminal and editor. Here a switch recolors the Claude Code terminal theme,
+  picks the matching Hermes skin (daylight or default), and swaps the Obsidian
+  vault theme too.
+- **Crash watchdog.** AeroSpace can self-terminate on macOS 26. The launchd
+  agent above relaunches it on a crash and respects a clean quit.
+- **Gaming mode (⌘⌃G).** Quits every Dock app, drops Tailscale if it is
+  installed, and launches Steam. The reverse is a normal quit.
+- **Quit all (⌘⌃⇧Q).** Quits every Dock app except Finder. Apps with unsaved
+  work show their own save dialog; nothing is force-killed. Also in the
+  control menu under Toggle.
