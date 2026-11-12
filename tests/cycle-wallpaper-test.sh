@@ -41,6 +41,13 @@ OUT="$(env -i HOME="$H" PATH="$STUBS:/usr/bin:/bin" /bin/bash "$BIN" 2>&1)"; sle
 check "prints the video name" test "$OUT" = "Wallpaper|||jade_clip.mp4"
 check "its still frame is the desktop picture" grep -qxF "$H/.cache/omarchy/background-stills/jade_clip.mp4.png" "$T/argv.log"
 check "the player loops the video" grep -qxF "$H/Pictures/Wallpapers/jade_clip.mp4" "$T/player.log"
+
+echo "run through its ~/.local/bin link, it finds omarchy-bg-set in the repo (2026-11-12):"
+rm -f "$T/argv.log" "$H/Pictures/Wallpapers/jade_clip.mp4"; : > "$H/Pictures/Wallpapers/jade_a.jpg"
+ln -s "$(cd "$(dirname "$BIN")" && pwd)/omarchy-cycle-wallpaper" "$H/.local/bin/omarchy-cycle-wallpaper"
+OUT="$(env -i HOME="$H" PATH="$STUBS:/usr/bin:/bin" /bin/bash "$H/.local/bin/omarchy-cycle-wallpaper" 2>&1)"
+check "no missing helper" bash -c '[[ "$1" != *"No such file"* ]]' _ "$OUT"
+check "sets the picture" grep -qxF "$H/Pictures/Wallpapers/jade_a.jpg" "$T/argv.log"
 rm -rf "$T"
 
 [[ "$fails" -eq 0 ]] && echo "PASS" || { echo "FAIL: $fails check(s)"; exit 1; }

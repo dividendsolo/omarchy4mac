@@ -7,6 +7,7 @@ maintainer's Mac runs from a clone of it, the same as yours.
 
 ## 2026-11-12
 
+<<<<<<< ours
 - The README is one screen now, and the reading lives on a docs site:
   **https://omarchy4mac-docs.vercel.app** has the install steps, every
   keybinding, the theme pipeline, uninstall, troubleshooting, the changelog and
@@ -18,6 +19,13 @@ maintainer's Mac runs from a clone of it, the same as yours.
   moved out of the README with it, so `tests/dictation-test.sh`,
   `tests/keys-test.sh` and `tests/pins-test.sh` read those rows on the pages
   that hold them now.
+=======
+- A theme switch sets the wallpaper again after a `git pull`. `theme` and
+  ⌘⌃P call `omarchy-bg-set`, and they looked for it next to the link in
+  `~/.local/bin`. That helper came on 2026-11-11, and a pull adds no link for
+  it, so every switch skipped the wallpaper until `install.sh` ran again. Both
+  now follow their own link into the clone and run the helper from there.
+>>>>>>> theirs
 - `theme` switches in about a second again. It gave every Hermes profile the
   new skin with one `hermes skin use` per profile, and each one starts Python:
   with 55 profiles that was 24 of 25 seconds. One script now writes the skin
