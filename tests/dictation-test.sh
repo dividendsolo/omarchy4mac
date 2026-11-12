@@ -45,8 +45,11 @@ echo "Hammerspoon:"
 check "⌥Space toggles a Hex dictation" \
   "alt-space /Applications/Hex.app/Contents/MacOS/hex dictation toggle" "$(press)"
 
-echo "README:"
+# The parity table lives on the docs page now (it moved out of the README when
+# the docs site landed, #73).
+PARITY="${PARITY:-$HERE/../docs-site/content/docs/parity.mdx}"
+echo "The parity page:"
 check "the parity table lists dictation as Hex" 1 \
-  "$(grep -cE '^\| Voice typing .*\| \[Hex\]\(https://github.com/anomalyco/hex\)' "$ROOT/README.md")"
+  "$(grep -cE '^\| Voice typing .*\| \[Hex\]\(https://github.com/anomalyco/hex\)' "$PARITY")"
 
 [[ "$fails" -eq 0 ]] && echo "PASS" || { echo "FAIL: $fails check(s)"; exit 1; }

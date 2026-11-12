@@ -45,12 +45,14 @@ check "⌘⌃⌥E opens the world clock" 'exec-and-forget open -a Clock' "$(key 
 check "⌘⌃⌥F toggles the full screen desktop" \
   'exec-and-forget /opt/homebrew/bin/sketchybar --bar hidden=toggle' "$(key cmd-ctrl-alt-f)"
 
-README="${README:-$HERE/../README.md}"
-echo "README.md parity table:"
+# The parity table lives on the docs page now (it moved out of the README when
+# the docs site landed, #73).
+PARITY="${PARITY:-$HERE/../docs-site/content/docs/parity.mdx}"
+echo "the parity page's table:"
 check "the bar hide/show row names ⌘⌃⌥F" 1 \
-  "$(grep -E '^\| Bar hide/show key ' "$README" | grep -F 'sketchybar --bar hidden=toggle' | grep -cF '⌘⌃⌥F')"
-check "no README line puts the bar toggle on ⌘⇧Space" 0 \
-  "$(grep -E 'hidden=toggle|[Bb]ar hide' "$README" | grep -c '⌘⇧Space')"
+  "$(grep -E '^\| Bar hide/show key ' "$PARITY" | grep -F 'sketchybar --bar hidden=toggle' | grep -cF '⌘⌃⌥F')"
+check "no line puts the bar toggle on ⌘⇧Space" 0 \
+  "$(grep -E 'hidden=toggle|[Bb]ar hide' "$PARITY" | grep -c '⌘⇧Space')"
 
 command -v luajit >/dev/null || { echo "  FAIL  luajit is not installed (brew install luajit)"; exit 1; }
 TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
