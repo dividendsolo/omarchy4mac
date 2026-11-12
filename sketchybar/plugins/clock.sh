@@ -37,11 +37,9 @@ fi
 
 if [ "$BUILTIN" != "-" ]; then
   sketchybar --set clock_right drawing=on associated_display="$BUILTIN" \
-                   icon="$ICON" icon.color="$MAGENTA" label="$LABEL" label.color="$FG" \
-             --set theme_name_right drawing=on associated_display="$BUILTIN" \
-                   label="$THEME" label.color="$FG"
+                   icon="$ICON" icon.color="$MAGENTA" label="$LABEL" label.color="$FG"
 else
-  sketchybar --set clock_right drawing=off --set theme_name_right drawing=off
+  sketchybar --set clock_right drawing=off
 fi
 
 if [ "$OTHERS" != "-" ]; then

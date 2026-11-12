@@ -331,7 +331,7 @@ what changed and when is in [`CHANGELOG.md`](CHANGELOG.md).
 | Omarchy Quattro has | omarchy4mac uses | Match | Why not, and the plan |
 |---|---|---|---|
 | Tiling WM: focus, move, swap, resize, fullscreen, 5 workspaces, monitors | AeroSpace | ✅ |  |
-| Top bar: logo opens menu, workspaces, indicators, clock, weather, Friday sunset, updates badge, agents limits (Claude, Codex and Grok: a meter and reset time per limit, hidden when signed out), bluetooth, wifi, audio, battery | SketchyBar, v4 layout | ✅ |  |
+| Top bar: logo opens menu, workspaces, indicators, clock, weather, Friday sunset, updates badge, agents limits (Claude, Codex and Grok: a meter and reset time per limit, the percentages only beside a laptop notch, hidden when signed out), bluetooth, wifi, audio, battery | SketchyBar, v4 layout | ✅ |  |
 | 4.5 bar polish: scroll the workspaces, drag a widget off the bar to remove it, clock with live seconds (right-click), quiet across daylight saving | SketchyBar, plus a Hammerspoon drag watch; `omarchy-bar-remove --reset` brings removed widgets back | ⚠️ | No tray drawer, tooltips, hover reveal or wallpaper sampling: SketchyBar has none of those. A removed widget comes back only with `--reset`, not by dragging it back. |
 | Active-window borders | JankyBorders | ✅ |  |
 | Window transparency (opaque, transparent, glassy) and corners (theme, sharp, rounded), from Appearance > Window Transparency / Window Corners | `omarchy-appearance`: Ghostty opacity and blur, SketchyBar background, JankyBorders style | ✅ | macOS draws other apps solid and rounds every window itself, so the choices reach the terminal, the bar and the borders. |

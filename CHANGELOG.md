@@ -7,6 +7,13 @@ maintainer's Mac runs from a clone of it, the same as yours.
 
 ## 2026-11-12
 
+- Nothing on the bar runs under a MacBook's notch any more (#70). On the
+  built-in screen the agents limits show the percentages only
+  (`Claude 14% · 97%`); the external screens keep the meters and reset
+  times. The theme name and the Bluetooth icon now show on the external
+  screens only, and the focused app's name stops at 20 characters and
+  scrolls, like the music title. `tests/notch-test.sh` lays the bar out on a
+  notched screen and fails when an item reaches the notch.
 - SketchyBar's items take clicks again. The install hides the macOS menu bar,
   which slides back down whenever the pointer reaches the top edge, and the
   bar was drawn above windows only (`topmost=window`), so the revealed menu

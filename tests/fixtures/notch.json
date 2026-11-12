@@ -1,0 +1,31 @@
+{
+  "_about": "The built-in screen of a MacBook Pro 16 (looks like 1512 x 982) and the bar's item widths, measured on the live bar on 2026-11-12 with Hack Nerd Font (sketchybar --query <item> bounding_rects). tests/notch-test.sh lays the bar out from these.",
+  "screen_width": 1512,
+  "auxiliary_top_left_width": 663.5,
+  "auxiliary_top_right_width": 663.5,
+  "bar_padding": 8,
+  "item_padding": 4,
+  "label_char_width": 7.89,
+  "_fixed": "Drawn width of an item without a label.",
+  "fixed": {
+    "logo": 29, "space.1": 20, "space.2": 20, "space.3": 20, "space.4": 20, "space.5": 20,
+    "space_sep": 17, "media_next": 20, "wifi": 26, "bluetooth": 20, "standup": 25
+  },
+  "_overhead": "Drawn width of a labelled item minus its label (characters x label_char_width).",
+  "overhead": {
+    "front_app": 33.8, "media": 29.1,
+    "battery": 29.4, "theme_name_right": 32.3, "clock_right": 34.3, "volume": 34.3, "sunset": 33.8,
+    "agents.claude": 71.0, "agents.codex": 64.1, "agents.grok": 56.1,
+    "agents_notch.claude": 71.0, "agents_notch.codex": 64.1, "agents_notch.grok": 56.1
+  },
+  "_worst": "The widest a day can draw them: the longest theme name, a Friday with the stand-up timer on, a long app and track name, both Claude limits at 100%.",
+  "worst": {
+    "theme": "catppuccin-latte",
+    "front_app": "Microsoft Teams (work or school)",
+    "media": "A very long track title that scrolls",
+    "sunset": "8:59 PM",
+    "battery": "100",
+    "volume": "100",
+    "claude": "5h ▰▰▰▰▰ 100% 12:19pm · 7d ▰▰▰▰▰ 100% 9:59pm"
+  }
+}
