@@ -5,6 +5,20 @@ dotfiles repo; entries before that date are those exports. Since then this
 repo is the only source: every change lands here by pull request, and the
 maintainer's Mac runs from a clone of it, the same as yours.
 
+## 2026-11-13
+
+- Every GitHub Action these workflows use is pinned to a commit, and CI now
+  fails a job that uses one it does not cover. A tag is a mutable pointer:
+  `actions/checkout@v5` runs whatever that tag points to on the next run, with
+  the whole job's token. The week of 2026-11-13, attackers took over more than
+  4,800 GitHub accounts and planted a CI-key stealer in at least 1,806
+  repositories. `.github/workflows/actions.lock` records the commit behind each
+  `uses:`, and a `gh actions-lock --verify` step in `ci.yml`, right after the
+  `actions/checkout` step so the lockfile is on the runner before the check
+  runs, fails the job when a workflow uses an action the lockfile does not
+  cover. The two `@v5` and `@v4` refs in `ci.yml` now read `@v5.1.0` and
+  `@v4.4.0`, the tags those refs resolved to (#77).
+
 ## 2026-11-12
 
 - The README is one screen now, and the reading lives on a docs site:
