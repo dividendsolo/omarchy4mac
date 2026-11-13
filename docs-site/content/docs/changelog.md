@@ -22,6 +22,12 @@ maintainer's Mac runs from a clone of it, the same as yours.
   runs, fails the job when a workflow uses an action the lockfile does not
   cover. The two `@v5` and `@v4` refs in `ci.yml` now read `@v5.1.0` and
   `@v4.4.0`, the tags those refs resolved to (#77).
+- The README and the docs home open on the real thing now: a Tokyo Night
+  desktop, the rocket-launch wallpaper behind Omarchy's bar, and a second
+  picture with a Ghostty terminal open in tokyo-night, tmux on the left and
+  Claude Code on the right. The copy says the script *themes* the terminal,
+  the editor, the bar and the wallpaper, and `tests/docs-words-test.sh` fails
+  when the old word comes back (#78).
 
 ## 2026-11-12
 
