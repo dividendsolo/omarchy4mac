@@ -1,10 +1,12 @@
 # omarchy4mac
 
 Omarchy 4, for the Mac: AeroSpace tiles the windows, SketchyBar takes the bar,
-and one script recolours the terminal, the editor, the bar and the wallpaper at
+and one script themes the terminal, the editor, the bar and the wallpaper at
 once. The full documentation is at https://omarchy4mac.dividendsolo.com
 
-![The finished omarchy4mac desktop: Omarchy's bar across the top with five workspaces, a clock, the weather and the gruvbox theme, and a Ghostty terminal below it](docs-site/public/omarchy4mac-desktop.webp)
+![The finished omarchy4mac desktop: Omarchy's bar across the top with five workspaces, the clock, the weather and the tokyo-night theme, over a rocket-launch wallpaper](docs-site/public/omarchy4mac-desktop.webp)
+
+![The same desktop with a Ghostty terminal open in tokyo-night: tmux on the left and Claude Code on the right](docs-site/public/omarchy4mac-terminal.webp)
 
 ## Install
 

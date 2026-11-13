@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     template: '%s · omarchy4mac',
   },
   description:
-    "Omarchy 4's desktop on the Mac: AeroSpace for tiling, SketchyBar for the bar, and one theme script that recolours everything.",
+    "Omarchy 4's desktop on the Mac: AeroSpace for tiling, SketchyBar for the bar, and one theme script that themes everything.",
 };
 
 export default function Layout({ children }: LayoutProps<'/'>) {
