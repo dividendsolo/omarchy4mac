@@ -15,7 +15,13 @@ jobs:
       contents: read
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v5.1.0
+      - name: Lockfile check (every action pinned to a commit)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh extension list | grep -q 'gh-actions-lock' || gh extension install github/gh-actions-lock --pin v0.4.1
+          gh actions-lock --verify
       # tests/starship-test.sh renders the prompt with the real starship;
       # tests/menu-test.sh and tests/console-test.sh run hammerspoon/init.lua in luajit.
       - run: brew install starship luajit
@@ -32,8 +38,8 @@ jobs:
       contents: read
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5.1.0
+      - uses: actions/setup-node@v4.4.0
         with:
           node-version: '24'
           cache: npm
