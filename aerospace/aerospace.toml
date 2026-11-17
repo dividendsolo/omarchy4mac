@@ -21,18 +21,18 @@ exec-on-workspace-change = ['/bin/bash', '-c',
   '/opt/homebrew/bin/sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE']
 
 [workspace-to-monitor-force-assignment]
-1 = ['\(1\)$', '\(2\)$', 'VA2446', 'built-in']      # browser → left, else right, else laptop
-2 = ['\(2\)$', '\(1\)$', 'VA2446', 'built-in']      # Claude + Ghostty → right, else left, else laptop
-3 = ['\(2\)$', '\(1\)$', 'VA2446', 'built-in']      # spare   → right, else left, else laptop
-4 = ['built-in', '\(2\)$', '\(1\)$', 'VA2446']      # comms   → laptop, else right, else left
-5 = ['built-in', '\(2\)$', '\(1\)$', 'VA2446']      # music   → laptop, else right, else left
+1 = ['\(1\)$', '\(2\)$', 'VA2446', 'built-in']
+2 = ['\(2\)$', '\(1\)$', 'VA2446', 'built-in']
+3 = ['\(2\)$', '\(1\)$', 'VA2446', 'built-in']
+4 = ['built-in', '\(2\)$', '\(1\)$', 'VA2446']
+5 = ['built-in', '\(2\)$', '\(1\)$', 'VA2446']
 
 [gaps]
 inner.horizontal = 8
 inner.vertical = 8
 outer.left = 8
 outer.bottom = 8
-outer.top = 40   # 32 (SketchyBar height) + 8 (visual gap)
+outer.top = 40
 outer.right = 8
 
 [mode.main.binding]
@@ -138,8 +138,8 @@ cmd-shift-d = 'exec-and-forget open -na Ghostty --args -e lazydocker'
 cmd-shift-o = 'exec-and-forget open -a Obsidian'
 cmd-shift-w = 'exec-and-forget open -a Typora'
 
-cmd-shift-x = 'exec-and-forget open https://x.com'   # Finicky → Brave
-cmd-shift-alt-x = 'exec-and-forget open https://x.com/compose/post'   # Finicky → Brave
+cmd-shift-x = 'exec-and-forget open https://x.com'
+cmd-shift-alt-x = 'exec-and-forget open https://x.com/compose/post'
 cmd-shift-y = 'exec-and-forget $HOME/.local/bin/omarchy-launch-browser --app=https://youtube.com --workspace=5'
 
 cmd-ctrl-c = 'exec-and-forget /bin/sh -c "osascript -e \"tell application \\\"System Events\\\" to key code 23 using {command down, shift down}\""'
@@ -152,12 +152,12 @@ cmd-ctrl-alt-comma = 'exec-and-forget shortcuts run "Toggle Do Not Disturb"'
 cmd-ctrl-a = 'exec-and-forget open "x-apple.systempreferences:com.apple.Sound-Settings.extension"'
 cmd-ctrl-b = 'exec-and-forget open "x-apple.systempreferences:com.apple.BluetoothSettings"'
 cmd-ctrl-n = 'exec-and-forget open "x-apple.systempreferences:com.apple.wifi-settings-extension"'
-cmd-ctrl-s = 'exec-and-forget open -a LocalSend'   # v4: share menu (LocalSend); Sharing settings live in the menu under Setup
+cmd-ctrl-s = 'exec-and-forget open -a LocalSend'
 alt-shift-t = 'exec-and-forget open -na Ghostty --args -e btop'
 cmd-ctrl-h = 'exec-and-forget open -a "System Information"'
 cmd-ctrl-period = 'exec-and-forget open -a HandBrake'
 
-cmd-ctrl-e = 'exec-and-forget open "raycast://extensions/raycast/emoji-symbols/search-emoji-symbols"'   # emoji picker
+cmd-ctrl-e = 'exec-and-forget open "raycast://extensions/raycast/emoji-symbols/search-emoji-symbols"'
 cmd-ctrl-alt-e = 'exec-and-forget open -a Clock'
 cmd-ctrl-alt-f = 'exec-and-forget /opt/homebrew/bin/sketchybar --bar hidden=toggle'
 cmd-shift-ctrl-a = 'exec-and-forget open -na Ghostty --args -e $HOME/.local/bin/omarchy-agent'

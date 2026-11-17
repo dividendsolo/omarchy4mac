@@ -76,7 +76,7 @@ hs.hotkey = { bind = function(mods, key, fn)
   table.sort(mods)
   binds[table.concat(mods, "+") .. "+" .. key] = fn
   return stub()
-end, new = function() return stub() end } -- new: the theme chooser's ⌘⌫, live only while it is open
+end, new = function() return stub() end }
 local pressed = {}
 local function el(name, subrole, children)
   return { name = name,

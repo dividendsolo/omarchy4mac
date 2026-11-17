@@ -210,7 +210,7 @@ local M365 = {
 omarchyMenu("Install")
 local inst = texts(choosers[#choosers].shown)
 check("Install has Service", (", " .. inst .. ","):find(", Service,", 1, true) ~= nil, inst)
-slackThere = true   -- Slack installed: the item only opens it
+slackThere = true
 walk({ { "Microsoft", "chooser:Install › Service › Microsoft › ", M365 }, { "Slack", "ran:launchOrFocus Slack" } },
   { "Install", "Service" })
 searchAll(M365, "Install › Service › Microsoft")
@@ -238,7 +238,7 @@ local slackPath
 hs.application.pathForBundleID = function(id) return id == "com.tinyspeck.slackmacgap" and slackPath or nil end
 slackPath = nil; styled = {}
 local row = serviceRow("Slack")
-local DIM = "#565f89" -- the palette's comment colour
+local DIM = "#565f89"
 local function dimmed(s) return styled[s] ~= nil and styled[s].color.hex == DIM end
 check("Slack not installed: listed, not dimmed", row ~= nil and styled.Slack ~= nil and not dimmed("Slack")
   and row.subText:sub(1, (#"✓")) ~= "✓", row and row.subText)

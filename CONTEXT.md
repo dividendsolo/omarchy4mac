@@ -102,6 +102,15 @@ A skipped test is a failure: the checker's `vitest.no-skip.ts` fails the run.
   on (`bin/omarchy-workspace` reads `[workspace-to-monitor-force-assignment]`,
   whose first pattern is a workspace's own monitor). `config-version 2` lists
   the bound workspaces instead of guessing them from the bindings.
+- Workspace homes, each with its fallback order when a monitor is missing:
+  1 the browser (left monitor, else right, else laptop); 2 Claude and Ghostty
+  and 3 spare (right, else left, else laptop); 4 comms and 5 music (laptop,
+  else right, else left).
+- `outer.top = 40` is the 32-pixel SketchyBar height plus the 8-pixel gap.
+- `cmd-shift-x` and `cmd-shift-alt-x` open x.com with `open`, so Finicky
+  routes them to Brave. `cmd-ctrl-s` opens LocalSend, the share menu; the
+  Sharing settings live in the menu under Setup. `cmd-ctrl-e` is the Raycast
+  emoji picker.
 - `on-window-detected`: the first rule that matches wins, so the screensaver
   rule stays above the Ghostty rule, and a float rule above a workspace rule
   still moves the window.
