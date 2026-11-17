@@ -9,6 +9,22 @@ dotfiles repo; entries before that date are those exports. Since then this
 repo is the only source: every change lands here by pull request, and the
 maintainer's Mac runs from a clone of it, the same as yours.
 
+## 2026-11-17
+
+- omarchy4mac tracks Omarchy **4.5.0**. `OMARCHY_VERSION` says 4.5.0 and
+  `OMARCHY_COMMIT` holds the commit the v4.5.0 tag points at, `ac2690cd`.
+  `theme --sync` installs all 23 themes of that release: 4.5 renames
+  `osaka-jade` to `jade-horse` and adds `starship`, and every theme still
+  carries a `colors.toml` plus Omarchy's five templates, so the sync needs no
+  change.
+- The parity page is re-scored against v4.5.0: **75%**, 29 matched, 5 partial,
+  8 not portable, out of 42 scored. The page said 73% of v4.0.6, counted from
+  a table that had grown to 42 rows across the 4.5 work while the number
+  stayed at 25 matched, 4 partial, 8 not portable out of 37. The score now
+  says 23 themes, not 22, because 4.5 ships a renamed theme and a new one.
+  `tests/parity-test.sh` counts the table itself and fails when the page, the
+  README or `OMARCHY_VERSION` disagree with it.
+
 ## 2026-11-13
 
 - Every GitHub Action these workflows use is pinned to a commit, and CI now
