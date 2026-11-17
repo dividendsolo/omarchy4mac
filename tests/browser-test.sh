@@ -1,35 +1,23 @@
 #!/bin/bash
-# Checks the Omarchy 4.5 Brave and web app fixes (#40): the browser key falls
-# back to Safari when the https handler names a browser that is gone
-# (omacom/omarchy#16422), ⌥⇧L copies the front tab's URL in any Brave profile
-# or web app window (#10292, #10308), and omarchy-chromium-setup gives every
-# installed Chromium browser the 1Password and Bitwarden native messaging hosts
-# and overlay scrollbars (#14456). Runs in a throwaway HOME with open,
-# osascript, pbcopy and defaults stubbed, so nothing on the Mac is touched.
-#
-#   tests/browser-test.sh
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 BIN_DIR="$HERE/../bin"
 LUA="${HAMMERSPOON_LUA:-$HERE/../hammerspoon/init.lua}"
 fails=0
-check() { # check <description> <expected> <actual>
+check() {
   if [[ "$3" == "$2" ]]; then echo "  ok    $1"
   else echo "  FAIL  $1 (expected '$2', got '$3')"; fails=$((fails + 1)); fi
 }
 
-LUAJIT="$(command -v luajit)"   # found before PATH shrinks to the stubs
+LUAJIT="$(command -v luajit)"
 TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
 export HOME="$TMP/home" LOG="$TMP/log" STUBS="$TMP/stubs"
 mkdir -p "$HOME" "$STUBS"
 export PATH="$STUBS:/usr/bin:/bin"
-# open and defaults log their command line. osascript answers the installed-app
-# check (NSWorkspace) from $INSTALLED and a browser's URL from $URL.
 for tool in open defaults; do
   printf '#!/bin/bash\necho "%s $*" >>"$LOG"\n' "$tool" >"$STUBS/$tool"
 done
-cat >"$STUBS/osascript" <<'EOF'
-#!/bin/bash
+{ printf '#!/bin/bash\n'; cat; } > "$STUBS/osascript" <<'EOF'
 if [[ "$*" == *URLForApplicationWithBundleIdentifier* ]]; then
   [[ " $INSTALLED " == *" ${@: -1} "* ]] && echo "/Applications/${@: -1}.app"
   exit 0
@@ -40,7 +28,7 @@ EOF
 printf '#!/bin/bash\ncat >"%s/clipboard"\n' "$TMP" >"$STUBS/pbcopy"
 chmod +x "$STUBS"/*
 
-handler() { # handler <bundle id>: make it the https handler in LaunchServices
+handler() {
   local plist="$HOME/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist"
   mkdir -p "${plist%/*}"
   plutil -create xml1 "$plist"
@@ -103,8 +91,6 @@ check "⌥⇧L runs omarchy-copy-url for the front app" "~/.local/bin/omarchy-co
 
 echo "omarchy-chromium-setup:"
 AS="$HOME/Library/Application Support"
-# Brave and Helium are installed (each has its profile folder); Chrome is not.
-# 1Password registered its host with Brave only, Bitwarden with Helium only.
 mkdir -p "$AS/BraveSoftware/Brave-Browser/NativeMessagingHosts" "$AS/net.imput.helium/NativeMessagingHosts"
 echo '{"name":"com.1password.1password"}' >"$AS/BraveSoftware/Brave-Browser/NativeMessagingHosts/com.1password.1password.json"
 echo '{"name":"com.8bit.bitwarden"}' >"$AS/net.imput.helium/NativeMessagingHosts/com.8bit.bitwarden.json"

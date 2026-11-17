@@ -5,7 +5,6 @@ export const docsRoute = '/docs';
 export const docsImageRoute = '/og/docs';
 export const docsContentRoute = '/llms.mdx/docs';
 
-// The repo the pages link back to, and the path of the content inside it.
 export const gitConfig = {
   user: 'dividendsolo',
   repo: 'omarchy4mac',

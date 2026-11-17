@@ -1,0 +1,16 @@
+{
+  "name": "no-comments",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "typescript": "^5.9.3",
+    "yaml": "^2.9.1"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "vitest": "^5.0.3"
+  }
+}

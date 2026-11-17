@@ -1,15 +1,4 @@
 #!/bin/bash
-# Super+Return (alt-enter): a new Ghostty window in the folder of the focused
-# terminal's shell, like Omarchy's omarchy-cmd-terminal-cwd. Any other app
-# gets a terminal in $HOME (Omarchy 4.5, omacom/omarchy#15007): a browser's
-# helper shell sitting in ~/Downloads is not a terminal's shell.
-#
-# A terminal starts its shell on a pty of its own, as the session leader or
-# (Ghostty on macOS) as the child of a `login` that leads the session. A
-# helper shell another app spawns has no pty, or shares the app's.
-#
-# shortcut: an app with several windows (Ghostty tabs) gives its newest shell,
-# as Omarchy does; the focused tab's shell needs the terminal's own API.
 set -u
 AS="${AEROSPACE:-aerospace}"
 

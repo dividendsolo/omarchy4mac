@@ -38,7 +38,6 @@ from pathlib import Path
 
 CACHE_DIR = Path.home() / ".cache" / "omarchy" / "agent-usage"
 MAX_AGE = 900
-# SketchyBar runs plugins with launchd's short PATH; the CLIs live in these.
 EXTRA_PATH = [str(Path.home() / p) for p in (".local/bin", ".bun/bin", ".npm-global/bin")] + [
   "/opt/homebrew/bin", "/usr/local/bin"]
 
@@ -68,8 +67,6 @@ def span_label(minutes):
   return f"{minutes}m" if minutes else "limit"
 
 
-# ---- Claude ---------------------------------------------------------------
-
 def claude_login():
   found = subprocess.run(
     ["security", "find-generic-password", "-s", "Claude Code-credentials", "-w"],
@@ -96,8 +93,6 @@ def claude_probe(token):
   return limits
 
 
-# ---- Codex ----------------------------------------------------------------
-
 def codex_login():
   home = Path(os.environ.get("CODEX_HOME") or Path.home() / ".codex")
   try:
@@ -106,12 +101,11 @@ def codex_login():
     config = ""
   store = re.search(r'^\s*cli_auth_credentials_store\s*=\s*"(\w+)"', config, re.M)
   if store and store.group(1) != "file":
-    return home  # keyring or auto store: only Codex knows; its answer decides.
+    return home
   try:
     auth = json.loads((home / "auth.json").read_text())
   except (OSError, ValueError):
     raise NoLogin()
-  # An API key login bills by the token and has no plan limits to show.
   if auth.get("auth_mode") == "apikey" or (auth.get("auth_mode") is None and auth.get("OPENAI_API_KEY")):
     raise NoLogin()
   if not auth.get("tokens"):
@@ -154,13 +148,11 @@ def codex_probe(home):
   path = os.pathsep.join([os.environ.get("PATH", "")] + EXTRA_PATH)
   codex = shutil.which("codex", path=path)
   if not codex:
-    # A login shell finds a codex installed outside the PATH above (nvm), as bin/omarchy-agent does.
     found = subprocess.run(["zsh", "-lic", "command -v codex"], capture_output=True, text=True,
                            stdin=subprocess.DEVNULL, timeout=10).stdout.split()
     codex = found[-1] if found and os.path.isabs(found[-1]) else None
   if not codex:
     raise RuntimeError("codex not found")
-  # The npm launcher needs the node that sits beside it.
   path = os.path.dirname(codex) + os.pathsep + path
   proc = subprocess.Popen(
     [codex, "-s", "read-only", "-a", "on-request", "app-server"],
@@ -175,7 +167,6 @@ def codex_probe(home):
     pending = b""
 
     def reply(request_id, timeout=8):
-      # Read the raw fd: notifications can arrive in the same write as a reply.
       nonlocal pending
       deadline = time.monotonic() + timeout
       while True:
@@ -211,8 +202,6 @@ def codex_probe(home):
   return codex_limits(answer.get("result") or {})
 
 
-# ---- Grok -----------------------------------------------------------------
-
 GROK_BILLING = "https://cli-chat-proxy.grok.com/v1/billing"
 REFRESH_LIFETIME = 30 * 24 * 3600
 
@@ -223,15 +212,11 @@ def grok_login():
     auth = json.loads((home / "auth.json").read_text())
   except (OSError, ValueError):
     raise NoLogin()
-  # One login per issuer; the first is the CLI's own.
   entry = next((v for v in auth.values() if isinstance(v, dict)), {}) if isinstance(auth, dict) else {}
   if not entry.get("key"):
     raise NoLogin()
   expires = entry.get("expires_at")
   if expires and parse_time(expires).timestamp() <= time.time():
-    # Grok mints a new access token from its refresh token when it starts, so
-    # a lapsed one only pauses the limits; a refresh token past its 30 days
-    # is a sign-in to redo.
     if entry.get("refresh_token") and time.time() - parse_time(expires).timestamp() < REFRESH_LIFETIME:
       raise RuntimeError("access token lapsed")
     raise NoLogin()
@@ -250,7 +235,6 @@ def grok_get(token, url):
 
 
 def money(value):
-  # Protobuf JSON: a money field is {"val": n}, and a zero is left out.
   return float((value.get("val") or 0) if isinstance(value, dict) else (value or 0))
 
 
@@ -278,7 +262,7 @@ def grok_limits(credits, monthly):
     try:
       limits.append(grok_monthly(monthly()))
     except Exception:
-      pass  # the weekly window stands on its own
+      pass
   return limits
 
 
@@ -293,8 +277,6 @@ PROVIDERS = {
   "grok": (grok_login, grok_probe),
 }
 
-
-# ---- Output ---------------------------------------------------------------
 
 def limits(provider, force=False):
   login, probe = PROVIDERS[provider]
@@ -311,7 +293,6 @@ def limits(provider, force=False):
   except NoLogin:
     return None
   except Exception:
-    # Rate limited, offline, a lapsed token: the last answer still describes the account.
     return cached["limits"] if cached else []
   cache.parent.mkdir(parents=True, exist_ok=True)
   cache.write_text(json.dumps({"checkedAt": time.time(), "limits": fresh}))
@@ -349,7 +330,7 @@ def main():
     sys.exit("usage: omarchy-agent-usage claude|codex|grok [--force]")
   found = limits(args[0], "--force" in sys.argv)
   if found is None:
-    sys.exit(1)  # no login here: the bar hides the provider
+    sys.exit(1)
   text = line(found, dt.datetime.now().astimezone())
   if text:
     print(text)

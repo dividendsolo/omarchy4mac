@@ -1,34 +1,29 @@
 #!/usr/bin/env bash
-#
-# theme — unified theme switcher for Ghostty + Neovim (LazyVim),
-#         driven by Omarchy's own theme definitions.
-#
-# Usage:
-#   theme                 show current theme + list installed
-#   theme <name>          switch to <name>
-#   theme random          switch to a random theme matching the current
-#                         macOS appearance (light system → light themes only,
-#                         dark system → dark themes only); never repicks current
-#   theme -l | --list     list installed themes
-#   theme --mode          print current macOS appearance: light | dark
-#   theme --appearance    print the light/dark appearance of the current theme
-#                         (or of [name], if given)
-#   theme -s | --sync     download / refresh all themes from the Omarchy repo
-#   theme --no-reload <n> switch without reloading nvim, btop, sketchybar
-#   theme --remove <name> delete a theme (not the current one); --sync skips it
-#                         from then on (delete its line in ~/.config/theme-switcher/removed)
-#   theme --herdr-sync [on|off]  mirror theme switches to your herdr machines
-#
-# `--sync` pulls every theme from github.com/omacom/omarchy at the commit pinned
-# in OMARCHY_COMMIT (repo root, next to OMARCHY_VERSION), renders
-# Ghostty, btop, and neovim from Omarchy's own templates, and fetches each
-# theme's backgrounds into ~/Pictures/Wallpapers. Switching is then offline.
 
 set -euo pipefail
-# The folder this script really lives in: ~/.local/bin/<name> is a link into the
-# clone, and a helper added to bin/ later has no link there until install.sh
-# runs again. A git pull must be enough (2026-11-12: every theme switch skipped
-# the wallpaper, because ~/.local/bin had no omarchy-bg-set).
+
+usage() {
+  cat <<'USAGE'
+theme — unified theme switcher for Ghostty + Neovim (LazyVim), driven by
+Omarchy's own theme definitions.
+
+Usage:
+  theme                 show current theme + list installed
+  theme <name>          switch to <name>
+  theme random          switch to a random theme matching the current macOS
+                        appearance (light system → light themes only, dark
+                        system → dark themes only); never repicks the current one
+  theme -l | --list     list installed themes
+  theme --mode          print the current macOS appearance: light | dark
+  theme --appearance    print the light/dark appearance of the current theme
+                        (or of [name], if given)
+  theme -s | --sync     download / refresh all themes from the Omarchy repo
+  theme --no-reload <n> switch without reloading nvim, btop, sketchybar
+  theme --remove <name> delete a theme (not the current one); --sync skips it
+                        from then on (delete its line in ~/.config/theme-switcher/removed)
+  theme --herdr-sync [on|off]  mirror theme switches to your herdr machines
+USAGE
+}
 self="$0"
 while [[ -L "$self" ]]; do
   link="$(readlink "$self")"
@@ -36,49 +31,36 @@ while [[ -L "$self" ]]; do
 done
 BIN_DIR="$(cd "$(dirname "$self")" && pwd)"
 
-# Omarchy 4 (Quattro): the repo moved to omacom/omarchy, default branch
-# quattro. A theme ships colors.toml (24 named colours, plus mode), an
-# optional neovim.lua, and backgrounds/. btop, ghostty, and a fallback
-# neovim spec are rendered from default/themed/*.tpl, the same templates
-# Omarchy renders at theme-set time.
 REPO="omacom/omarchy"
-REF="${OMARCHY_REF:-}"                # empty: the commit in OMARCHY_COMMIT; a branch or SHA overrides
+REF="${OMARCHY_REF:-}"
 GIT_URL="https://github.com/$REPO.git"
-SRC=""                                # the sync's partial clone (set in sync_themes)
+SRC=""
 TEMPLATES=(btop.theme.tpl ghostty.conf.tpl neovim.lua.tpl claude.json.tpl obsidian.css.tpl)
 
-CACHE="$HOME/.config/theme-switcher/cache"      # cache/<name>/{colors.toml,neovim.lua,btop.theme,claude.json,obsidian.css}
+CACHE="$HOME/.config/theme-switcher/cache"
 CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
 OBSIDIAN_JSON="$HOME/Library/Application Support/obsidian/obsidian.json"
 TPL_CACHE="$HOME/.config/theme-switcher/templates"
 WALLPAPERS="$HOME/Pictures/Wallpapers"
 STATE="$HOME/.config/theme-switcher/current"
-REMOVED="$HOME/.config/theme-switcher/removed"         # one name per line: --sync skips these
-BG_MEMORY="$HOME/.config/theme-switcher/backgrounds"   # <theme>: the path of its last wallpaper
-HERDR_SYNC="$HOME/.config/theme-switcher/herdr-sync"   # present: switches mirror to herdr machines
+REMOVED="$HOME/.config/theme-switcher/removed"
+BG_MEMORY="$HOME/.config/theme-switcher/backgrounds"
+HERDR_SYNC="$HOME/.config/theme-switcher/herdr-sync"
 HERDR_LOG="$HOME/.local/state/omarchy4mac/theme-herdr.log"
 NVIM_THEME_FILE="$HOME/.config/nvim/lua/plugins/theme.lua"
 BTOP_THEMES_DIR="$HOME/.config/btop/themes"
 BTOP_CONFIG="$HOME/.config/btop/btop.conf"
 SKETCHYBAR_COLORS="$HOME/.config/sketchybar/colors.sh"
 
-# Ghostty reads BOTH the macOS app-support config and the XDG config, with the
-# app-support one loaded last (it wins). Edit whichever actually takes effect.
 GHOSTTY_MAC="$HOME/Library/Application Support/com.mitchellh.ghostty"
 GHOSTTY_XDG="${XDG_CONFIG_HOME:-$HOME/.config}/ghostty"
 
-# every ghostty config Ghostty might read. We keep the `theme =` line in sync in
-# ALL of them so it doesn't matter which one wins precedence — they all agree.
-# (Ghostty loads both the macOS app-support config and the XDG config; which one
-# wins has bitten us before, so we stop betting on it.)
 ghostty_configs() {
   local found=0
   [[ -f "$GHOSTTY_MAC/config" ]] && { echo "$GHOSTTY_MAC/config"; found=1; }
   [[ -f "$GHOSTTY_XDG/config" ]] && { echo "$GHOSTTY_XDG/config"; found=1; }
-  # nothing exists yet → default to the macOS app-support path
   [[ "$found" -eq 1 ]] || echo "$GHOSTTY_MAC/config"
 }
-# all themes/ dirs Ghostty might search — write generated theme files to each
 ghostty_theme_dirs() {
   [[ -d "$GHOSTTY_MAC" ]] && echo "$GHOSTTY_MAC/themes"
   echo "$GHOSTTY_XDG/themes"
@@ -87,11 +69,8 @@ ghostty_theme_dirs() {
 c_bold=$'\033[1m'; c_dim=$'\033[2m'; c_grn=$'\033[32m'; c_red=$'\033[31m'; c_yel=$'\033[33m'; c_rst=$'\033[0m'
 die() { echo "${c_red}error:${c_rst} $*" >&2; exit 1; }
 
-# A theme name reaches Lua (hs -c), AppleScript and file paths: letters,
-# digits, dot, underscore and dash only. Upstream folder names are not trusted.
 valid_name() { [[ "$1" =~ ^[A-Za-z0-9._-]+$ ]]; }
 
-# The omacom/omarchy commit `--sync` takes, from OMARCHY_COMMIT in this repo.
 pinned_commit() {
   local f; f="$(cd "$BIN_DIR/.." && pwd)/OMARCHY_COMMIT"
   local sha; sha="$(tr -d '[:space:]' < "$f" 2>/dev/null)" || sha=""
@@ -99,10 +78,6 @@ pinned_commit() {
   echo "$sha"
 }
 
-# Toast for callers with no terminal (AeroSpace exec-and-forget, launchd).
-# Without this, alt-t shows nothing at all — failures were invisible.
-# Hammerspoon's on-screen alert first: osascript notifications post as Script
-# Editor, which macOS shows only after that app gets notification permission.
 notify() {
   [[ -t 1 ]] && return 0
   local hs; hs="$(command -v hs 2>/dev/null || echo /opt/homebrew/bin/hs)"
@@ -113,12 +88,6 @@ notify() {
   osascript -e "display notification \"$1\" with title \"Theme\"" >/dev/null 2>&1 || true
 }
 
-# Render an Omarchy template ({{ key }}, {{ key_strip }}, {{ key_rgb }},
-# {{ mix a b amount }}) against a colors.toml. Mirrors
-# bin/omarchy-theme-set-templates: selection_background = selection,
-# selection_foreground = bright_foreground, legacy bg/fg names, and
-# color0..15 from the named palette. orange and brown are optional upstream
-# (Solitude, Last Horizon, White omit them) and fall back to yellow / muted.
 render_template() {
   local colors="$1" tpl="$2"
   COLORS="$colors" TPL="$tpl" python3 - <<'PY'
@@ -170,7 +139,6 @@ print(re.sub(r"\{\{\s*(.*?)\s*\}\}", sub, open(os.environ["TPL"]).read()), end="
 PY
 }
 
-# colors.toml (stdin) -> SketchyBar colors.sh (stdout). v4 palette keys.
 toml_to_sketchybar() {
   awk '
     function strip(s){ sub(/^[^=]*=/,"",s); gsub(/[" \t\r]/,"",s); return s }
@@ -197,7 +165,6 @@ toml_to_sketchybar() {
     }'
 }
 
-# extract `colorscheme = "X"` from a neovim.lua spec
 colorscheme_of() {
   grep -oE 'colorscheme[[:space:]]*=[[:space:]]*"[^"]+"' "$1" 2>/dev/null \
     | head -1 | sed -E 's/.*"([^"]+)".*/\1/'
@@ -211,8 +178,6 @@ installed_themes() {
 current_theme() { [[ -f "$STATE" ]] && cat "$STATE" || echo "(none)"; }
 
 system_appearance() {
-  # Ask the live session via System Events — `defaults read` can serve a stale
-  # cfprefsd view in some process contexts (observed lying in a shell session).
   local dm
   dm="$(osascript -e 'tell application "System Events" to tell appearance preferences to get dark mode' 2>/dev/null)"
   case "$dm" in
@@ -222,7 +187,6 @@ system_appearance() {
   esac
 }
 
-# light/dark from the theme's `mode` key (v4), else background luminance
 theme_appearance() {
   local bg mode
   mode="$(awk -F= '$1 ~ /^[[:space:]]*mode[[:space:]]*$/ {gsub(/[" \t\r]/,"",$2); print $2; exit}' "$CACHE/$1/colors.toml" 2>/dev/null)"
@@ -234,15 +198,10 @@ theme_appearance() {
   (( lum > 128 )) && echo light || echo dark
 }
 
-# The last few themes, newest first: `theme random` skips them, so a shuffle never
-# lands on a theme just seen (James, 2026-11-12: "it switched to a new theme, but
-# it's the same theme").
 RECENT="$HOME/.config/theme-switcher/recent"
 RECENT_KEEP=3
 
 pick_random_theme() {
-  # optional $1 forces the mode — used by theme-appearance-watch, which has
-  # already detected the flip (re-detecting here races the OS transition)
   local want cur t r pool=() fresh=() recent=" "
   want="${1:-$(system_appearance)}"
   cur="$(current_theme)"
@@ -252,10 +211,7 @@ pick_random_theme() {
     pool+=("$t")
     [[ "$recent" == *" $t "* ]] || fresh+=("$t")
   done < <(installed_themes)
-  # Skip recent themes only while others are left; a mode with few themes
-  # still never repeats the current one.
   [[ ${#fresh[@]} -gt 0 ]] && pool=("${fresh[@]}")
-  # only match is the current theme → keep it rather than switch appearance
   if [[ ${#pool[@]} -eq 0 && "$(theme_appearance "$cur")" == "$want" ]]; then pool=("$cur"); fi
   [[ ${#pool[@]} -gt 0 ]] || die "no $want themes cached (system is in $want mode)"
   echo "${pool[$((RANDOM % ${#pool[@]}))]}"
@@ -269,7 +225,6 @@ remember_theme() {
   printf '%s\n' "${keep[@]}" > "$RECENT"
 }
 
-# One file from the sync's clone; a blob not yet local is fetched on demand.
 src_file() { git -C "$SRC" show "HEAD:$1" 2>/dev/null; }
 
 sync_templates() {
@@ -281,24 +236,19 @@ sync_templates() {
   done
 }
 
-# Backgrounds land as <theme>_<file> so apply_wallpaper and the ⌘⌃P cycler
-# find them by prefix. Existing files are kept; only missing ones download.
 sync_backgrounds() {
   local n="$1" files f got=0
-  # blobs only: a folder (intros/, below) is not a background
   files="$(git -C "$SRC" ls-tree "HEAD:themes/$n/backgrounds" 2>/dev/null | awk -F'\t' '$1 ~ / blob / {print $2}')" || return 0
   [[ -n "$files" ]] || return 0
   mkdir -p "$WALLPAPERS"
   while IFS= read -r f; do
     [[ -n "$f" ]] || continue
-    valid_name "$f" || continue   # upstream file names are not trusted (#50)
+    valid_name "$f" || continue
     local base="$WALLPAPERS/${n}_$f"
     [[ -f "$base" ]] && continue
     src_file "themes/$n/backgrounds/$f" > "$base.part" && mv "$base.part" "$base" && got=$((got+1))
     rm -f "$base.part"
   done <<< "$files"
-  # Omarchy 4.5 theme intros: backgrounds/intros/<stem>.mp4 plays before the
-  # still <stem>.* (omarchy-bg-set finds it in $WALLPAPERS/intros).
   files="$(git -C "$SRC" ls-tree "HEAD:themes/$n/backgrounds/intros" 2>/dev/null | awk -F'\t' '$1 ~ / blob / {print $2}')" || files=""
   while IFS= read -r f; do
     [[ -n "$f" ]] || continue
@@ -312,20 +262,15 @@ sync_backgrounds() {
   echo "$got"
 }
 
-# One shallow, blobless clone instead of the GitHub contents API (60 requests an
-# hour per IP; a sync used 24, so two installs on one network hit the limit).
-# Only the trees come down at first; each file's blob is fetched when read.
 sync_themes() {
   command -v git >/dev/null || die "git is required"
   [[ -n "$REF" ]] || REF="$(pinned_commit)"
   echo "${c_bold}Fetching themes from $REPO@$REF …${c_rst}"
   SRC="$(mktemp -d "${TMPDIR:-/tmp}/theme-sync.XXXXXX")"
   trap 'rm -rf "$SRC"' EXIT
-  # init + fetch, not clone --branch: a clone cannot take a commit SHA
   { git init --quiet "$SRC" && git -C "$SRC" remote add origin "$GIT_URL" \
       && git -C "$SRC" fetch --quiet --depth 1 --filter=blob:none origin "$REF"; } 2>/dev/null \
     || die "could not fetch $REPO@$REF (network down?)"
-  # fetch every theme file and template in one batch; wallpapers stay lazy
   git -C "$SRC" sparse-checkout set --no-cone '/default/themed/' '/themes/*/colors.toml' '/themes/*/neovim.lua' 2>/dev/null \
     && git -C "$SRC" checkout --quiet FETCH_HEAD 2>/dev/null \
     || die "could not fetch themes from $REPO@$REF"
@@ -356,17 +301,12 @@ sync_themes() {
     mkdir -p "$CACHE/$n"
     printf '%s\n' "$colors" > "$CACHE/$n/colors.toml"
 
-    # neovim: the theme's own spec, else Omarchy's aether template with the
-    # palette baked in (what Omarchy itself does for themes without one).
     local nvim_src="theme"
     nvim="$(src_file "themes/$n/neovim.lua")" \
       || { nvim="$(render_template "$CACHE/$n/colors.toml" "$TPL_CACHE/neovim.lua.tpl")"; nvim_src="aether"; }
-    # catppuccin-nvim exists only in new catppuccin/nvim checkouts; Omarchy 4.5
-    # names the flavour instead (omacom/omarchy#12864), the pinned commit does not.
     nvim="${nvim//catppuccin-nvim/catppuccin-mocha}"
     printf '%s\n' "$nvim" > "$CACHE/$n/neovim.lua"
 
-    # btop + ghostty from the templates
     render_template "$CACHE/$n/colors.toml" "$TPL_CACHE/btop.theme.tpl" > "$CACHE/$n/btop.theme"
     render_template "$CACHE/$n/colors.toml" "$TPL_CACHE/claude.json.tpl" > "$CACHE/$n/claude.json"
     render_template "$CACHE/$n/colors.toml" "$TPL_CACHE/obsidian.css.tpl" > "$CACHE/$n/obsidian.css"
@@ -403,8 +343,6 @@ apply_ghostty() {
   while IFS= read -r cfg; do
     mkdir -p "$(dirname "$cfg")"
     if [[ -f "$cfg" ]] && grep -qE '^[[:space:]]*theme[[:space:]]*=' "$cfg"; then
-      # /g so any duplicate theme lines are ALL rewritten — a stale one further
-      # down the file would otherwise win and silently pin the old theme.
       GT="omarchy-$name" perl -0pi -e 's/^[ \t]*theme[ \t]*=.*$/theme = $ENV{GT}/mg' "$cfg"
     else
       printf '\ntheme = omarchy-%s\n' "$name" >> "$cfg"
@@ -414,12 +352,6 @@ apply_ghostty() {
 }
 
 reload_ghostty() {
-  # No live reload. Live reload hung Ghostty with sessions open: SIGUSR2
-  # (Ghostty 1.3.1) triggered "libxev_kqueue: invalid state in submission
-  # queue" and a main-thread hang that needed a force quit, every time the
-  # appearance watcher switched themes. The config file is already rewritten;
-  # the Hammerspoon watcher on the Ghostty configs (hammerspoon/init.lua)
-  # reloads open windows through Ghostty's own menu item.
   echo "  ${c_dim}ghostty${c_rst}  open windows reload through Hammerspoon"
 }
 
@@ -430,9 +362,6 @@ apply_nvim() {
     return 0
   fi
   mkdir -p "$(dirname "$NVIM_THEME_FILE")"
-  # Aggregate plugin specs from EVERY cached theme so they're all installed and
-  # eager-loaded. Each theme switch just flips the active colorscheme, never
-  # waits for Lazy to install a new plugin.
   CACHE="$CACHE" CURRENT="$name" OUT="$NVIM_THEME_FILE" python3 <<'PY'
 import os, re, sys
 cache = os.environ['CACHE']
@@ -447,7 +376,6 @@ for theme in sorted(os.listdir(cache)):
     m = re.search(r'return\s*\{(.*)\}\s*\Z', text, re.DOTALL)
     if not m: continue
     inner = m.group(1)
-    # Split top-level { ... } blocks
     depth = 0; start = None; blocks = []
     for i, c in enumerate(inner):
         if c == '{':
@@ -459,26 +387,17 @@ for theme in sorted(os.listdir(cache)):
                 blocks.append(inner[start:i+1]); start = None
     for b in blocks:
         if 'LazyVim/LazyVim' in b: continue
-        # aether.nvim is one plugin whose colours ride in opts: several
-        # themes generate a spec for it (v4 template), and Lazy would merge
-        # them. Keep only the current theme's copy, or the first one seen.
         if 'aether.nvim' in b:
             if theme != current and any('aether.nvim' in x for x in specs): continue
             if theme != current and os.path.exists(os.path.join(cache, current, 'neovim.lua')) \
                and 'aether.nvim' in open(os.path.join(cache, current, 'neovim.lua')).read(): continue
             specs[:] = [x for x in specs if 'aether.nvim' not in x]
-        # Inject `lazy = false` right after the plugin name string
         b2 = re.sub(r'(\{\s*"[^"]+")', r'\1, lazy = false', b, count=1)
-        # Strip any auto-applied colorscheme inside the spec's config() — those
-        # would override whatever LazyVim's colorscheme option resolves to.
-        # Matches: vim.cmd([[colorscheme foo]]) / vim.cmd("colorscheme foo")
-        #          / vim.cmd.colorscheme("foo")
         b2 = re.sub(r'\s*vim\.cmd\s*(\(\s*)?\[\[\s*colorscheme\s+[^\]]+\]\]\s*\)?', '', b2)
         b2 = re.sub(r'\s*vim\.cmd\s*\(\s*["\']\s*colorscheme\s+[^"\']+["\']\s*\)', '', b2)
         b2 = re.sub(r'\s*vim\.cmd\.colorscheme\s*\(\s*["\'][^"\']+["\']\s*\)', '', b2)
         specs.append(b2.strip())
 
-# Find current theme's colorscheme name
 cs = 'tokyonight'
 src = open(os.path.join(cache, current, 'neovim.lua')).read()
 m = re.search(r'colorscheme\s*=\s*"([^"]+)"', src)
@@ -518,7 +437,6 @@ reload_nvim() {
       "<C-\\><C-N>:lua local w='$cs' if not pcall(vim.cmd.colorscheme,w) then pcall(vim.cmd.colorscheme,(w:gsub('%-%a+\$',''))) end<CR>" 2>/dev/null \
       && count=$((count+1)) || true
   done < <(
-    # Glob the known socket spots; a recursive find over the temp dirs took 10s+.
     shopt -s nullglob
     local t
     for t in "${TMPDIR:-/tmp}" "$(getconf DARWIN_USER_TEMP_DIR 2>/dev/null)" /tmp; do
@@ -536,10 +454,8 @@ apply_btop() {
     echo "  ${c_yel}btop${c_rst}     ! no btop.theme for '$name' — skipped"
     return 0
   fi
-  # Make sure the theme file is installed (sync may have run before this dir existed)
   mkdir -p "$BTOP_THEMES_DIR"
   [[ -f "$BTOP_THEMES_DIR/omarchy-$name.theme" ]] || cp "$src" "$BTOP_THEMES_DIR/omarchy-$name.theme"
-  # Ensure config exists
   [[ -f "$BTOP_CONFIG" ]] || { mkdir -p "$(dirname "$BTOP_CONFIG")"; printf 'color_theme = "Default"\n' > "$BTOP_CONFIG"; }
   if grep -qE '^[[:space:]]*color_theme[[:space:]]*=' "$BTOP_CONFIG"; then
     BT="omarchy-$name" perl -0pi -e 's/^[ \t]*color_theme[ \t]*=.*$/color_theme = "$ENV{BT}"/m' "$BTOP_CONFIG"
@@ -550,8 +466,6 @@ apply_btop() {
 }
 
 reload_btop() {
-  # btop doesn't reload its config live; signal running instances to restart.
-  # SIGUSR2 reloads config in some versions; otherwise the user must restart it.
   pkill -USR2 -x btop 2>/dev/null && echo "  ${c_dim}btop${c_rst}     ↻ signaled to reload" || true
   return 0
 }
@@ -571,15 +485,7 @@ reload_sketchybar() {
   fi
 }
 
-# Hermes (the CLI agent): its skin paints its own colors and ignores the
-# terminal palette, so a dark-built skin is unreadable on a light Ghostty.
-# Light theme -> the `daylight` skin, dark -> `default`. New sessions pick it up.
 apply_hermes() {
-  # Every Hermes profile keeps its own config, so each one gets the skin. A
-  # `hermes -p X skin use` per profile starts Python each time: 55 profiles took
-  # 24 of the switch's 25 seconds (2026-11-12). One python3 writes the one
-  # display.skin line in every config instead; running sessions still pick it
-  # up live, because Hermes watches its config file.
   [[ -d "$HOME/.hermes" ]] || { echo "  ${c_dim}hermes${c_rst}   skipped (no ~/.hermes)"; return 0; }
   local skin=default
   [[ "$(theme_appearance "$1")" == light ]] && skin=daylight
@@ -625,8 +531,6 @@ PY
   echo "  ${c_dim}hermes${c_rst}   → $skin"
 }
 
-# Claude Code: ~/.claude/themes/omarchy.json + settings theme "custom:omarchy"
-# (what omarchy-theme-set-claude --activate does). New sessions pick it up.
 apply_claude() {
   local name="$1" src="$CACHE/$1/claude.json"
   [[ -f "$src" && -d "$CLAUDE_DIR" ]] || return 0
@@ -643,8 +547,6 @@ PY
   echo "  ${c_dim}claude${c_rst}   → custom:omarchy ${c_dim}(new sessions)${c_rst}"
 }
 
-# Obsidian: an "Omarchy" theme in every vault Obsidian knows about, selected
-# in appearance.json. Obsidian reloads the css of the active theme live.
 apply_obsidian() {
   local name="$1" src="$CACHE/$1/obsidian.css"
   [[ -f "$src" && -f "$OBSIDIAN_JSON" ]] || return 0
@@ -674,9 +576,6 @@ PY
   echo "  ${c_dim}obsidian${c_rst} → Omarchy theme in $count vault(s)"
 }
 
-# The outgoing theme keeps the picture on the desktop (omacom/omarchy#7718),
-# unless that picture belongs to another theme: it only stayed because the
-# outgoing theme has no wallpaper of its own.
 remember_wallpaper() {
   local old="$1" pic="$2" t
   [[ -n "$pic" && "$old" != "$3" ]] && valid_name "$old" && [[ -d "$CACHE/$old" ]] || return 0
@@ -688,25 +587,20 @@ remember_wallpaper() {
 
 apply_wallpaper() {
   local name="$1" dir="$HOME/Pictures/Wallpapers"
-  # a video background shows its still frame as the picture: remember the video itself
   local current; current="$(cat "$HOME/.local/state/omarchy/background-video" 2>/dev/null)" || current=""
   [[ -n "$current" ]] || current="$(osascript -e 'tell application "System Events" to tell current desktop to get picture' 2>/dev/null)"
   remember_wallpaper "$(current_theme)" "$current" "$name"
   local remembered; remembered="$(cat "$BG_MEMORY/$name" 2>/dev/null)" || remembered=""
   [[ -f "$remembered" ]] || remembered=""
   shopt -s nullglob nocaseglob
-  # Declare, then assign: bash 3.2 drops `local files=( <glob> )` entirely.
   local files; files=( "$dir/${name}_"*.{jpg,jpeg,png,heic,webp,mp4,mov,m4v} )
   shopt -u nocaseglob
-  # bash 3.2 + set -u: ${#files[@]} on an empty array is "unbound", so test the join.
-  # Thanks to @tylerkessler (omarchy4mac#6).
   if [[ -z "${files[*]-}" && -z "$remembered" ]]; then
     echo "  ${c_yel}wallpaper${c_rst} ! none found for '$name' in $dir — skipped"
     WALLPAPER_NOTE=" No wallpaper for this theme in ~/Pictures/Wallpapers, so the previous wallpaper stays."
     return 0
   fi
 
-  # If current desktop picture is already from this theme, keep it
   if [[ -n "$current" && ( "$(basename "$current")" == "${name}_"* || "$current" == "$remembered" ) ]]; then
     echo "  ${c_dim}wallpaper${c_rst} kept $(basename "$current")"
     return 0
@@ -714,17 +608,13 @@ apply_wallpaper() {
 
   local pick="$remembered"
   [[ -n "$pick" ]] || pick="${files[$((RANDOM % ${#files[@]}))]}"
-  # an image (with its intro, if the theme has one) or a looping video (Omarchy 4.5)
   "$BIN_DIR/omarchy-bg-set" "$pick" || true
-  # keep the cycler's index in step so ⌘⌃P starts from this picture
   local idx=0 i=0
   for f in "${files[@]-}"; do [[ "$f" == "$pick" ]] && idx=$i; i=$((i+1)); done
-  # omarchy-cycle-wallpaper keeps one index per theme
   mkdir -p "$HOME/.cache"; echo "$idx" > "$HOME/.cache/omarchy-wallpaper-index-$name"
   echo "  ${c_dim}wallpaper${c_rst} → $(basename "$pick")"
 }
 
-# Delete a theme and what --sync generated for it (omacom/omarchy#14713).
 remove_theme() {
   local name="$1" td
   valid_name "$name" || die "invalid theme name: $name"
@@ -746,32 +636,21 @@ herdr_sync_toggle() {
   [[ -f "$HERDR_SYNC" ]] && echo "herdr theme sync: on" || echo "herdr theme sync: off"
 }
 
-# Mirror the current theme to every enabled herdr machine (omacom/omarchy#13430).
-# Runs in the background after a switch. A machine takes the theme only when
-# its own sync is on; THEME_SYNC_FROM stops it from echoing the theme back.
-# shortcut: no lock between runs (macOS has no flock); two quick switches can
-# land out of order on a slow machine, and the next switch corrects it.
 herdr_push() {
   local herdr targets target theme result rc
-  # launchd and hotkey shells often lack Homebrew on PATH
   herdr="$(command -v herdr 2>/dev/null || true)"
   [[ -n "$herdr" || ! -x /opt/homebrew/bin/herdr ]] || herdr=/opt/homebrew/bin/herdr
   [[ -n "$herdr" ]] || { echo "$(date '+%F %T') herdr not found"; return 0; }
-  # Columns: id, label, SSH target, session, state. This Mac may be listed; it is already on the theme.
   targets="$("$herdr" machine list 2>/dev/null | awk -F '\t' '$5 == "enabled" { print $3 }')"
-  # The remote runs under a login shell for its PATH. Braces make bash read the
-  # whole script before running it, so nothing it runs eats the rest.
   local remote
   read -r -d '' remote <<'EOF' || true
 {
   if [[ -x ~/.local/bin/theme ]]; then
-    # omarchy4mac
     if [[ ! -f ~/.config/theme-switcher/herdr-sync ]]; then echo "theme sync is off"; exit; fi
     if [[ $(cat ~/.config/theme-switcher/current 2>/dev/null) == "$theme" ]]; then echo "already on $theme"; exit; fi
     if THEME_SYNC_FROM="$from" ~/.local/bin/theme "$theme" >/dev/null 2>&1; then echo "set $theme"; else echo "failed to set $theme"; fi
     exit
   fi
-  # Omarchy: the same steps as omarchy-theme-set-herdr-machines
   if [[ ! -f ~/.local/state/omarchy/toggles/herdr-theme-sync ]]; then echo "theme sync is off"; exit; fi
   if [[ $(cat ~/.local/state/omarchy/current/theme.name 2>/dev/null) == "$theme" ]]; then echo "already on $theme"; exit; fi
   export XDG_RUNTIME_DIR="/run/user/$(id -u)"
@@ -784,22 +663,18 @@ herdr_push() {
   if omarchy theme set "$theme" >/dev/null 2>&1; then echo "set $theme"; else echo "failed to set $theme"; fi
 } </dev/null
 EOF
-  # One machine at a time, so an SSH agent like 1Password asks at most once.
-  # The theme travels on stdin as a quoted assignment, never in the ssh command.
   while IFS= read -r target; do
-    [[ -n "$target" && "$target" != -* ]] || continue   # never an ssh option
+    [[ -n "$target" && "$target" != -* ]] || continue
     theme="$(current_theme)"
     valid_name "$theme" || return 0
     result="$(printf 'theme=%q from=%q\n%s\n' "$theme" "$(hostname -s 2>/dev/null || hostname)" "$remote" |
       ssh -o BatchMode=yes -o ConnectTimeout=5 -o ServerAliveInterval=5 -o ServerAliveCountMax=2 \
         "$target" bash -l -s 2>&1 | tail -n 1)" && rc=0 || rc=$?
-    # ssh exits 255 when it cannot reach the machine (asleep, offline); go on to the next one
     (( rc != 255 )) || result=""
     echo "$(date '+%F %T') $target: ${result:-unreachable}"
   done <<< "$targets"
 }
 
-# --- arg parsing ------------------------------------------------------------
 do_reload=1; want_appearance=0; args=()
 while [[ $# -gt 0 ]]; do
   a="$1"; shift
@@ -812,7 +687,7 @@ while [[ $# -gt 0 ]]; do
     --mode)      system_appearance; exit 0 ;;
     --appearance) want_appearance=1 ;;
     --no-reload) do_reload=0 ;;
-    -h|--help)   sed -n '3,22p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help)   usage; exit 0 ;;
     -*)          die "unknown option: $a" ;;
     *)           args+=("$a") ;;
   esac
@@ -830,7 +705,6 @@ if [[ "${#args[@]}" -eq 0 ]]; then
   exit 0
 fi
 
-# auto-sync on first ever use
 if [[ -z "$(installed_themes)" ]]; then
   echo "${c_dim}no themes cached yet — syncing first…${c_rst}"; sync_themes; echo
 fi
@@ -843,17 +717,11 @@ if [[ "$name" != "random" || -d "$CACHE/random" ]]; then
   fi
 fi
 
-# Single-instance lock. alt-t fires one process per keypress (and key repeat),
-# and a full apply takes seconds. Overlapping runs both read the stale state
-# file, pick different themes, and the desktop flashes through both — that was
-# the "went through two themes / same theme, new wallpaper" bug. mkdir is
-# atomic; a lock whose owner died is reclaimed.
 LOCK="$HOME/.config/theme-switcher/lock"
 lock_taken=0
 for _ in 1 2; do
   if mkdir "$LOCK" 2>/dev/null; then echo $$ > "$LOCK/pid"; lock_taken=1; break; fi
   owner="$(cat "$LOCK/pid" 2>/dev/null || true)"
-  # ps sees every user's processes; kill -0 lies (EPERM) for other users' pids
   if [[ -n "$owner" ]] && ! ps -p "$owner" -o pid= >/dev/null 2>&1; then rm -rf "$LOCK"; continue; fi
   break
 done
@@ -861,12 +729,9 @@ if [[ "$lock_taken" -eq 0 ]]; then
   echo "${c_dim}theme: switch already in progress — ignoring${c_rst}" >&2
   exit 0
 fi
-trap 'rm -rf "$LOCK" ${SRC:+"$SRC"}' EXIT   # SRC: a first-use sync's clone
+trap 'rm -rf "$LOCK" ${SRC:+"$SRC"}' EXIT
 
-# The random pick comes after the lock: a press during a switch used to read the
-# old state, pick the theme being applied, and announce it (2026-11-12).
 if [[ "$name" == "random" && ! -d "$CACHE/random" ]]; then
-  # `theme random [light|dark]` — mode arg wins, else detect once
   want="${args[1]:-$(system_appearance)}"
   name="$(pick_random_theme "$want")"
   echo "${c_dim}random pick ($want mode):${c_rst} ${c_bold}$name${c_rst}"
@@ -879,14 +744,11 @@ apply_btop "$name"
 apply_sketchybar "$name"
 apply_wallpaper "$name"
 mkdir -p "$(dirname "$STATE")"; echo "$name" > "$STATE"; remember_theme "$name"
-# Detached and logged, so SSH never holds up a switch (or the hotkey's task).
 if [[ -f "$HERDR_SYNC" && -z "${THEME_SYNC_FROM:-}" ]]; then
   mkdir -p "$(dirname "$HERDR_LOG")"
   nohup /bin/bash "$0" --herdr-push >> "$HERDR_LOG" 2>&1 < /dev/null &
 fi
 
-# What the eye sees reloads first. Hermes starts one Python per profile and
-# took 4s+ (more under lane load), which held the bar on the old theme.
 if [[ "$do_reload" -eq 1 ]]; then
   reload_sketchybar
   reload_ghostty
@@ -897,6 +759,5 @@ apply_claude "$name"
 apply_obsidian "$name"
 apply_hermes "$name"
 echo "${c_grn}done.${c_rst} ${c_dim}New Ghostty windows + nvim sessions + btop launches use $name immediately.${c_rst}"
-# A normal switch shows itself; only a missing wallpaper needs words.
 [[ -n "${WALLPAPER_NOTE:-}" ]] && notify "Switched to $name.$WALLPAPER_NOTE"
 exit 0

@@ -1,18 +1,4 @@
 #!/usr/bin/env bash
-# Shared by the centre-cluster plugins (clock, weather, updates, indicators).
-# Exports BUILTIN and OTHERS: sketchybar arrangement ids for the notched
-# built-in panel and for the external displays ("-" when absent).
-#
-# The built-in display has a notch, so centered items are lost behind it. Rather
-# than switching the whole bar to one layout or the other, pin each variant to
-# the displays it suits: centered on the externals, right-side (in front of the
-# battery) on the built-in. Both can be drawn at once, on different screens.
-#
-# sketchybar's associated_display takes arrangement ids, so map the built-in's
-# DirectDisplayID (per CoreGraphics, the authority on which panel is built-in)
-# through `sketchybar --query displays` to get its arrangement id.
-# The query fails now and then under load (many items run at once on wake), so
-# try it three times before giving up.
 for _ in 1 2 3; do
 read -r BUILTIN OTHERS <<<"$(
   sketchybar --query displays 2>/dev/null | python3 -c '
@@ -35,18 +21,14 @@ print(",".join(builtin) or "-", ",".join(others) or "-")
 [ -n "$BUILTIN" ] && break
 sleep 0.3
 done
-# If anything above failed, fall back to the plain centered layout everywhere.
 DISPLAYS_OK=1
 if [ -z "$BUILTIN" ]; then
   DISPLAYS_OK=0; BUILTIN="-"; OTHERS="0"
   echo "$(date '+%F %T') displays.sh: detection failed (${NAME:-?})" >> "$HOME/.cache/sketchybar-displays.log"
 fi
 
-# Show a centre item on the externals only; the notch eats the centre on the
-# built-in. Usage: center_item <name> [--set args...]
 center_item() {
   local item="$1"; shift
-  # A failed lookup must not hide the item: keep where it is drawn, refresh the rest.
   if [ "$DISPLAYS_OK" = 0 ]; then
     sketchybar --set "$item" "$@"
   elif [ "$OTHERS" != "-" ]; then

@@ -1,21 +1,14 @@
 #!/bin/bash
-# Checks that code fetched from omacom at install or sync time is pinned to a
-# recorded commit, never a branch head (#45): OMARCHY_COMMIT for `theme --sync`,
-# `cargo install --rev` for ttfx.
-#
-#   tests/pins-test.sh
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$HERE/.."
 fails=0
 
-check() { # check <description> <test command...>
+check() {
   local d="$1"; shift
   if "$@"; then echo "  ok    $d"; else echo "  FAIL  $d"; fails=$((fails + 1)); fi
 }
 
-# The manual install steps left the README for the docs page when the docs site
-# landed (#73).
 INSTALL_DOC="$ROOT/docs-site/content/docs/install.mdx"
 echo "pins:"
 check "OMARCHY_COMMIT holds one full commit SHA" grep -qxE '[0-9a-f]{40}' "$ROOT/OMARCHY_COMMIT"

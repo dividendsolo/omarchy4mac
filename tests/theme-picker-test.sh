@@ -1,13 +1,4 @@
 #!/bin/bash
-# Checks the theme chooser's delete key (hammerspoon/init.lua, Omarchy 4.5,
-# omacom/omarchy#14713): ⌘⌫ on a theme asks first, then runs
-# `theme --remove <name>` with the name as one argument and reopens the
-# chooser; the current theme and Cancel delete nothing; the key works only
-# while the chooser is open. Also checks Trigger > Toggle > Herdr Theme Sync
-# (omacom/omarchy#13430). init.lua runs in LuaJIT with a stub `hs`, so
-# nothing on the Mac is touched.
-#
-#   tests/theme-picker-test.sh
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 LUA="${HAMMERSPOON_LUA:-$HERE/../hammerspoon/init.lua}"
@@ -70,7 +61,7 @@ end }
 dofile(arg[1])
 
 local function delKey()
-  for i = #keys, 1, -1 do if keys[i].id == "cmd+delete" and not keys[i].deleted then return keys[i] end end
+  for i = (#keys), 1, -1 do if keys[i].id == "cmd+delete" and not keys[i].deleted then return keys[i] end end
 end
 local function open()
   binds["cmd+ctrl+t"]()
@@ -80,20 +71,18 @@ local function rowOf(c, name)
   for i, r in ipairs(c.shown) do if r.themeName == name then return i end end
 end
 
--- ---- the key exists only while the chooser is open ------------------------
 local c = open()
 check("the chooser says ⌘⌫ deletes", (c.placeholder or ""):find("⌘⌫", 1, true) ~= nil, c.placeholder)
 local k = delKey()
 check("⌘⌫ is on while the chooser is open", k ~= nil and k.on)
 
--- ---- delete a theme ---------------------------------------------------------
 c.row = rowOf(c, "tokyo-night")
-local nTasks = #tasks
+local nTasks = (#tasks)
 k.fn()
 check("asks before deleting", asked[#asked] and asked[#asked]:find("tokyo-night", 1, true) ~= nil, asked[#asked])
 local t = tasks[nTasks + 1]
 check("runs theme --remove with the name as one argument",
-  t ~= nil and t.path:match("/%.local/bin/theme$") ~= nil and t.args[1] == "--remove" and t.args[2] == "tokyo-night" and #t.args == 2,
+  t ~= nil and t.path:match("/%.local/bin/theme$") ~= nil and t.args[1] == "--remove" and t.args[2] == "tokyo-night" and (#t.args) == 2,
   t and (t.path .. " " .. table.concat(t.args, " ")) or "no task")
 check("the hidden chooser's ⌘⌫ is gone", k.deleted)
 local c2 = choosers[#choosers]
@@ -101,28 +90,24 @@ check("reopens the chooser after the delete", c2 ~= c and c2.visible)
 local after = c2.shown[c2.row] and c2.shown[c2.row].themeName
 check("selection lands on the theme before the deleted one", after == "rose-pine" or after == "nord", tostring(after))
 
--- ---- the current theme is not deleted --------------------------------------
 c = choosers[#choosers]; k = delKey()
 c.row = rowOf(c, "nord")
-nTasks = #tasks
+nTasks = (#tasks)
 k.fn()
-check("the current theme: no delete", #tasks == nTasks)
+check("the current theme: no delete", (#tasks) == nTasks)
 check("the current theme: says why", alerts[#alerts] and alerts[#alerts]:find("nord", 1, true) ~= nil, alerts[#alerts])
 
--- ---- Cancel deletes nothing --------------------------------------------------
 answer = "Cancel"
 c.row = rowOf(c, "rose-pine")
-nTasks = #tasks
+nTasks = (#tasks)
 k.fn()
-check("Cancel: no delete", #tasks == nTasks)
+check("Cancel: no delete", (#tasks) == nTasks)
 answer = "Delete"
 
--- ---- picking a theme turns the key off ------------------------------------
 c = choosers[#choosers]; k = delKey()
 c:hide()
 check("closing the chooser removes ⌘⌫", k.deleted and not k.on)
 
--- ---- Trigger > Toggle > Herdr Theme Sync -----------------------------------
 omarchyMenu("Trigger")
 local m = choosers[#choosers]
 local function find(c, text) for _, r in ipairs(c.shown) do if r.text == text then return r end end end
@@ -131,7 +116,7 @@ m = choosers[#choosers]
 local row = find(m, "Herdr Theme Sync")
 check("Toggle lists Herdr Theme Sync", row ~= nil)
 if row then
-  local n = #ran
+  local n = (#ran)
   m.cb(row)
   check("Herdr Theme Sync turns it on when off", (ran[n + 1] or ""):find("theme --herdr-sync on", 1, true) ~= nil, ran[n + 1])
 end

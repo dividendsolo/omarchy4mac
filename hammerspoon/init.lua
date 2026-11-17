@@ -1,15 +1,6 @@
--- Hammerspoon config — Omarchy-style keybindings overlay
--- Reload after edits: `hs -c 'hs.reload()'` from terminal, or use the menu icon.
-
--- Enable the `hs` CLI so we can reload/test from the terminal
 require("hs.ipc")
 
-----------------------------------------------------------------------
--- Keybindings shown in the popup (display only — actual bindings live
--- in ~/.aerospace.toml). cmd = SUPER in our setup.
-----------------------------------------------------------------------
 local bindings = {
-  -- Launching
   { "SUPER + SPACE",            "Raycast" },
   { "ALT + SPACE",              "Dictation on / off (Hex)" },
   { "hold RIGHT ALT",           "Dictate while held (Hex)" },
@@ -41,7 +32,6 @@ local bindings = {
   { "SUPER + SHIFT + C",        "HEY Calendar (app window)" },
   { "SUPER + SHIFT + E",        "HEY Mail (app window)" },
 
-  -- Window / layout
   { "ALT + W",                  "Quit app (sends ⌘Q)" },
   { "ALT + Q",                  "Quit app (sends ⌘Q)" },
   { "CTRL + ALT + BACKSPACE",   "Close all windows but current" },
@@ -55,7 +45,6 @@ local bindings = {
   { "SUPER + ALT + F",          "Fullscreen (tile)" },
   { "SUPER + CTRL + F",         "Fullscreen (tile)" },
 
-  -- Focus
   { "SUPER + LEFT / DOWN / UP / RIGHT",  "Focus window in direction (crosses displays)" },
   { "SUPER + `",                "Quake console (default agent)" },
   { "SUPER + SHIFT + `",        "Second Quake console" },
@@ -64,10 +53,8 @@ local bindings = {
   { "CTRL + ALT + TAB",         "Focus next monitor" },
   { "CTRL + ALT + SHIFT + TAB", "Focus prev monitor" },
 
-  -- Move / swap
   { "SUPER + SHIFT + ←/↓/↑/→",  "Swap window in direction" },
 
-  -- Workspaces
   { "ALT + 1..5",               "Switch to this monitor's workspace N" },
   { "SUPER + SHIFT + 1..5",     "Move window to this monitor's workspace N and follow" },
   { "SUPER + SHIFT + ALT + 1..5", "Move window to this monitor's workspace N (stay)" },
@@ -76,13 +63,11 @@ local bindings = {
   { "SUPER + SHIFT + ALT + ←/→/↑/↓", "Move workspace to prev/next monitor" },
   { "SUPER + CTRL + SHIFT + ←/↓/↑/→", "Move focused window across monitors (floats centre)" },
 
-  -- Resize
   { "ALT + =",                  "Grow focused window" },
   { "ALT + -",                  "Shrink focused window" },
   { "SUPER + SHIFT + =",        "Grow height" },
   { "SUPER + SHIFT + -",        "Shrink height" },
 
-  -- System
   { "SUPER + CTRL + A",         "Sound settings" },
   { "SUPER + CTRL + B",         "Bluetooth settings" },
   { "SUPER + CTRL + N",         "Network (Wi-Fi settings)" },
@@ -112,23 +97,17 @@ local bindings = {
   { "SUPER + CTRL + ALT + B",   "Battery toast" },
   { "SUPER + ESC",              "System menu (Lock/Sleep/Restart/…)" },
 
-  -- Appearance
   { "SUPER + ALT + SPACE",      "Apps launcher (curated)" },
   { "SUPER + SHIFT + SPACE",    "Omarchy control menu" },
   { "SUPER + CTRL + SHIFT + SPACE", "Theme chooser" },
   { "SUPER + CTRL + T",         "Theme chooser" },
   { "OPT + T",                  "Random theme (matches system light/dark)" },
 
-  -- Service mode
   { "SUPER + SHIFT + ;",        "Enter service mode (R=flatten, F=float, esc=exit)" },
 
-  -- Help
   { "ALT + K",                  "Show this keybindings overlay" },
 }
 
-----------------------------------------------------------------------
--- Tokyo Night palette
-----------------------------------------------------------------------
 local function hex(s)
   return { hex = s }
 end
@@ -141,16 +120,10 @@ local COLORS = {
   comment  = hex("#565f89"),
 }
 
-----------------------------------------------------------------------
--- Build chooser
-----------------------------------------------------------------------
--- A second press of a chooser's key closes it (Omarchy 4.5, omacom/omarchy#6725).
 local function closeIfOpen(chooser)
   if chooser and chooser:isVisible() then chooser:hide(); return true end
 end
 
--- One overlay, built once and shown again: it runs nothing, so closing it
--- leaves no process behind (omacom/omarchy#7564).
 local keysChooser
 local function showKeybindings()
   if closeIfOpen(keysChooser) then return end
@@ -175,12 +148,8 @@ local function showKeybindings()
   keysChooser:show()
 end
 
-----------------------------------------------------------------------
--- Hotkeys
-----------------------------------------------------------------------
 hs.hotkey.bind({"alt"}, "k", showKeybindings)
 
--- Run a shell script that prints "TITLE|||BODY" and show as notification
 local function notifyFromScript(script)
   hs.task.new("/bin/bash", function(_, stdOut, _)
     local title, body = stdOut:match("^(.-)|||(.-)\n?$")
@@ -194,13 +163,10 @@ hs.hotkey.bind({"cmd", "ctrl", "alt"}, "t", function() notifyFromScript("~/.loca
 hs.hotkey.bind({"cmd", "ctrl", "alt"}, "w", function() notifyFromScript("~/.local/bin/omarchy-notice weather") end)
 hs.hotkey.bind({"cmd", "ctrl", "alt"}, "b", function() notifyFromScript("~/.local/bin/omarchy-notice battery") end)
 hs.hotkey.bind({"cmd", "ctrl"},        "p", function() notifyFromScript("~/.local/bin/omarchy-cycle-wallpaper") end)
--- Omarchy 4.5: Super+Ctrl+W is the background switcher (Network moved to Super+Ctrl+N).
 hs.hotkey.bind({"cmd", "ctrl"},        "w", function() notifyFromScript("~/.local/bin/omarchy-cycle-wallpaper") end)
 hs.hotkey.bind({"cmd", "ctrl"},        "g", function() notifyFromScript("~/.local/bin/gaming-mode") end)
--- Omarchy 4.5's Copy URL (Alt+Shift+L): the front browser tab's address to the clipboard.
 hs.hotkey.bind({"alt", "shift"}, "l", function()
   local front = hs.application.frontmostApplication()
-  -- A bundle id is letters, digits, dots and dashes; anything else stays out of the shell line.
   local id = ((front and front:bundleID()) or ""):gsub("[^%w%.%-]", "")
   notifyFromScript("~/.local/bin/omarchy-copy-url '" .. id .. "'")
 end)
@@ -209,15 +175,12 @@ hs.hotkey.bind({"cmd", "ctrl", "shift"}, "q", function()
   hs.task.new("/bin/bash", nil, { "-lc", "~/.local/bin/quit-all" }):start()
 end)
 
--- Dictation (Omarchy 4.5, #28): Hex. Holding Right Option is Hex's own shortcut
--- (install.sh sets it); Hex can't also take ⌥Space, so the toggle goes through its CLI.
--- dictation: begin
-local HEX = "/Applications/Hex.app/Contents/MacOS/hex"
-hs.hotkey.bind({"alt"}, "space", function() hs.task.new(HEX, nil, { "dictation", "toggle" }):start() end)
--- dictation: end
+local function bindDictation()
+  local hex = "/Applications/Hex.app/Contents/MacOS/hex"
+  hs.hotkey.bind({"alt"}, "space", function() hs.task.new(hex, nil, { "dictation", "toggle" }):start() end)
+end
+bindDictation()
 
--- Reminder (v4: Super+Ctrl+R): "20m stand up", "1h30 call back", "45s tea".
--- A notification fires when the time is up. Timers live for this session.
 local reminders = {}
 local function setReminder()
   local button, text = hs.dialog.textPrompt("Reminder", "Delay then message, e.g. 20m stand up", "", "Set", "Cancel")
@@ -238,9 +201,6 @@ local function setReminder()
 end
 hs.hotkey.bind({"cmd", "ctrl"}, "r", setReminder)
 
--- Super+Comma (Omarchy 4.5): act on the newest notification. macOS draws the
--- banners in Notification Center's window, newest first; press the top one,
--- which opens it like a click. No banner on screen: nothing happens.
 local function newestNotification(root)
   local queue, i = { root }, 1
   while queue[i] do
@@ -256,12 +216,7 @@ hs.hotkey.bind({"alt"}, ",", function()
   if banner then banner:performAction("AXPress") end
 end)
 
-----------------------------------------------------------------------
--- Screensaver (v4: ttfx ASCII art after 150 s idle, in a fullscreen
--- terminal per monitor). The scripts do the launching; this is the idle
--- clock and the "any input ends it" part that Hyprland gives Omarchy.
-----------------------------------------------------------------------
-local SCREENSAVER_IDLE = 150 -- seconds, Omarchy's shell.json idle.screensaver
+local SCREENSAVER_IDLE = 150
 local screensaverTap = nil
 local screensaverRunning = false
 
@@ -277,7 +232,6 @@ local function startScreensaver(force)
   local ok = os.execute("~/.local/bin/omarchy-launch-screensaver " .. (force and "force" or ""))
   if not ok then return end
   screensaverRunning = true
-  -- Arm after a beat so the launch itself does not end it.
   hs.timer.doAfter(1.5, function()
     if not screensaverRunning then return end
     screensaverTap = hs.eventtap.new({
@@ -288,44 +242,25 @@ local function startScreensaver(force)
     screensaverTap:start()
   end)
 end
-launchScreensaver = startScreensaver -- reachable from `hs -c` and the menu
+launchScreensaver = startScreensaver
 
 hs.timer.doEvery(15, function()
   if screensaverRunning then
-    -- Ended from inside the terminal (a key) without us noticing.
     if hs.execute("pgrep -f '[o]marchy-screensaver$'", true) == "" then stopScreensaver() end
     return
   end
   if hs.host.idleTime() >= SCREENSAVER_IDLE then startScreensaver(false) end
 end)
 
--- Backgrounds (Omarchy 4.5): restart a video background, and play the theme
--- intro once per login. Hammerspoon's pid survives a config reload, so a
--- reload does not replay the intro.
 hs.task.new("/bin/bash", nil, { "-lc", "~/.local/bin/omarchy-bg-set --login " .. tostring(hs.processInfo.processID) }):start()
 
--- macOS keeps a picture per screen arrangement, so after an unplug the laptop
--- shows whatever it had when it was last alone (#69): set the current
--- background again once the screens settle (one run per burst of events).
 local reapplyTimer = nil
-bgScreenWatcher = hs.screen.watcher.new(function() -- global: a local watcher is garbage-collected
+bgScreenWatcher = hs.screen.watcher.new(function()
   if reapplyTimer then reapplyTimer:stop() end
   reapplyTimer = hs.timer.doAfter(2, function() hs.task.new("/bin/bash", nil, { "-lc", "~/.local/bin/omarchy-bg-set --reapply" }):start() end)
 end):start()
 
-----------------------------------------------------------------------
--- Forward declarations so mutually-referenced choosers can find each other
-----------------------------------------------------------------------
 local showAppsMenu, showThemeChooser, showOmarchyMenu, reloadIfWhole
-
-----------------------------------------------------------------------
--- Omarchy menu (SUPER+ALT+SPACE) — the v4 (Quattro) tree, nested search
-----------------------------------------------------------------------
--- Mirrors omacom/omarchy default/omarchy/omarchy-menu.jsonc, keeping only
--- entries that do something on macOS. An entry is a leaf { text, sub,
--- action } or a branch { text, sub, children }. Empty query shows the
--- current level; typing searches every leaf below it (v4's nested search),
--- with the path as the subtitle. "‹ Back" climbs one level.
 
 local function sh(cmd) return function() hs.execute(cmd, true) end end
 local function app(name) return function() hs.application.launchOrFocus(name) end end
@@ -337,14 +272,11 @@ local function keystroke(code, mods)
   return sh([[osascript -e 'tell application "System Events" to key code ]] .. code .. [[ using {]] .. mods .. [[}']])
 end
 local function toast(scriptName) return function() notifyFromScript("~/.local/bin/" .. scriptName) end end
--- Appearance > Window Transparency / Window Corners (Omarchy 4.5): one choice row, checked when it is the saved one.
 local APPEARANCE = os.getenv("HOME") .. "/.local/bin/omarchy-appearance"
 local function look(what, value, text, sub)
   return { text = text, action = function() hs.alert.show((hs.execute(APPEARANCE .. " " .. what .. " " .. value):gsub("%s+$", "")), 4) end,
     sub = function() return (hs.execute(APPEARANCE .. " " .. what):gsub("%s+$", "") == value and "✓ " or "") .. sub end }
 end
--- Install > Service > Microsoft (Omarchy 4.5): Microsoft 365 as web apps, each in
--- its own app window of the default browser. The Apps launcher lists them too.
 local function webapp(u) return sh("~/.local/bin/omarchy-launch-browser --app=" .. u) end
 local MICROSOFT = {
   { text = "Outlook",    sub = "Microsoft 365 web app", action = webapp("https://outlook.cloud.microsoft/mail/") },
@@ -354,14 +286,11 @@ local MICROSOFT = {
   { text = "Teams",      sub = "Microsoft 365 web app", action = webapp("https://teams.cloud.microsoft/") },
   { text = "OneDrive",   sub = "Microsoft 365 web app", action = webapp("https://onedrive.cloud.microsoft/") },
 }
--- The repo this init.lua lives in (dotfiles here, omarchy4mac for adopters):
--- resolve the symlink ~/.hammerspoon/init.lua and go two directories up.
 local D = (function()
   local target = hs.execute("readlink " .. os.getenv("HOME") .. "/.hammerspoon/init.lua"):gsub("%s+$", "")
   if target == "" then target = os.getenv("HOME") .. "/.hammerspoon/init.lua" end
   return target:match("^(.*)/hammerspoon/[^/]+$") or (os.getenv("HOME") .. "/code/omarchy4mac")
 end)()
--- Shell file: dotfiles keeps the whole zshrc; the public repo ships only the Omarchy block.
 local ZSH = hs.fs.attributes(D .. "/zsh/omarchy.zsh") and (D .. "/zsh/omarchy.zsh") or (D .. "/zsh/zshrc")
 
 local MENU = {
@@ -375,7 +304,6 @@ local MENU = {
     { text = "Tmux", sub = "Cheat sheet", action = url("https://tmuxcheatsheet.com") },
     { text = "Herdr", sub = "Keybindings", action = url("https://herdr.dev/docs/") },
   }},
-  -- Omarchy 4.5 (omacom/omarchy#15973): Appearance replaces Style, right before Trigger.
   { text = "Appearance", sub = "Theme, background, windows, dock", children = {
     { text = "Theme", sub = "Pick a theme", action = function() showThemeChooser() end },
     { text = "Background", sub = "Next image or video for this theme", action = toast("omarchy-cycle-wallpaper") },
@@ -436,7 +364,6 @@ local MENU = {
       { text = "Gaming Mode", sub = "Quit apps, Tailscale down, Steam", action = toast("gaming-mode") },
       { text = "Quit All", sub = "Quit every Dock app, keep Finder", action = sh("~/.local/bin/quit-all") },
       { text = "Screensaver", sub = "Enable or disable the idle screensaver", action = toast("omarchy-toggle-screensaver") },
-      -- Omarchy 4.5 (omacom/omarchy#13430): mirror theme switches to and from herdr machines.
       { text = "Herdr Theme Sync", action = function()
           local on = hs.fs.attributes(os.getenv("HOME") .. "/.config/theme-switcher/herdr-sync")
           hs.alert.show((hs.execute("~/.local/bin/theme --herdr-sync " .. (on and "off" or "on")):gsub("%s+$", "")), 3)
@@ -486,7 +413,6 @@ local MENU = {
     { text = "Package", sub = "brew search in Ghostty", action = ghostty("read -p \"brew search: \" q && brew search \"$q\"") },
     { text = "Homebrew", sub = "brew.sh", action = url("https://brew.sh") },
     { text = "Omarchy themes", sub = "Community themes", action = url("https://omarchy.org/themes/") },
-    -- Omarchy 4.5 (omacom/omarchy#14434): Slack opens if it is there, else installs, then opens.
     { text = "Service", sub = "Apps and web services", children = {
       { text = "Microsoft", sub = "Outlook, Word, Excel, PowerPoint, Teams, OneDrive", children = MICROSOFT },
       { text = "Slack", sub = "brew install --cask slack",
@@ -521,8 +447,6 @@ local MENU = {
   }},
 }
 
--- hs.chooser choices must be plain data (no functions, no nested tables),
--- so rows carry indices into these side tables.
 local function flatten(items, path, out)
   for _, item in ipairs(items) do
     local here = path and (path .. " › " .. item.text) or item.text
@@ -532,9 +456,6 @@ local function flatten(items, path, out)
   return out
 end
 
--- Row text, styled per row: an installed item is dimmed and marked, never
--- hidden (Omarchy 4.5, omacom/omarchy#6955). Per-row colour replaces the
--- chooser's fgColor, which would paint over it.
 local function rowText(item)
   local installed = item.present and item.present()
   return hs.styledtext.new(item.text, { color = installed and COLORS.comment or COLORS.blue, font = { size = 20 } }), installed
@@ -585,7 +506,6 @@ local function showMenuLevel(items, parents)
   end)
   menuChooser:choices(level)
   menuChooser:width(28)
-  -- Room for every row of the level, so the last one is never cut off (omacom/omarchy#13916).
   menuChooser:rows(#level)
   menuChooser:bgDark(true)
   menuChooser:subTextColor(COLORS.fg)
@@ -606,12 +526,8 @@ showOmarchyMenu = function(section)
   end
   showMenuLevel(MENU)
 end
--- `hs -c 'omarchyMenu("System")'` from AeroSpace (cmd-esc) opens a section.
 omarchyMenu = showOmarchyMenu
 
--- Update > Config > Hammerspoon: reload only a whole init.lua. One read
--- mid-write (git pull, an editor's save) would load half a file, and the menu
--- with it would be gone until the next reload (omacom/omarchy#16268).
 reloadIfWhole = function()
   local path = os.getenv("HOME") .. "/.hammerspoon/init.lua"
   local f = io.open(path, "r")
@@ -621,13 +537,8 @@ reloadIfWhole = function()
   hs.alert.show("init.lua is not whole yet: kept the running menu", 4)
 end
 
--- Omarchy 4.5: Super+Alt+Space opens Apps; the menu (Omarchy's Super+Space,
--- which is Raycast here) moves to cmd-shift-space, the key Apps had.
 hs.hotkey.bind({"cmd", "shift"}, "space", function() showOmarchyMenu() end)
 
-----------------------------------------------------------------------
--- Theme chooser (SUPER+CTRL+SHIFT+SPACE)
-----------------------------------------------------------------------
 local themeChooser
 showThemeChooser = function(selectRow)
   if closeIfOpen(themeChooser) then return end
@@ -658,17 +569,12 @@ showThemeChooser = function(selectRow)
 
   themeChooser = hs.chooser.new(function(choice)
     if choice then
-      -- a login shell for Homebrew's PATH (theme reloads sketchybar, nvim, hs), but the
-      -- name is $1, one argv element, never shell text: it comes from upstream folder names
       hs.task.new("/bin/bash", function()
         hs.notify.new({title="Theme", informativeText="Switched to " .. choice.themeName, withdrawAfter=3}):send()
       end, { "-lc", '~/.local/bin/theme "$1"', "theme", choice.themeName }):start()
     end
   end)
 
-  -- Omarchy 4.5 (omacom/omarchy#14713): delete a theme from the chooser. ⌘⌫,
-  -- not Delete alone, which edits the search text. Asks first; then the chooser
-  -- reopens on the theme before the deleted one.
   local delKey = hs.hotkey.new({"cmd"}, "delete", function()
     local row = themeChooser:selectedRowContents()
     if not row or not row.themeName then return end
@@ -701,12 +607,9 @@ showThemeChooser = function(selectRow)
 end
 
 hs.hotkey.bind({"cmd", "ctrl", "shift"}, "space", showThemeChooser)
-hs.hotkey.bind({"cmd", "ctrl"}, "t", showThemeChooser) -- Omarchy 4.5: Super+Ctrl+T opens themes
+hs.hotkey.bind({"cmd", "ctrl"}, "t", showThemeChooser)
 hs.hotkey.bind({"cmd", "alt"}, "space", function() showAppsMenu() end)
 
-----------------------------------------------------------------------
--- Apps chooser — curated launcher (called from Omarchy menu's "Apps")
-----------------------------------------------------------------------
 local apps = {
   { name = "1Password",        sub = "Passwords",         action = function() hs.application.launchOrFocus("1Password") end },
   { name = "Basecamp",         sub = "Web",               action = function() hs.execute("open https://3.basecamp.com") end },
@@ -766,24 +669,15 @@ showAppsMenu = function()
   appsChooser:show()
 end
 
--- Let scripts reload us: osascript -e 'tell application "Hammerspoon" to execute lua code "hs.reload()"'
 hs.allowAppleScript(true)
 
--- Tell us the config reloaded
 hs.alert.show("Hammerspoon: keybindings ready (⌥K)")
 
--- Ghostty live reload. `theme` rewrites the Ghostty config, but Ghostty has no
--- reload signal and the theme-appearance listener (launchd) has no
--- Accessibility permission, so its AppleScript reload fails and open windows
--- keep the old colors. Hammerspoon has the permission: watch the config and
--- click Ghostty > Reload Configuration whenever it changes.
 local ghosttyConfigs = {
   os.getenv("HOME") .. "/Library/Application Support/com.mitchellh.ghostty",
   os.getenv("HOME") .. "/.config/ghostty",
 }
 local ghosttyReloadTimer
--- Reload EVERY Ghostty process: `open -na Ghostty` (tmux launcher, omarchy-tui)
--- starts extra instances, and hs.application.find returns only the first.
 local function reloadGhostty()
   for _, app in ipairs(hs.application.applicationsForBundleID("com.mitchellh.ghostty")) do
     if not app:selectMenuItem({ "Ghostty", "Reload Configuration" }) then
@@ -796,7 +690,6 @@ for _, dir in ipairs(ghosttyConfigs) do
   GhosttyWatchers[#GhosttyWatchers + 1] = hs.pathwatcher.new(dir, function(paths)
     for _, p in ipairs(paths) do
       if p:match("/config$") then
-        -- debounce: `theme` writes both configs within the same second
         if ghosttyReloadTimer then ghosttyReloadTimer:stop() end
         ghosttyReloadTimer = hs.timer.doAfter(0.5, reloadGhostty)
         return
@@ -805,30 +698,17 @@ for _, dir in ipairs(ghosttyConfigs) do
   end):start()
 end
 
-----------------------------------------------------------------------
--- Quake console (Omarchy 4.5: Super + Grave, default/hypr/qconsole.lua).
--- ⌘` and ⌘⇧` each own one Ghostty process, started with the default agent
--- the first time. Show: float it, bring it to the focused workspace, put it
--- on the top half of the screen over a dimmed desktop. Hide: hide the app,
--- so the session keeps running. Losing focus hides it too.
-----------------------------------------------------------------------
--- console-frame: begin
--- Top half of the screen; a wide screen gets a centered panel twice as wide
--- as it is tall (qconsole.lua: share 0.5, box 2).
 local function consoleFrame(screen)
   local h = math.floor(screen.h * 0.5)
   local w = math.min(screen.w, h * 2)
   return { x = screen.x + math.floor((screen.w - w) / 2), y = screen.y, w = w, h = h }
 end
--- console-frame: end
 
 local GHOSTTY = "com.mitchellh.ghostty"
 local BOOT = hs.execute("/usr/sbin/sysctl -n kern.boottime")
-local consoles = { {}, {} } -- [n] = { pid, shown, dim, timer, launching }
+local consoles = { {}, {} }
 local showConsole
 
--- The console's Ghostty, kept in hs.settings so a Hammerspoon reload keeps
--- the session. The boot time guards against a reused PID after a restart.
 local function consoleApp(n)
   local saved = hs.settings.get("omarchy.console." .. n)
   if not saved or saved.boot ~= BOOT then return nil end
@@ -842,7 +722,6 @@ local function launchConsole(n)
   hs.execute("open -na Ghostty --args -e $HOME/.local/bin/omarchy-agent")
   local tries = 0
   if c.timer then c.timer:stop() end
-  -- Until the window shows up, another press must not start a second Ghostty.
   c.launching = true
   c.timer = hs.timer.doEvery(0.1, function()
     tries = tries + 1
@@ -851,12 +730,11 @@ local function launchConsole(n)
         c.timer:stop()
         c.launching = false
         hs.settings.set("omarchy.console." .. n, { pid = a:pid(), boot = BOOT })
-        -- Let AeroSpace see the new window first, or it tiles it after the float.
         hs.timer.doAfter(0.5, function() showConsole(n, a) end)
         return
       end
     end
-    if tries >= 100 then c.timer:stop(); c.launching = false end -- 10 s: Ghostty did not start
+    if tries >= 100 then c.timer:stop(); c.launching = false end
   end)
 end
 
@@ -890,24 +768,21 @@ end
 showConsole = function(n, app)
   local win = app:mainWindow() or app:allWindows()[1]
   if win then return place(n, app, win) end
-  -- A hidden app may not list its window until it is shown.
   app:unhide()
   hs.timer.doAfter(0.3, function()
     win = app:mainWindow() or app:allWindows()[1]
     if win then return place(n, app, win) end
-    app:kill() -- the agent quit and closed its window: start a fresh console
+    app:kill()
     launchConsole(n)
   end)
 end
 
--- console-toggle: begin
 local function toggleConsole(n)
   if consoles[n].launching then return end
   if consoles[n].shown then return hideConsole(n) end
   local app = consoleApp(n)
   if app then showConsole(n, app) else launchConsole(n) end
 end
--- console-toggle: end
 
 hs.hotkey.bind({"cmd"}, "`", function() toggleConsole(1) end)
 hs.hotkey.bind({"cmd", "shift"}, "`", function() toggleConsole(2) end)
@@ -919,14 +794,7 @@ ConsoleWatcher = hs.application.watcher.new(function(_, event, app)
   end
 end):start()
 
--- Drag a widget off the bar to remove it (Omarchy 4.5, omacom/omarchy#6782): a
--- drag that starts on SketchyBar and ends 48 px or more below it runs
--- omarchy-bar-remove on the point where it started. `omarchy-bar-remove --reset`
--- brings every removed widget back. The press must land on a SketchyBar window.
--- The bar is drawn above the auto-hidden macOS menu bar (topmost=on, #68), but a
--- press on any part of the menu bar the bar does not cover is a menu pick, not a
--- drag off the bar.
-local BAR_HEIGHT, REMOVE_PULL = 32, 48 -- sketchybarrc height=32; Omarchy's pull to arm removal
+local BAR_HEIGHT, REMOVE_PULL = 32, 48
 local barDragStart
 local function screenTop(p)
   for _, s in ipairs(hs.screen.allScreens()) do
@@ -934,8 +802,8 @@ local function screenTop(p)
     if p.x >= f.x and p.x < f.x + f.w and p.y >= f.y and p.y < f.y + f.h then return f.y end
   end
 end
-local function onSketchyBar(p) -- the frontmost visible window under p is SketchyBar's
-  for _, w in ipairs(hs.window.list(true) or {}) do -- on-screen windows, front to back
+local function onSketchyBar(p)
+  for _, w in ipairs(hs.window.list(true) or {}) do
     local b = w.kCGWindowBounds
     if b and (w.kCGWindowAlpha or 1) > 0 and p.x >= b.X and p.x < b.X + b.Width and p.y >= b.Y and p.y < b.Y + b.Height then
       return w.kCGWindowOwnerName == "sketchybar"
@@ -959,7 +827,6 @@ BarDragTap = hs.eventtap.new({ hs.eventtap.event.types.leftMouseDown, hs.eventta
   return false
 end):start()
 
--- Gaming mode hides SketchyBar; show it again when Steam quits.
 SteamWatcher = hs.application.watcher.new(function(name, event, app)
   if event == hs.application.watcher.terminated and name == "Steam" then
     hs.execute("/opt/homebrew/bin/sketchybar --bar hidden=off")

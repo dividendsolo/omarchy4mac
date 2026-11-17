@@ -1,15 +1,9 @@
 #!/bin/bash
-# Tests for bin/omarchy-bg-set and bin/omarchy-toggle-intros (Omarchy 4.5 video backgrounds and theme
-# intros) in a throwaway HOME. osascript, qlmanage and defaults are stubs, and
-# the player (omarchy-video-wallpaper) is a stub that logs its arguments and
-# waits, so nothing on this Mac changes.
-#
-#   tests/bg-set-test.sh
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 BIN="$HERE/../bin/omarchy-bg-set"
 fails=0
-check() { # check <description> <test command...>
+check() {
   local d="$1"; shift
   if "$@"; then echo "  ok    $d"; else echo "  FAIL  $d"; fails=$((fails + 1)); fi
 }
@@ -17,23 +11,18 @@ check() { # check <description> <test command...>
 setup() {
   T="$(mktemp -d)"; H="$T/home"; STUBS="$T/stubs"; W="$H/Pictures/Wallpapers"
   mkdir -p "$W/intros" "$H/.local/bin" "$STUBS"
-  cat > "$STUBS/osascript" <<EOF
-#!/bin/bash
+  { printf '#!/bin/bash\n'; cat; } > "$STUBS/osascript" <<EOF
 [[ "\$*" == *"get picture"* ]] && { cat "$T/current" 2>/dev/null; exit 0; }
 echo "\${@: -1}" >> "$T/picture.log"
-# macOS keeps one picture per screen arrangement (Index.plist): a set reaches only the connected one
 mkdir -p "$T/shown"; echo "\${@: -1}" > "$T/shown/\$(cat "$T/arrangement" 2>/dev/null || echo laptop)"
 EOF
-  # qlmanage -t -s <n> -o <dir> <file> writes <dir>/<file name>.png
-  cat > "$STUBS/qlmanage" <<EOF
-#!/bin/bash
+  { printf '#!/bin/bash\n'; cat; } > "$STUBS/qlmanage" <<EOF
 echo still > "\$5/\${6##*/}.png"
 EOF
   printf '#!/bin/bash\ncat "%s/reduce" 2>/dev/null\n' "$T" > "$STUBS/defaults"
-  cat > "$H/.local/bin/omarchy-video-wallpaper" <<EOF
-#!/bin/bash
+  { printf '#!/bin/bash\n'; cat; } > "$H/.local/bin/omarchy-video-wallpaper" <<EOF
 echo "\$*" >> "$T/player.log"
-[[ "\$1" == --once ]] || while :; do sleep 0.1; done   # stays the player process, as the real one does
+[[ "\$1" == --once ]] || while :; do sleep 0.1; done
 EOF
   chmod +x "$STUBS"/* "$H/.local/bin/omarchy-video-wallpaper"
 }

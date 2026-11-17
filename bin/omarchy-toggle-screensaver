@@ -1,6 +1,4 @@
 #!/bin/bash
-# Toggle screensaver availability (flag file named for the off state, like
-# Omarchy's ~/.local/state/omarchy/toggles/). Prints TITLE|||BODY for Hammerspoon.
 FLAG="$HOME/.local/state/omarchy/toggles/screensaver-off"
 mkdir -p "$(dirname "$FLAG")"
 if [[ -f "$FLAG" ]]; then rm -f "$FLAG"; echo "Screensaver|||Enabled"

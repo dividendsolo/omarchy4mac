@@ -1,17 +1,3 @@
-// Keeps the two pages that come from the repo in step with the repo:
-// content/docs/changelog.md from CHANGELOG.md, and
-// content/docs/parity-checklist.md from docs/parity-v4.md.
-//
-//   node scripts/sync-content.mjs           # write both pages
-//   node scripts/sync-content.mjs --check   # fail when a page differs (CI)
-//
-// The pages are committed, so the site builds on its own (Vercel builds this
-// directory only, and the repo's files are not in that upload). Editing
-// CHANGELOG.md or docs/parity-v4.md without re-running this leaves the site
-// stale; `--check` is the test that catches it.
-//
-// The first h1 of the source becomes the page's title, so the body must not
-// repeat it.
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -40,7 +26,7 @@ for (const { from, to, note } of pages) {
   const body = await readFile(from, 'utf8');
   const title = body.match(/^#\s+(.*)$/m)?.[1]?.trim();
   if (!title) throw new Error(`${from} has no h1 to use as the page title`);
-  const source = body.replace(/^#\s+.*\n+/, ''); // the h1 is the page title
+  const source = body.replace(/^#\s+.*\n+/, '');
   const page = `---\ntitle: ${JSON.stringify(title)}\n---\n\n_${note}_\n\n${source}`;
   const where = relative(repo, to);
 

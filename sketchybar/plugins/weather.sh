@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# Weather from wttr.in for the current location (IP-based). Hidden offline.
 source "$CONFIG_DIR/colors.sh"
 source "$CONFIG_DIR/plugins/displays.sh"
 

@@ -1,23 +1,16 @@
 #!/bin/bash
-# Checks the Omarchy 4.5 keybinding changes (#31): every moved key does its new
-# job, the old key does nothing or its new job, the new default keys exist, and
-# the ⌥K overlay lists the new table. AeroSpace keys are read from
-# aerospace.toml; Hammerspoon keys run in LuaJIT with a stub `hs` that records
-# what a key would run, so nothing on the Mac is touched.
-#
-#   tests/keys-test.sh
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 TOML="${AEROSPACE_TOML:-$HERE/../aerospace/aerospace.toml}"
 LUA="${HAMMERSPOON_LUA:-$HERE/../hammerspoon/init.lua}"
 fails=0
 
-check() { # check <description> <expected> <actual>
+check() {
   if [[ "$3" == "$2" ]]; then echo "  ok    $1"
   else echo "  FAIL  $1 (expected '$2', got '$3')"; fails=$((fails + 1)); fi
 }
 
-key() { # key <aerospace key> -> its main-mode command, or "" when unbound
+key() {
   python3 - "$TOML" "$1" <<'PY'
 import sys, tomllib
 print(tomllib.load(open(sys.argv[1], "rb"))["mode"]["main"]["binding"].get(sys.argv[2], ""))
@@ -45,8 +38,6 @@ check "⌘⌃⌥E opens the world clock" 'exec-and-forget open -a Clock' "$(key 
 check "⌘⌃⌥F toggles the full screen desktop" \
   'exec-and-forget /opt/homebrew/bin/sketchybar --bar hidden=toggle' "$(key cmd-ctrl-alt-f)"
 
-# The parity table lives on the docs page now (it moved out of the README when
-# the docs site landed, #73).
 PARITY="${PARITY:-$HERE/../docs-site/content/docs/parity.mdx}"
 echo "the parity page's table:"
 check "the bar hide/show row names ⌘⌃⌥F" 1 \
@@ -66,7 +57,6 @@ local function check(desc, ok, detail)
   else print("  FAIL  " .. desc .. (detail and (" (" .. tostring(detail) .. ")") or "")); fails = fails + 1 end
 end
 
--- ---- stub hs: no-ops, except binds, commands and choosers -----------------
 local ran, choosers, binds = {}, {}, {}
 local function stub()
   return setmetatable({}, { __index = function() return stub() end, __call = function() return stub() end })
@@ -87,7 +77,6 @@ hs.hotkey = { bind = function(mods, key, fn)
   binds[table.concat(mods, "+") .. "+" .. key] = fn
   return stub()
 end, new = function() return stub() end } -- new: the theme chooser's ⌘⌫, live only while it is open
--- Notification Center: a window holding a stack of two banners, newest first.
 local pressed = {}
 local function el(name, subrole, children)
   return { name = name,
@@ -105,13 +94,12 @@ end }, { __index = function() return stub() end })
 hs.axuielement = { applicationElement = function() return tree end }
 dofile(arg[1])
 
--- Press a chord; return what it did.
 local function press(chord)
   local fn = binds[chord]
   if not fn then return "unbound" end
-  local nRan, nChoosers = #ran, #choosers
+  local nRan, nChoosers = (#ran), (#choosers)
   fn()
-  if #choosers > nChoosers then return "chooser:" .. (choosers[#choosers].placeholder or "") end
+  if (#choosers) > nChoosers then return "chooser:" .. (choosers[#choosers].placeholder or "") end
   return "ran:" .. (ran[nRan + 1] or "nothing")
 end
 
@@ -127,9 +115,8 @@ check("⌥, presses the newest notification", table.concat(pressed, ",") == "new
 pressed = {}
 tree = el("app", nil, { el("window", nil, {}) })
 local ok, err = pcall(press, "alt+,")
-check("⌥, with no notification on screen does nothing", ok and #pressed == 0, err or table.concat(pressed, ","))
+check("⌥, with no notification on screen does nothing", ok and (#pressed) == 0, err or table.concat(pressed, ","))
 
--- ---- the ⌥K overlay -------------------------------------------------------
 press("alt+k")
 local overlay = {}
 for _, r in ipairs(choosers[#choosers].shown) do overlay[r.text] = r.subText end

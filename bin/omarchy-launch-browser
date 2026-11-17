@@ -1,15 +1,4 @@
 #!/bin/zsh
-# Browser and web apps in the macOS default browser (v4.0.5: omarchy-launch-browser
-# and omarchy-launch-webapp follow the user's default instead of a fixed browser).
-#   omarchy-launch-browser               new window
-#   omarchy-launch-browser --private     incognito / private window
-#   omarchy-launch-browser --app=<url>   web app window (Chromium); a tab elsewhere
-#     --workspace=<n>                    move that web app window to workspace n
-#                                        (it is a browser window, so the browser
-#                                        rule in aerospace.toml sends it to 1)
-# A Finicky install is the https handler, not a browser, so its defaultBrowser
-# from ~/.finicky.js stands in for it. A handler that is no longer installed
-# falls back to Safari.
 export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
 
 handler() {
@@ -25,8 +14,6 @@ elif [[ $bundle == se.johnste.finicky ]]; then
   name=$(perl -ne 'print $1 and exit if /defaultBrowser:\s*["'\'']([^"'\'']+)/' "$HOME/.finicky.js" 2>/dev/null)
   bundle=$(osascript -e "id of app \"${name:-Safari}\"" 2>/dev/null || echo com.apple.Safari)
 fi
-# The handler can outlive its browser (Omarchy 4.5, omacom/omarchy#16422): then
-# `open -b` fails and the key does nothing, so open Safari, the Mac's own browser.
 installed() {
   [[ -n $(osascript -l JavaScript -e 'ObjC.import("AppKit")' -e 'function run(argv) {
     return $.NSWorkspace.sharedWorkspace.URLForApplicationWithBundleIdentifier(argv[0]).isNil() ? "" : "yes" }' "$1" 2>/dev/null) ]]
@@ -44,12 +31,10 @@ done
 
 case ${bundle:l} in
   com.brave.browser*|com.google.chrome*|org.chromium.chromium|com.microsoft.edgemac*|com.vivaldi.vivaldi|net.imput.helium|company.thebrowser.browser)
-    # -n: a running Chromium browser drops --args otherwise.
     if [[ -n $app && -n $workspace ]]; then
       windows() { aerospace list-windows --monitor all --app-bundle-id "$bundle" --format "%{window-id}" 2>/dev/null; }
       before=(${(f)"$(windows)"})
       open -nb "$bundle" --args --app="$app"
-      # Wait up to 5 s for the new window, then move it and follow it.
       for _ in {1..50}; do
         for id in ${(f)"$(windows)"}; do
           if (( ! ${before[(Ie)$id]} )); then
@@ -68,6 +53,5 @@ case ${bundle:l} in
     elif $private; then exec open -nb "$bundle" --args --private-window
     else exec open -b "$bundle"; fi ;;
   *)
-    # Safari and the rest: no app windows and no private flag, so a plain tab.
     if [[ -n $app ]]; then exec open -b "$bundle" "$app"; else exec open -b "$bundle"; fi ;;
 esac

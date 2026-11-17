@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# Omarchy-style system menu — SUPER+ESCAPE
 choice=$(osascript <<'EOF'
 tell application "System Events"
   activate

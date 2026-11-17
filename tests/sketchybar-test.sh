@@ -1,20 +1,14 @@
 #!/bin/bash
-# Checks the bar's music title width: 23 characters, about 180 px in Hack
-# Nerd Font 13, the same as Omarchy 4's media widget (maxLabelWidth: 180).
-# The live check measures the running bar: a scratch item with the music
-# item's font and limit, drawn for about a second, then removed.
-#
-#   tests/sketchybar-test.sh
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 RC="${SKETCHYBARRC:-$HERE/../sketchybar/sketchybarrc}"
 fails=0
 
-check() { # check <description> <expected> <actual>
+check() {
   if [[ "$3" == "$2" ]]; then echo "  ok    $1"
   else echo "  FAIL  $1 (expected '$2', got '$3')"; fails=$((fails + 1)); fi
 }
-in_range() { # in_range <description> <min> <max> <actual>
+in_range() {
   if (( $4 >= $2 && $4 <= $3 )); then echo "  ok    $1 ($4 px)"
   else echo "  FAIL  $1 (expected $2-$3 px, got $4 px)"; fails=$((fails + 1)); fi
 }
@@ -22,19 +16,15 @@ in_range() { # in_range <description> <min> <max> <actual>
 echo "sketchybarrc:"
 max="$(awk '/--add item media left/{f=1} f&&/label.max_chars=/{sub(/.*label.max_chars=/,""); print $1; exit}' "$RC")"
 check "music title is at most 23 characters" 23 "$max"
-# The install hides the macOS menu bar, which slides down over a bar drawn
-# above windows only and takes its clicks (#68). The bar sits above it.
 topmost="$(grep -o 'topmost=[a-z]*' "$RC" | head -1)"
 check "the bar is drawn above the menu bar" "topmost=on" "$topmost"
 
 if pgrep -xq sketchybar; then
   echo "running bar:"
-  # Measure a scratch item with the music item's real font and limit, so the
-  # music item's own refresh can never redraw in the middle of a measurement.
   font="$(sketchybar --query media | python3 -c 'import json,sys; print(json.load(sys.stdin)["label"]["font"])')"
   sketchybar --add item width_test left --set width_test icon.drawing=off \
              label.font="$font" label.max_chars="$max" scroll_texts=on
-  width() { # width <label>: drawn width of the scratch item in px
+  width() {
     sketchybar --set width_test label="$1"; sleep 0.3
     sketchybar --query width_test | python3 -c \
       'import json,sys; r=json.load(sys.stdin)["bounding_rects"]; print(int(next(iter(r.values()))["size"][0]))'

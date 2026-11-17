@@ -1,18 +1,11 @@
 #!/bin/bash
-# Checks Hex as the default dictation (Omarchy 4.5 ships Superwhisper, #28):
-# the Brewfile installs Hex, install.sh gives Hex its hold-Right-Option
-# shortcut, and Hammerspoon's ⌥Space toggles a dictation through Hex's CLI
-# (that block of hammerspoon/init.lua runs under Lua with a stub hs).
-# Needs `luajit` (brew install luajit), or `lua`.
-#
-#   tests/dictation-test.sh
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$HERE/.."
 LUA_FILE="${HAMMERSPOON_LUA:-$ROOT/hammerspoon/init.lua}"
 fails=0
 
-check() { # check <description> <expected> <actual>
+check() {
   if [[ "$3" == "$2" ]]; then echo "  ok    $1"
   else echo "  FAIL  $1 (expected '$2', got '$3')"; fails=$((fails + 1)); fi
 }
@@ -29,9 +22,8 @@ echo "install.sh:"
 check "hold Right Option dictates" 1 "$(grep -c 'settings set dictation_hotkey right-option' "$ROOT/install.sh")"
 check "the shortcut is held, not toggled" 1 "$(grep -c 'settings set shortcut_mode hold' "$ROOT/install.sh")"
 
-# The ⌥Space block between its markers, with hs stubbed to record the binding and the task.
-BLOCK="$(sed -n '/^-- dictation: begin/,/^-- dictation: end/p' "$LUA_FILE")"
-press() { # what one ⌥Space press runs
+BLOCK="$(sed -n '/^local function bindDictation(/,/^bindDictation()$/p' "$LUA_FILE")"
+press() {
   printf '%s\n' "local bound
 hs = {
   hotkey = { bind = function(mods, key, fn) bound = { table.concat(mods, '+') .. '-' .. key, fn } end },
@@ -45,8 +37,6 @@ echo "Hammerspoon:"
 check "⌥Space toggles a Hex dictation" \
   "alt-space /Applications/Hex.app/Contents/MacOS/hex dictation toggle" "$(press)"
 
-# The parity table lives on the docs page now (it moved out of the README when
-# the docs site landed, #73).
 PARITY="${PARITY:-$HERE/../docs-site/content/docs/parity.mdx}"
 echo "The parity page:"
 check "the parity table lists dictation as Hex" 1 \

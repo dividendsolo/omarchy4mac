@@ -1,17 +1,11 @@
-# Omarchy 4 shell defaults, ported from omarchy default/bash/{aliases,envs}.
-# Source this from ~/.zshrc. Needs: eza bat fzf zoxide (brew install).
-
-# ---- Omarchy 4 shell defaults (ported from default/bash/aliases + envs) ----
 export EDITOR="${EDITOR:-nvim}"
 export BAT_THEME=ansi
 export MANROFFOPT="-c"
 export MANPAGER="sh -c 'col -bx | bat -l man -p'"
 
-# File system
 alias ff="fzf --preview 'bat --style=numbers --color=always {}'"
 alias eff='$EDITOR "$(ff)"'
 
-# zoxide: `cd` falls through to `z` for anything that is not a real path
 eval "$(zoxide init zsh)"
 zd() {
   if (( $# == 0 )); then
@@ -26,12 +20,10 @@ zd() {
 }
 alias cd='zd'
 
-# Directories
 alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
 
-# Tools
 alias d='docker'
 alias r='rails'
 alias t='tmux attach || tmux new -s Work'
@@ -39,33 +31,23 @@ alias h='herdr'
 alias mup='MISE_MINIMUM_RELEASE_AGE=0 mise up'
 n() { if [ "$#" -eq 0 ]; then command nvim . ; else command nvim "$@"; fi; }
 
-# Git
 alias g='git'
 alias gcm='git commit -m'
 alias gcam='git commit -a -m'
 alias gcad='git commit -a --amend'
 
 
-# Herdr layouts (Omarchy 4 default/bash/fns/herdr, verbatim; `emulate -L ksh` gives
-# each function bash's 0-indexed arrays). hdl <ai> dev layout, hds square, hdlm one
-# tab per subdirectory, hsl <n> <cmd> swarm grid. Need jq.
-# Echo a split ratio as a float
-# Usage: _herdr_ratio <numerator> <denominator>
 _herdr_ratio() {
   emulate -L ksh
   awk -v a="$1" -v b="$2" 'BEGIN { printf "%.4f", a / b }'
 }
 
-# Split a herdr pane and echo the id of the new pane
-# Usage: _herdr_split <pane_id> <right|down> <ratio> <cwd>
 _herdr_split() {
   emulate -L ksh
   herdr pane split "$1" --direction "$2" --ratio "$3" --cwd "$4" --no-focus |
     jq -r '.result.pane.pane_id'
 }
 
-# Create a Herdr Dev Layout with editor, ai, and terminal
-# Usage: hdl <c|cx|codex|other_ai> [<second_ai>]
 hdl() {
   emulate -L ksh
   [[ -z $1 ]] && { echo "Usage: hdl <c|cx|codex|other_ai> [<second_ai>]"; return 1; }
@@ -76,33 +58,24 @@ hdl() {
   local ai="$1"
   local ai2="${2:-}"
 
-  # Use HERDR_PANE_ID for the pane we're running in (stable even if focus moves)
   editor_pane="$HERDR_PANE_ID"
 
-  # Name the current tab after the base directory name
   herdr tab rename "$HERDR_TAB_ID" "$(basename "$current_dir")" >/dev/null
 
-  # Split tab vertically - top 85%, bottom 15%
   _herdr_split "$editor_pane" down 0.85 "$current_dir" >/dev/null
 
-  # Split editor pane horizontally - AI on right 30%
   ai_pane=$(_herdr_split "$editor_pane" right 0.7 "$current_dir")
 
-  # If second AI provided, split the AI pane vertically
   if [[ -n $ai2 ]]; then
     ai2_pane=$(_herdr_split "$ai_pane" down 0.5 "$current_dir")
     herdr pane run "$ai2_pane" "$ai2" >/dev/null
   fi
 
-  # Run ai in the right pane
   herdr pane run "$ai_pane" "$ai" >/dev/null
 
-  # Run nvim in the left pane
   herdr pane run "$editor_pane" "$EDITOR ." >/dev/null
 }
 
-# Create a Herdr Dev Square layout with editor, diff watch, terminal, and opencode
-# Usage: hds
 hds() {
   emulate -L ksh
   [[ -n $1 ]] && { echo "Usage: hds"; return 1; }
@@ -124,8 +97,6 @@ hds() {
   herdr pane run "$opencode_pane" "opencode" >/dev/null
 }
 
-# Create multiple hdl tabs with one per subdirectory in the current directory
-# Usage: hdlm <c|cx|codex|other_ai> [<second_ai>]
 hdlm() {
   emulate -L ksh
   [[ -z $1 ]] && { echo "Usage: hdlm <c|cx|codex|other_ai> [<second_ai>]"; return 1; }
@@ -137,7 +108,6 @@ hdlm() {
   local first=true
   local hdl_command
 
-  # Rename the workspace to the current directory name
   herdr workspace rename "$HERDR_WORKSPACE_ID" "$(basename "$base_dir")" >/dev/null
 
   for dir in "$base_dir"/*/; do
@@ -148,7 +118,6 @@ hdlm() {
     [[ -n $ai2 ]] && printf -v hdl_command '%s %q' "$hdl_command" "$ai2"
 
     if $first; then
-      # Reuse the current tab for the first project
       printf -v hdl_command 'cd %q && %s' "$dirpath" "$hdl_command"
       herdr pane run "$HERDR_PANE_ID" "$hdl_command" >/dev/null
       first=false
@@ -161,8 +130,6 @@ hdlm() {
   done
 }
 
-# Create a multi-pane swarm layout with the same command started in each pane (great for AI)
-# Usage: hsl <pane_count> <command>
 hsl() {
   emulate -L ksh
   [[ -z $1 || -z $2 ]] && { echo "Usage: hsl <pane_count> <command>"; return 1; }
@@ -175,19 +142,15 @@ hsl() {
 
   herdr tab rename "$HERDR_TAB_ID" "$(basename "$current_dir")" >/dev/null
 
-  # Tile into a grid: ceil(sqrt(count)) columns, rows spread across them
   local cols=1
   while (( cols * cols < count )); do ((cols++)); done
 
-  # Even columns come from splitting the rightmost one off at 1/(n-k+1) each time,
-  # which keeps the array in left-to-right order
   columns=("$HERDR_PANE_ID")
   local k
   for (( k = 1; k < cols; k++ )); do
     columns+=("$(_herdr_split "${columns[-1]}" right "$(_herdr_ratio 1 $((cols - k + 1)))" "$current_dir")")
   done
 
-  # Split each column into its share of rows, again evenly and top-to-bottom
   local col index rows j last
   for (( index = 0; index < cols; index++ )); do
     col="${columns[index]}"
