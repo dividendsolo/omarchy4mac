@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-# Quick info — prints "TITLE|||BODY" to stdout for Hammerspoon to display.
-# Usage: omarchy-notice time|weather|battery
 
 case "$1" in
   time)

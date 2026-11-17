@@ -1,11 +1,4 @@
 #!/bin/bash
-# End-to-end tests for bin/theme, run the way a hotkey runs it: no terminal,
-# macOS system bash (3.2), in a throwaway HOME. Every tool that would touch
-# the real desktop (osascript, hs, sketchybar, nvim, pkill, pgrep) is a stub
-# that logs its arguments, so nothing on this Mac changes.
-#
-#   tests/theme-test.sh                 test bin/theme next to this file
-#   THEME_BIN=/path/to/theme tests/theme-test.sh
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 THEME_BIN="${THEME_BIN:-$HERE/../bin/theme}"
@@ -17,7 +10,6 @@ setup() {
   H="$T/home"; STUBS="$T/stubs"; LOG="$T/calls.log"
   mkdir -p "$H/.config/theme-switcher/cache" "$H/Pictures/Wallpapers" \
            "$H/.config/ghostty/themes" "$H/.claude" "$H/.config/sketchybar" "$STUBS"
-  # Two themes with the same colors: "withwall" has a wallpaper, "nowall" has none.
   cp -R "$FIXTURE" "$H/.config/theme-switcher/cache/withwall"
   cp -R "$FIXTURE" "$H/.config/theme-switcher/cache/nowall"
   : > "$H/Pictures/Wallpapers/withwall_1.jpg"
@@ -26,36 +18,31 @@ setup() {
   for cmd in osascript hs sketchybar nvim pkill; do
     printf '#!/bin/bash\necho "%s $*" >> "%s"\nexit 0\n' "$cmd" "$LOG" > "$STUBS/$cmd"
   done
-  # osascript also logs its script text (-e) and its argv apart (#50).
-  cat > "$STUBS/osascript" <<EOF
-#!/bin/bash
+  { printf '#!/bin/bash\n'; cat; } > "$STUBS/osascript" <<EOF
 echo "osascript \$*" >> "$LOG"
 while [[ \$# -gt 0 ]]; do
   if [[ "\$1" == -e ]]; then echo "\$2" >> "$T/script.log"
-    # the desktop picture a test put in \$T/desktop
     [[ "\$2" == *"get picture"* ]] && cat "$T/desktop" 2>/dev/null
     shift 2
   else echo "\$1" >> "$T/argv.log"; shift; fi
 done
 exit 0
 EOF
-  # pgrep: Hammerspoon is running, nothing else is.
   printf '#!/bin/bash\necho "pgrep $*" >> "%s"\n[[ "$*" == *Hammerspoon* ]]\n' "$LOG" > "$STUBS/pgrep"
   chmod +x "$STUBS"/*
 }
 
-# run <theme args...>: no tty on stdout, stub PATH first, /bin/bash via env.
 run() {
   OUT="$T/out.txt"
   env -i HOME="$H" USER="$USER" PATH="$STUBS:/usr/bin:/bin" TMPDIR="$T" \
       XDG_CONFIG_HOME="$H/.config" CLAUDE_CONFIG_DIR="$H/.claude" ${SYNC_FROM:+THEME_SYNC_FROM="$SYNC_FROM"} \
       /bin/bash "$THEME_BIN" "$@" > "$OUT" 2>&1 < /dev/null
   CODE=$?
-  sleep 0.3   # the alert is sent in the background
+  sleep 0.3
   LC_ALL=C sed $'s/\033\\[[0-9;]*m//g' "$OUT" > "$OUT.tmp" && mv "$OUT.tmp" "$OUT"
 }
 
-check() { # check <description> <test command...>
+check() {
   local d="$1"; shift
   if "$@"; then echo "  ok    $d"; else echo "  FAIL  $d"; fails=$((fails + 1)); fi
 }
@@ -156,11 +143,9 @@ echo "herdr theme sync (omacom/omarchy#13430):"
 herdr_setup() {
   setup
   printf '#!/bin/bash\n[[ "$*" == "machine list" ]] && printf "1\\tbox\\tme@box\\tmain\\tenabled\\n2\\toff\\tme@off\\tmain\\tdisabled\\n"\nexit 0\n' > "$STUBS/herdr"
-  # ssh runs the remote script here, in a second HOME: a Mac running omarchy4mac
   R="$T/remote"; mkdir -p "$R/.local/bin" "$R/.config/theme-switcher"
   printf '#!/bin/bash\necho "remote-theme $* from=$THEME_SYNC_FROM" >> "%s"\n' "$T/remote.log" > "$R/.local/bin/theme"
-  cat > "$STUBS/ssh" <<EOF
-#!/bin/bash
+  { printf '#!/bin/bash\n'; cat; } > "$STUBS/ssh" <<EOF
 echo "ssh \$*" >> "$LOG"
 HOME="$R" /bin/bash -s
 EOF
@@ -188,11 +173,9 @@ check "the toggle turns off" test ! -e "$H/.config/theme-switcher/herdr-sync"
 : > "$LOG"; run nowall; sleep 1
 check "sync off: no push" bash -c "! grep -q '^ssh' '$LOG'"
 rm -rf "$T"
-# One machine asleep: ssh exits 255 there, and the next machine still gets the theme
 herdr_setup; touch "$R/.config/theme-switcher/herdr-sync"
 printf '#!/bin/bash\n[[ "$*" == "machine list" ]] && printf "1\\tdown\\tme@down\\tmain\\tenabled\\n2\\tbox\\tme@box\\tmain\\tenabled\\n"\nexit 0\n' > "$STUBS/herdr"
-cat > "$STUBS/ssh" <<EOF
-#!/bin/bash
+{ printf '#!/bin/bash\n'; cat; } > "$STUBS/ssh" <<EOF
 echo "ssh \$*" >> "$LOG"
 [[ "\$*" == *me@down* ]] && { cat >/dev/null; echo "ssh: connect to host down: Operation timed out" >&2; exit 255; }
 HOME="$R" /bin/bash -s
@@ -228,7 +211,6 @@ PIN="$(git -C "$UP" rev-parse HEAD)"
 mkdir -p "$UP/themes/later"; cp "$FIXTURE/colors.toml" "$UP/themes/later/colors.toml"
 g add -A; g commit -qm later
 g config uploadpack.allowFilter true; g config uploadpack.allowAnySHA1InWant true
-# the installed layout: ~/.local/bin/theme is a symlink into the repo clone
 mkdir -p "$T/repo/bin" "$H/.local/bin"
 cp "$THEME_BIN" "$T/repo/bin/theme"; echo "$PIN" > "$T/repo/OMARCHY_COMMIT"
 ln -s "$T/repo/bin/theme" "$H/.local/bin/theme"
@@ -258,9 +240,6 @@ check "no OMARCHY_COMMIT: sync refuses" test "$?" -ne 0
 rm -rf "$T"
 
 echo "theme run through its ~/.local/bin link finds its helpers in the repo (2026-11-12):"
-# The hotkey runs ~/.local/bin/theme, a link into the clone. omarchy-bg-set was
-# added to bin/ later, and a git pull adds no link for it, so every switch
-# skipped the wallpaper: "it's still got the Tokyo Night wallpaper".
 setup
 mkdir -p "$H/.local/bin"; ln -s "$(cd "$(dirname "$THEME_BIN")" && pwd)/$(basename "$THEME_BIN")" "$H/.local/bin/theme"
 THEME_BIN_SAVED="$THEME_BIN"; THEME_BIN="$H/.local/bin/theme"; run withwall; THEME_BIN="$THEME_BIN_SAVED"
@@ -270,7 +249,6 @@ check "sets the wallpaper" grep -q 'set picture of every desktop to item 1 of ar
 rm -rf "$T"
 
 echo "hermes skin: one write for every profile, no hermes per profile (2026-11-12):"
-# 55 profiles took 24 of the switch's 25 seconds: one hermes call per profile, each a Python start.
 setup
 mkdir -p "$H/.local/bin"
 printf '#!/bin/bash\necho "hermes $*" >> "%s"\nexit 0\n' "$LOG" > "$H/.local/bin/hermes"; chmod +x "$H/.local/bin/hermes"
@@ -291,13 +269,11 @@ check "says so" grep -q 'hermes   → default' "$OUT"
 rm -rf "$T"
 
 echo "theme random never repeats a recent theme (2026-11-12):"
-# James: "it'll say it switched to a new theme, but it's the same theme".
 setup
 for n in t1 t2 t3 t4 t5; do cp -R "$FIXTURE" "$H/.config/theme-switcher/cache/$n"; done
 rm -rf "$H/.config/theme-switcher/cache/withwall" "$H/.config/theme-switcher/cache/nowall"
 echo true > "$T/darkmode"
-cat > "$STUBS/osascript" <<EOF
-#!/bin/bash
+{ printf '#!/bin/bash\n'; cat; } > "$STUBS/osascript" <<EOF
 [[ "\$*" == *"dark mode"* ]] && cat "$T/darkmode"
 exit 0
 EOF
@@ -310,7 +286,6 @@ for i in 1 2 3 4 5 6 7 8 9 10 11 12; do
   prev2="$prev"; prev="$cur"
 done
 check "twelve random switches never repeat one of the last two themes" test "$repeats" -eq 0
-# A press while a switch runs: the second run must not announce a pick at all.
 mkdir "$H/.config/theme-switcher/lock"; echo 1 > "$H/.config/theme-switcher/lock/pid"
 run random
 check "a press during a switch picks nothing" bash -c "! grep -q 'random pick' '$OUT'"

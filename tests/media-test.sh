@@ -1,23 +1,15 @@
 #!/bin/bash
-# Checks the bar's music item (sketchybar/plugins/media.sh): it shows whatever
-# plays (Spotify, YouTube Music in Brave, any player) from macOS Now Playing,
-# the way Omarchy 4's media widget does: a pause icon while playing, a play
-# icon while paused, "Title  ·  Artist". media-control and sketchybar are
-# stubs that log, so the running bar does not change.
-#
-#   tests/media-test.sh
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 PLUGIN="${MEDIA_PLUGIN:-$HERE/../sketchybar/plugins/media.sh}"
 RC="${SKETCHYBARRC:-$HERE/../sketchybar/sketchybarrc}"
 fails=0
 
-check() { # check <description> <test command...>
+check() {
   local d="$1"; shift
   if "$@"; then echo "  ok    $d"; else echo "  FAIL  $d"; fails=$((fails + 1)); fi
 }
 
-# run <now-playing JSON, or MISSING for no media-control>: runs the plugin.
 run() {
   T="$(mktemp -d)"; LOG="$T/calls.log"; : > "$LOG"; mkdir -p "$T/stubs" "$T/config"
   printf 'export FG=0xfffg\nexport COMMENT=0xffdim\n' > "$T/config/colors.sh"

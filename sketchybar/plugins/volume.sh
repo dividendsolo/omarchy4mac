@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 source "$CONFIG_DIR/colors.sh"
 
-# Volume comes from event $INFO on volume_change, otherwise query system
 if [ "$SENDER" = "volume_change" ]; then
   VOLUME="$INFO"
 else
@@ -10,9 +9,6 @@ fi
 
 [ -z "$VOLUME" ] && exit 0
 
-# Current default output device. Treat anything that isn't built-in speakers /
-# a display / TV as headphones. This catches Bluetooth headphones whose names
-# don't contain the word "headphone" (e.g. "soundcore Life Q30", "AirPods").
 DEVICE="$(SwitchAudioSource -c 2>/dev/null)"
 
 case "$DEVICE" in
@@ -25,7 +21,7 @@ case "$DEVICE" in
     esac
     ;;
   *)
-    ICON=""   # headphones
+    ICON=""
     ;;
 esac
 

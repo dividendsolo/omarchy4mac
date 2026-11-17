@@ -1,23 +1,10 @@
 #!/bin/bash
-# Every link that ships must work. This checks the links of the README, of the
-# docs site's content (which is where the old README's reading now lives), of
-# the changelog and of docs/:
-#
-#   - an http(s) link must answer 200 (redirects followed)
-#   - a /docs/<slug> link must be a real page in docs-site/content/docs
-#   - a /<file> link must exist under docs-site/public, or in the repo
-#   - a relative path must exist, resolved from the file that prints it
-#
-# The two pages that come from the repo (changelog, parity-checklist) are
-# committed; tests/docs-content-test.sh fails when either goes stale.
-#
-#   tests/docs-links-test.sh
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$HERE/.." && pwd)"
 fails=0
 
-check() { # check <description> <expected> <actual>
+check() {
   if [[ "$3" == "$2" ]]; then echo "  ok    $1"
   else echo "  FAIL  $1 (expected '$2', got '$3')"; fails=$((fails + 1)); fi
 }
@@ -70,7 +57,7 @@ def status(url):
                 code = r.status
         except urllib.error.HTTPError as e:
             code = e.code
-        except Exception as e:                               # timeout, DNS, TLS
+        except Exception as e:
             code = str(e)
         if code == 200:
             return code
@@ -81,7 +68,7 @@ def status(url):
 external, internal, bad = set(), [], []
 for src in sources:
     for target in targets(src.read_text()):
-        target = target.strip().rstrip("*.,;")   # a bare URL in bold, or at the end of a sentence
+        target = target.strip().rstrip("*.,;")
         if target.startswith(("http://", "https://")):
             external.add(target)
         elif target and not target.startswith(("mailto:", "tel:", "#")) and "${" not in target:

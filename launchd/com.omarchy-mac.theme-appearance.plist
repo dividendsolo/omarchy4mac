@@ -4,9 +4,6 @@
 <dict>
   <key>Label</key>
   <string>com.omarchy-mac.theme-appearance</string>
-  <!-- Resident listener for AppleInterfaceThemeChangedNotification — reacts
-       instantly to light/dark flips (replaces the old 15s poll). Source:
-       dotfiles/bin/theme-appearance-listener.swift -->
   <key>ProgramArguments</key>
   <array>
     <string>/Users/YOU/.local/bin/theme-appearance-listener</string>

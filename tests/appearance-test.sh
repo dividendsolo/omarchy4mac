@@ -1,11 +1,4 @@
 #!/bin/bash
-# Checks Appearance > Window Transparency / Window Corners (Omarchy 4.5): bin/omarchy-appearance saves the
-# window transparency and corners, Ghostty, SketchyBar and JankyBorders follow
-# the saved choice, and the choice is read again after a restart (the bar and
-# the borders read it when they start). Throwaway HOME; sketchybar, brew, hs
-# and borders are stubs on PATH, so the running desktop is never touched.
-#
-#   tests/appearance-test.sh
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 APPEARANCE="$HERE/../bin/omarchy-appearance"
@@ -17,24 +10,21 @@ mkdir -p "$STUBS" "$(dirname "$GMAC")" "$H/.config/ghostty" "$T/sb"
 printf 'theme = omarchy-jade\nbackground-opacity = 0.75\n' > "$GMAC"
 printf 'theme = omarchy-jade\n' > "$H/.config/ghostty/config"
 printf 'export BG="0xff112233"\nexport BG_TRANS="0xc0112233"\n' > "$T/sb/colors.sh"
-# sketchybarrc also asks osascript and aerospace for the front app and workspace.
 for cmd in sketchybar brew hs borders pgrep osascript aerospace; do
   printf '#!/bin/bash\necho "%s $*" >> "%s"\nexit 0\n' "$cmd" "$LOG" > "$STUBS/$cmd"
 done
 chmod +x "$STUBS"/*
 
 ap() { env -i HOME="$H" PATH="$STUBS:/usr/bin:/bin" /bin/bash "$APPEARANCE" "$@" 2>&1; }
-check() { # check <description> <test command...>
+check() {
   local d="$1"; shift
   if "$@"; then echo "  ok    $d"; else echo "  FAIL  $d"; fails=$((fails + 1)); fi
 }
-# bar_color: the color= the bar gets when sketchybarrc starts (a restart)
 bar_color() {
   : > "$LOG"
   env -i HOME="$H" PATH="$STUBS:/usr/bin:/bin" CONFIG_DIR="$T/sb" /bin/bash "$HERE/../sketchybar/sketchybarrc" >/dev/null 2>&1
   grep -m1 -- '--bar' "$LOG" | grep -oE 'color=0x[0-9a-f]+' | head -1
 }
-# border_style: the style= JankyBorders gets when bordersrc starts (a restart)
 border_style() {
   : > "$LOG"
   env -i HOME="$H" PATH="$STUBS:/usr/bin:/bin" /bin/bash "$HERE/../borders/bordersrc" >/dev/null 2>&1

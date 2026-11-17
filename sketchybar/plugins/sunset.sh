@@ -1,16 +1,4 @@
 #!/usr/bin/env bash
-# Friday sunset: on Friday the bar shows today's sunset time, so work stops
-# at sunset. Hidden on every other day. The label turns red in
-# the last 30 minutes before sunset and stays red after it.
-#
-# Sunset comes from wttr.in for the current location (IP-based, like
-# weather.sh), fetched once per day and cached. Hidden when it cannot be read.
-#
-# Two copies, like standup.sh: the centre copy (sunset_center) on the external
-# displays, the right copy (sunset) on the notched built-in panel.
-#
-# Test hooks: SUNSET_NOW="YYYY-MM-DD HH:MM" fakes the clock, SUNSET_CACHE moves
-# the cache file (tests/sunset-test.sh).
 source "$CONFIG_DIR/colors.sh"
 source "$CONFIG_DIR/plugins/displays.sh"
 
@@ -20,7 +8,7 @@ else
   NOW_EPOCH="$(date +%s)"
 fi
 TODAY="$(date -j -r "$NOW_EPOCH" +%F)"
-WEEKDAY="$(date -j -r "$NOW_EPOCH" +%u)" # 1 = Monday ... 5 = Friday
+WEEKDAY="$(date -j -r "$NOW_EPOCH" +%u)"
 
 if [ "$NAME" = "sunset_center" ]; then
   TARGET="$OTHERS"
@@ -31,8 +19,6 @@ fi
 hide() { sketchybar --set "$NAME" drawing=off; exit 0; }
 
 [ "$WEEKDAY" = 5 ] || hide
-# A failed display lookup must not hide the item (like clock.sh): keep where it
-# is drawn and only refresh the label.
 if [ "$DISPLAYS_OK" = 1 ]; then
   [ -n "$TARGET" ] && [ "$TARGET" != "-" ] || hide
   PLACE=(associated_display="$TARGET")

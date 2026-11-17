@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+[ -d tools/no-comments/node_modules ] || bun install --frozen-lockfile --cwd tools/no-comments >/dev/null
+exec bun tools/no-comments/check.ts --all .

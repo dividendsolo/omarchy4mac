@@ -1,39 +1,22 @@
 #!/bin/bash
-# Checks the bar's agents items (sketchybar/plugins/agents.sh and
-# bin/omarchy-agent-usage): Claude, Codex and Grok limits each show a meter
-# and a reset time, and a provider with no login is hidden. sketchybar,
-# security (the Keychain) and codex are stubs on PATH, HOME is a scratch
-# folder, and Claude's and Grok's endpoints are answered in-process, so no
-# real login or network is touched.
-#
-#   tests/agents-test.sh
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 USAGE="$HERE/../bin/omarchy-agent-usage"
 fails=0
 TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
 mkdir -p "$TMP/bin" "$TMP/repo/sketchybar" "$TMP/repo/bin"
-# colors.sh is written by bin/theme and is not in git, so the test brings its own.
 printf 'export ACCENT="0xff00ff00"\nexport FG="0xffffffff"\n' > "$TMP/repo/sketchybar/colors.sh"
-# One external screen, no built-in one: the full label only (tests/notch-test.sh
-# covers the built-in screen's short copy).
 mkdir -p "$TMP/repo/sketchybar/plugins"
 echo 'BUILTIN=-; OTHERS=1; DISPLAYS_OK=1' > "$TMP/repo/sketchybar/plugins/displays.sh"
 ln -s "$USAGE" "$TMP/repo/bin/omarchy-agent-usage"
-cat > "$TMP/bin/sketchybar" <<'STUB'
-#!/bin/bash
+{ printf '#!/bin/bash\n'; cat; } > "$TMP/bin/sketchybar" <<'STUB'
 echo "$*" >> "$AGENTS_TEST_LOG"
 STUB
-# The Keychain: Claude Code's login when CLAUDE_TEST_TOKEN is set, else none.
-cat > "$TMP/bin/security" <<'STUB'
-#!/bin/bash
+{ printf '#!/bin/bash\n'; cat; } > "$TMP/bin/security" <<'STUB'
 [ -n "${CLAUDE_TEST_TOKEN:-}" ] || exit 44
 echo "{\"claudeAiOauth\": {\"accessToken\": \"$CLAUDE_TEST_TOKEN\"}}"
 STUB
-# Codex's app-server: answers initialize, then account/rateLimits/read with
-# CODEX_TEST_LIMITS.
-cat > "$TMP/bin/codex" <<'STUB'
-#!/bin/bash
+{ printf '#!/bin/bash\n'; cat; } > "$TMP/bin/codex" <<'STUB'
 while read -r line; do
   case "$line" in
     *'"id": 1,'*) echo '{"method": "note", "params": {}}'; echo '{"id": 1, "result": {}}' ;;
@@ -44,28 +27,24 @@ STUB
 chmod +x "$TMP/bin/"*
 export PATH="$TMP/bin:$PATH"
 
-check() { # check <description> <expected regex> <actual>
+check() {
   if [[ "$3" =~ $2 ]]; then echo "  ok    $1"
   else echo "  FAIL  $1 (expected /$2/, got '$3')"; fails=$((fails + 1)); fi
 }
 
 fresh_home() { rm -rf "$TMP/home"; mkdir -p "$TMP/home"; export HOME="$TMP/home"; unset CODEX_HOME GROK_HOME CLAUDE_TEST_TOKEN; }
 
-plugin() { # plugin <provider>: what the bar item was set to
+plugin() {
   : > "$TMP/log"
   AGENTS_TEST_LOG="$TMP/log" CONFIG_DIR="$TMP/repo/sketchybar" NAME="agents.$1" \
     bash "$HERE/../sketchybar/plugins/agents.sh"
   cat "$TMP/log"
 }
 
-# macOS's /bin/bash 3.2 brace-expands the commas of a "{..., ...}" argument
-# inside "$( )", so every JSON answer is built in $answer first.
-# In-process run with Claude's and Grok's HTTPS answered from ANSWERS:
-# url substring -> JSON body, or an HTTP status number.
-inproc() { # inproc <provider> <answers json>: the collector's line, or "exit 1"
+inproc() {
   python3 - "$USAGE" "$1" "$2" <<'PY'
 import importlib.machinery, importlib.util, io, json, sys, urllib.error
-sys.dont_write_bytecode = True  # no __pycache__ in bin/, which install.sh links whole
+sys.dont_write_bytecode = True
 path, provider, answers = sys.argv[1], sys.argv[2], json.loads(sys.argv[3])
 loader = importlib.machinery.SourceFileLoader("usage", path)
 module = importlib.util.module_from_spec(importlib.util.spec_from_loader("usage", loader))

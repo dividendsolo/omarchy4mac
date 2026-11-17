@@ -1,15 +1,4 @@
 #!/bin/bash
-# Checks the Omarchy 4.5 bar polish (#37):
-# - scrolling over a workspace item changes workspace (omacom/omarchy#15256);
-# - a widget dragged off the bar leaves it, and stays off after a reload
-#   (omacom/omarchy#6782): the Hammerspoon drag tap and bin/omarchy-bar-remove;
-# - right-click on the clock turns seconds on and off (omacom/omarchy#7586);
-# - the clock writes nothing to the log across the end of daylight saving time
-#   (omacom/omarchy#16684).
-# sketchybar, aerospace and open are stubs on PATH, and init.lua runs in LuaJIT
-# with a stub `hs`, so the running bar and desktop are never touched.
-#
-#   tests/bar-test.sh
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$HERE/.."
@@ -20,11 +9,8 @@ printf 'export FG="0xfffffff0"\nexport MAGENTA="0xffff00ff"\nexport BG="0xff0000
 cp "$ROOT/sketchybar/plugins/displays.sh" "$TMP/config/plugins/"
 export CONFIG_DIR="$TMP/config" HOME="$TMP/home" LOG="$TMP/log"
 
-# sketchybar stub: answers the display query and the item queries from
-# $TMP/q/<name>.json, and logs every other call.
 mkdir -p "$TMP/q"
-cat > "$TMP/bin/sketchybar" <<'STUB'
-#!/bin/bash
+{ printf '#!/bin/bash\n'; cat; } > "$TMP/bin/sketchybar" <<'STUB'
 if [[ "$1" == "--query" ]]; then
   [[ "$2" == displays ]] && { echo '[{"arrangement-id": 1, "DirectDisplayID": 0}]'; exit 0; }
   cat "$(dirname "$0")/../q/$2.json"; exit 0
@@ -35,11 +21,11 @@ for tool in aerospace open; do printf '#!/bin/bash\necho "%s $*" >> "$LOG"\n' "$
 chmod +x "$TMP/bin/"*
 export PATH="$TMP/bin:$PATH"
 
-check() { # check <description> <expected substring> <actual>
+check() {
   if [[ "$3" == *"$2"* ]]; then echo "  ok    $1"
   else echo "  FAIL  $1 (expected '$2' in '$3')"; fails=$((fails + 1)); fi
 }
-check_not() { # check_not <description> <unexpected substring> <actual>
+check_not() {
   if [[ "$3" != *"$2"* ]]; then echo "  ok    $1"
   else echo "  FAIL  $1 (did not expect '$2' in '$3')"; fails=$((fails + 1)); fi
 }
@@ -57,7 +43,7 @@ check_not "a scroll does not repaint the item" "sketchybar" "$(log)"
 echo "clock seconds:"
 SEC="$HOME/.config/omarchy/clock-seconds"
 clock() { : > "$LOG"; NAME=clock "$@" bash "$ROOT/sketchybar/plugins/clock.sh" 2> "$TMP/err"; log; }
-NOON=1794423600 # 2026-11-11 14:00:00 EST
+NOON=1794423600
 out="$(clock env TZ=America/New_York SENDER=forced CLOCK_NOW=$NOON)"
 check "seconds off: hours and minutes" 'label=Wed  2:00 PM' "$out"
 check "seconds off: a tick every 10 s" "update_freq=10" "$out"
@@ -77,7 +63,6 @@ check "the right clock runs the same script" "--subscribe clock_right mouse.clic
 
 echo "clock across the end of daylight saving (2026-11-01, New York):"
 touch "$SEC"
-# 01:59:59 EDT, 01:00:00 EST (the hour repeats), 01:30 EST, 02:00 EST
 for t in 1793512799:'1:59:59 AM' 1793512800:'1:00:00 AM' 1793514600:'1:30:00 AM' 1793516400:'2:00:00 AM'; do
   for sender in routine forced; do
     out="$(clock env TZ=America/New_York SENDER=$sender CLOCK_NOW="${t%%:*}")"
@@ -92,7 +77,7 @@ rm -f "$SEC"
 echo "omarchy-bar-remove:"
 REMOVE="$ROOT/bin/omarchy-bar-remove"
 LIST="$HOME/.config/omarchy/bar-removed"
-item_json() { # item_json <name> <drawing> <position> <x> <w>
+item_json() {
   printf '{"name":"%s","geometry":{"drawing":"%s","position":"%s"},"bounding_rects":{"display-1":{"origin":[%s,0.0],"size":[%s,32.0]},"display-2":{"origin":[-9999.0,-9999.0],"size":[24.0,32.0]}}}' "$@"
 }
 bar_json() { printf '{"hidden":"%s","items":["logo","clock","weather","bar_removed","media"]}' "$1"; }
@@ -121,8 +106,6 @@ check "--reset reloads the bar" "sketchybar --reload" "$(log)"
 echo "drag off the bar (hammerspoon/init.lua):"
 if ! command -v luajit >/dev/null; then echo "  FAIL  luajit is not installed (brew install luajit)"; fails=$((fails + 1))
 else
-# The Lua goes to a file first: macOS bash 3.2 cannot parse a here-document
-# inside $(...) when its text holds a quote or a paren.
 cat > "$TMP/drag.lua" <<'LUAEOF'
 local function stub()
   return setmetatable({}, { __index = function() return stub() end, __call = function() return stub() end })
@@ -140,7 +123,6 @@ hs.eventtap = setmetatable({
     return setmetatable({ start = function(self) return self end }, mt)
   end,
 }, mt)
--- Two screens side by side, the second one taller.
 local screens = { { x = 0, y = 0, w = 1512, h = 982 }, { x = 1512, y = -200, w = 2560, h = 1440 } }
 hs.screen = setmetatable({ allScreens = function()
   local out = {}
@@ -148,8 +130,6 @@ hs.screen = setmetatable({ allScreens = function()
   return out
 end }, mt)
 hs.task = { new = function(path, _, args) tasks[#tasks + 1] = path .. " " .. table.concat(args, " "); return stub() end }
--- On-screen windows, front to back (CGWindowListCopyWindowInfo): SketchyBar's
--- bar on each screen, and the auto-hidden macOS menu bar when it is shown.
 local bars = {
   { kCGWindowOwnerName = "sketchybar", kCGWindowAlpha = 1, kCGWindowBounds = { X = 0, Y = 0, Width = 1512, Height = 32 } },
   { kCGWindowOwnerName = "sketchybar", kCGWindowAlpha = 1, kCGWindowBounds = { X = 1512, Y = -200, Width = 2560, Height = 32 } },
@@ -167,7 +147,7 @@ local function drag(x1, y1, x2, y2)
   end
   local t = tasks[#tasks] or "nothing"; tasks = {}; return t
 end
-print("taps=" .. #taps)
+print("taps=" .. (#taps))
 print("off=" .. drag(800, 10, 820, 200))
 print("short=" .. drag(800, 10, 800, 60))
 print("below=" .. drag(800, 100, 800, 400))

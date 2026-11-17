@@ -1,22 +1,9 @@
 #!/bin/bash
-# Super+L (alt-l): cycle the focused workspace through tiles, accordion and
-# floating, like Omarchy 4.5. AeroSpace floats windows, not workspaces, so
-# floating floats every tiled window on the workspace, and leaving floating
-# tiles back only those (a window floated by an on-window-detected rule stays
-# floating). The layout is saved per workspace, and `restore` (AeroSpace's
-# after-startup-command) puts it back after AeroSpace restarts.
-#
-#   omarchy-workspace-layout [cycle]
-#   omarchy-workspace-layout back      (Super+Alt+L: the other way round)
-#   omarchy-workspace-layout restore
-#
-# shortcut: alt-a (accordion/tiles toggle) does not save, so a restart can
-# bring back the layout from the last Super+L; route alt-a here if that bites.
 set -u
 AS="${AEROSPACE:-aerospace}"
 STATE="${XDG_STATE_HOME:-$HOME/.local/state}/omarchy/workspace-layouts"
 
-apply() { # apply <workspace> <tiles|accordion|floating>
+apply() {
   local ws=$1 mode=$2 id layout
   local floated="$STATE/$ws.floated"
   while read -r id layout; do
@@ -39,7 +26,6 @@ case "$1" in
   cycle|back)
     ws=$("$AS" list-workspaces --focused) || exit 1
     current=$(cat "$STATE/$ws" 2>/dev/null)
-    # Tiles and accordion are read live (alt-a may have changed them).
     if [[ $current != floating ]]; then
       current=$("$AS" list-workspaces --focused --format '%{workspace-root-container-layout}')
       current=${current#*_}

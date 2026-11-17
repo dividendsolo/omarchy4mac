@@ -1,7 +1,3 @@
-# Starship: Omarchy 4's prompt, copied verbatim from omacom/omarchy
-# config/starship.toml (quattro @ a6dcc31). Its colors are terminal colors (cyan),
-# so the prompt follows every theme switch. Update by copying it again.
-
 add_newline = true
 command_timeout = 200
 format = "[$directory$git_branch$git_status]($style)$character"

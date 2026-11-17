@@ -1,16 +1,10 @@
 #!/bin/bash
-# Checks the Starship prompt is Omarchy 4's: terminal (ANSI) colors only, so
-# the prompt follows every theme switch, and Omarchy's ❯ prompt symbol.
-# Renders the real prompt for a throwaway git repo with this config.
-#
-#   tests/starship-test.sh
-#   STARSHIP_TOML=/path/to/starship.toml tests/starship-test.sh
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 TOML="${STARSHIP_TOML:-$HERE/../starship/starship.toml}"
 fails=0
 
-check() { # check <description> <test command...>
+check() {
   local d="$1"; shift
   if "$@"; then echo "  ok    $d"; else echo "  FAIL  $d"; fails=$((fails + 1)); fi
 }
@@ -18,7 +12,7 @@ check() { # check <description> <test command...>
 command -v starship >/dev/null || { echo "starship not installed"; exit 1; }
 T="$(mktemp -d)"; trap 'rm -rf "$T"' EXIT
 mkdir -p "$T/myrepo/src" && git -C "$T/myrepo" init -q -b main
-: > "$T/myrepo/src/new-file"   # untracked: git_status has something to show
+: > "$T/myrepo/src/new-file"
 cd "$T/myrepo/src"
 PROMPT_OUT="$(STARSHIP_CONFIG="$TOML" STARSHIP_SHELL= starship prompt --status 0 2>/dev/null)"
 ERR_OUT="$(STARSHIP_CONFIG="$TOML" STARSHIP_SHELL= starship prompt --status 1 2>/dev/null)"

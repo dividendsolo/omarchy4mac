@@ -1,9 +1,4 @@
 #!/bin/bash
-# Checks per-monitor workspaces (Omarchy 4.5): the number keys pick the focused
-# monitor's own workspaces, and unplugging a monitor renumbers nothing.
-# aerospace is a stub on PATH, so the running window manager is never touched.
-#
-#   tests/workspace-test.sh
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 SCRIPT="$HERE/../bin/omarchy-workspace"
@@ -11,8 +6,7 @@ TOML="$HERE/../aerospace/aerospace.toml"
 fails=0
 TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
 mkdir -p "$TMP/bin"
-cat > "$TMP/bin/aerospace" <<'STUB'
-#!/bin/bash
+{ printf '#!/bin/bash\n'; cat; } > "$TMP/bin/aerospace" <<'STUB'
 touch "$WS_TEST_LOG.stub"
 case "$1 ${2:-}" in
   "config --config-path") echo "$WS_TEST_TOML" ;;
@@ -23,12 +17,12 @@ esac
 STUB
 chmod +x "$TMP/bin/aerospace"
 
-check() { # check <description> <expected> <actual>
+check() {
   if [[ "$3" == "$2" ]]; then echo "  ok    $1"
   else echo "  FAIL  $1 (expected '$2', got '$3')"; fails=$((fails + 1)); fi
 }
 
-run() { # run <monitor name> <workspaces on it> <args...>: prints the aerospace calls, one per line joined by ' ; '
+run() {
   : > "$TMP/log"
   PATH="$TMP/bin:$PATH" WS_TEST_TOML="$TOML" WS_TEST_MONITOR="$1" WS_TEST_WORKSPACES="$2" \
     WS_TEST_LOG="$TMP/log" bash "$SCRIPT" "${@:3}"
@@ -40,8 +34,6 @@ check "right monitor: 1 is its first workspace" "workspace 2" "$(run 'VA2446 (2)
 check "right monitor: 2 is its second workspace" "workspace 3" "$(run 'VA2446 (2)' '2 3' 2)"
 check "right monitor: 3 does not leave the monitor" "" "$(run 'VA2446 (2)' '2 3' 3)"
 check "laptop: 1 is workspace 4" "workspace 4" "$(run 'Built-in Retina Display' '4 5' 1)"
-# Both externals unplugged: the laptop keeps 4 and 5 as its 1 and 2, and the
-# guests from the externals come after them.
 check "externals unplugged: laptop keeps 1 = workspace 4" "workspace 4" "$(run 'Built-in Retina Display' '1 2 3 4 5' 1)"
 check "externals unplugged: laptop keeps 2 = workspace 5" "workspace 5" "$(run 'Built-in Retina Display' '1 2 3 4 5' 2)"
 check "externals unplugged: guests come after" "workspace 1" "$(run 'Built-in Retina Display' '1 2 3 4 5' 3)"
@@ -52,8 +44,6 @@ check "--move sends the window, focus stays" "move-node-to-workspace 5" "$(run '
 check "--move-follow sends the window and follows" "move-node-to-workspace 5 ; workspace 5" \
   "$(run 'Built-in Retina Display' '4 5' --move-follow 2)"
 
-# A Mac has the real aerospace in /opt/homebrew/bin: the script must still run
-# the stub. A copy of the script points that dir at a decoy that only leaves a mark.
 mkdir -p "$TMP/brew"
 printf '#!/bin/bash\ntouch "%s/decoy"\n' "$TMP" > "$TMP/brew/aerospace"
 chmod +x "$TMP/brew/aerospace"
@@ -83,7 +73,7 @@ for k in ("left", "down", "up", "right"):
 check("alt-tab cycles the focused monitor's workspaces", "workspace --wrap-around next", b["alt-tab"])
 check("cmd-ctrl-tab keeps back-and-forth", "workspace-back-and-forth", b["cmd-ctrl-tab"])
 
-def place(monitors):  # where AeroSpace puts each workspace: first pattern that matches a monitor
+def place(monitors):
     out = {}
     for ws, pats in assign.items():
         pats = [pats] if isinstance(pats, str) else pats
@@ -92,7 +82,6 @@ def place(monitors):  # where AeroSpace puts each workspace: first pattern that 
 L, R, B = "VA2446 (1)", "VA2446 (2)", "Built-in Retina Display"
 full = place([L, R, B])
 check("all plugged in: 1 left, 2-3 right, 4-5 laptop", {"1": L, "2": R, "3": R, "4": B, "5": B}, full)
-# macOS drops the (1)/(2) suffix once the twin is gone.
 check("left unplugged: 2-3 stay on the right, 4-5 on the laptop",
       ("VA2446", "VA2446", B, B), tuple(place(["VA2446", B])[w] for w in "2345"))
 check("right unplugged: 1 stays on the left, 4-5 on the laptop",

@@ -1,9 +1,3 @@
-// omarchy-video-wallpaper — plays a video behind the windows on every screen,
-// muted, with AVPlayer (Omarchy 4.5: video backgrounds and theme intros).
-//   omarchy-video-wallpaper <video>          loop it until killed (a video background)
-//   omarchy-video-wallpaper --once <video>   play it one time, then exit (a theme intro)
-// bin/omarchy-bg-set starts and stops it. install.sh builds it:
-//   swiftc -O omarchy-video-wallpaper.swift -o ~/.local/bin/omarchy-video-wallpaper
 import AppKit
 import AVFoundation
 
@@ -24,14 +18,11 @@ if once {
     for name in [AVPlayerItem.didPlayToEndTimeNotification, AVPlayerItem.failedToPlayToEndTimeNotification] {
         NotificationCenter.default.addObserver(forName: name, object: item, queue: .main) { _ in exit(0) }
     }
-    // An intro that cannot load posts nothing; never leave a window over the desktop.
     DispatchQueue.main.asyncAfter(deadline: .now() + 60) { exit(0) }
 } else {
     looper = AVPlayerLooper(player: player, templateItem: item)
 }
 
-// The desktop picture's level: behind every window and the desktop icons. An
-// intro sits one above, so it covers a video background while it plays.
 let level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.desktopWindow)) + (once ? 1 : 0))
 var windows: [NSWindow] = []
 
@@ -52,14 +43,14 @@ func cover() {
         layer.autoresizingMask = [.layerWidthSizable, .layerHeightSizable]
         view.layer?.addSublayer(layer)
         w.contentView = view
-        w.setFrame(screen.frame, display: true) // global coordinates, so each screen gets its own
+        w.setFrame(screen.frame, display: true)
         w.orderFront(nil)
         return w
     }
 }
 
 let app = NSApplication.shared
-app.setActivationPolicy(.accessory) // no Dock icon, never takes focus
+app.setActivationPolicy(.accessory)
 NotificationCenter.default.addObserver(
     forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main
 ) { _ in cover() }
