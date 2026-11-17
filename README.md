@@ -33,7 +33,7 @@ Hammerspoon once, and opens the settings pane for it.
 
 The docs page carries the rest: the install steps and every option, all the
 keybindings and shell aliases, the theme pipeline and the wallpapers, uninstall,
-troubleshooting, the changelog, and the score against Omarchy v4.0.6.
+troubleshooting, the changelog, and the score against Omarchy v4.5.0 (75%).
 
 https://omarchy4mac.dividendsolo.com
 
