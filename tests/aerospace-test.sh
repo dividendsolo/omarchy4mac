@@ -1,22 +1,15 @@
 #!/bin/bash
-# Checks the AeroSpace rules that keep the desktop Omarchy-like:
-# every fullscreen key stays below SketchyBar, and workspaces start in tiles.
-# File checks always run; live checks run when AeroSpace is running and read
-# the config it actually loaded (so a missing reload fails too).
-#
-#   tests/aerospace-test.sh
-#   AEROSPACE_TOML=/path/to/aerospace.toml tests/aerospace-test.sh
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 TOML="${AEROSPACE_TOML:-$HERE/../aerospace/aerospace.toml}"
 fails=0
 
-check() { # check <description> <expected> <actual>
+check() {
   if [[ "$3" == "$2" ]]; then echo "  ok    $1"
   else echo "  FAIL  $1 (expected '$2', got '$3')"; fails=$((fails + 1)); fi
 }
 
-get_file() { # get_file <dotted.key>
+get_file() {
   python3 - "$TOML" "$1" <<'PY'
 import sys, tomllib
 d = tomllib.load(open(sys.argv[1], "rb"))
@@ -33,8 +26,6 @@ for key in alt-f cmd-alt-f cmd-ctrl-f; do
   check "$key is fullscreen below the bar" fullscreen "$(get_file mode.main.binding.$key)"
 done
 check "alt-a still toggles accordion" "layout accordion tiles" "$(get_file mode.main.binding.alt-a)"
-# Omarchy 4.5: Super+L cycles tiles/accordion/floating, Super+M minimizes to
-# the Dock, and the saved layouts come back when AeroSpace starts.
 check "alt-l cycles the workspace layout" \
   'exec-and-forget $HOME/.local/bin/omarchy-workspace-layout cycle' "$(get_file mode.main.binding.alt-l)"
 check "alt-m minimizes to the Dock" macos-native-minimize "$(get_file mode.main.binding.alt-m)"
@@ -51,9 +42,6 @@ if pgrep -xq AeroSpace && command -v aerospace >/dev/null; then
     check "$key is fullscreen below the bar" fullscreen \
       "$(aerospace config --get "mode.main.binding.$key" 2>&1)"
   done
-  # A reload does not touch workspaces that already exist; their root keeps
-  # the layout it was made with. Every workspace must be in tiles unless the
-  # user pressed alt-a there (THEN set ALLOW_ACCORDION=<ws ws ...>).
   while read -r ws layout; do
     [[ " ${ALLOW_ACCORDION:-} " == *" $ws "* ]] && continue
     check "workspace $ws root is tiles" tiles "${layout#*_}"

@@ -7,9 +7,6 @@ const inter = Inter({
   subsets: ['latin'],
 });
 
-// The deployed address, for the Open Graph images. Vercel sets
-// VERCEL_PROJECT_PRODUCTION_URL; NEXT_PUBLIC_SITE_URL overrides it for a
-// custom domain.
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
   ? process.env.NEXT_PUBLIC_SITE_URL
   : process.env.VERCEL_PROJECT_PRODUCTION_URL

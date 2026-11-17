@@ -1,7 +1,4 @@
 #!/bin/bash
-# quit-all — quit every Dock app except Finder (and the terminal that ran it).
-# Bound to SUPER+CTRL+SHIFT+Q in ~/.hammerspoon/init.lua; also runnable from a terminal.
-# Apps with unsaved work show their own save dialog; nothing is force-killed.
 
 osascript <<'APPLESCRIPT'
 set keepList to {"com.apple.finder"}

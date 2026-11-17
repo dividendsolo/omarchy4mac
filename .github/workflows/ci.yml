@@ -1,38 +1,29 @@
 name: CI
 
-# CI runs once per PR, right before the merge, and the merge waits for it. It
-# starts by hand (workflow_dispatch) on the PR branch, and the merge happens
-# only when it passes. Pushes do not run it, to save Actions minutes.
 on:
   workflow_dispatch:
 
 jobs:
   check:
-    # A GitHub macOS runner: this is a Mac desktop, and its scripts use the Mac's own tools (BSD date). The Jog
-    # runners take private repos only, and this repo is public.
     runs-on: macos-latest
     permissions:
       contents: read
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5.1.0
+      - uses: oven-sh/setup-bun@v2.2.0
+      - name: The comment ban (tools/no-comments)
+        run: bin/no-comments
       - name: Lockfile check (every action pinned to a commit)
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh extension list | grep -q 'gh-actions-lock' || gh extension install github/gh-actions-lock --pin v0.4.1
           gh actions-lock --verify
-      # tests/starship-test.sh renders the prompt with the real starship;
-      # tests/menu-test.sh and tests/console-test.sh run hammerspoon/init.lua in luajit.
       - run: brew install starship luajit
       - run: for t in tests/*-test.sh; do echo "== $t"; bash "$t" || exit 1; done
 
   docs:
-    # The docs page (docs-site/) is a Next.js app that Vercel builds from this
-    # directory alone, so the build runs here too: a change that breaks the page
-    # fails before the merge. tests/docs-links-test.sh (the check job) covers the
-    # links, and tests/docs-content-test.sh covers the two pages that come from
-    # CHANGELOG.md and docs/parity-v4.md.
     runs-on: macos-latest
     permissions:
       contents: read

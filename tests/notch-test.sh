@@ -1,15 +1,4 @@
 #!/bin/bash
-# Checks that nothing on the bar is drawn under the notch of a MacBook's
-# built-in screen (#70): every left item ends before the notch, every right
-# item fits between the notch and the screen's right edge, and no centre item
-# draws there. The real sketchybarrc and the agents, clock and bluetooth
-# plugins run against a stub sketchybar that logs every call, with the
-# built-in screen as arrangement 3 and two external screens as 1 and 2. The
-# log is then laid out with the widths in tests/fixtures/notch.json (measured
-# on the live bar; the notch from NSScreen.auxiliaryTop*Area), so the test
-# runs on a Mac without a notch, and without SketchyBar, too.
-#
-#   tests/notch-test.sh
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$HERE/.."
@@ -20,22 +9,17 @@ mkdir -p "$TMP/bin" "$TMP/repo/bin" "$TMP/home/.config/theme-switcher" "$TMP/hom
 cp -R "$ROOT/sketchybar" "$TMP/repo/sketchybar"
 CONFIG="$TMP/repo/sketchybar"
 printf 'export FG=0xffffffff ACCENT=0xff00ff00 MAGENTA=0xffff00ff BLUE=0xff0000ff CYAN=0xff00ffff YELLOW=0xffffff00 GREEN=0xff00ff00 COMMENT=0xff888888 SURFACE=0xff222222 BG=0xff000000 BG_TRANS=0xcc000000\n' > "$CONFIG/colors.sh"
-# The display lookup: built-in is arrangement 3, the externals 1 and 2.
 { echo 'BUILTIN=3; OTHERS=1,2; DISPLAYS_OK=1'
   sed -n '/^center_item()/,/^}/p' "$ROOT/sketchybar/plugins/displays.sh"; } > "$CONFIG/plugins/displays.sh"
 fixture() { python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["worst"][sys.argv[2]])' "$FIXTURE" "$1"; }
 fixture theme > "$TMP/home/.config/theme-switcher/current"
 
-# sketchybar logs each call as one JSON array; queries answer empty.
-cat > "$TMP/bin/sketchybar" <<'STUB'
-#!/bin/bash
+{ printf '#!/bin/bash\n'; cat; } > "$TMP/bin/sketchybar" <<'STUB'
 [ "$1" = --query ] && { echo '{}'; exit 0; }
 python3 -c 'import json,sys; print(json.dumps(sys.argv[1:]))' "$@" >> "$NOTCH_TEST_LOG"
 STUB
 for tool in aerospace osascript networksetup; do printf '#!/bin/bash\n' > "$TMP/bin/$tool"; done
-# Claude signed in at its widest; Codex and Grok signed out.
-cat > "$TMP/repo/bin/omarchy-agent-usage" <<STUB
-#!/bin/bash
+{ printf '#!/bin/bash\n'; cat; } > "$TMP/repo/bin/omarchy-agent-usage" <<STUB
 [ "\$1" = claude ] || exit 1
 echo '$(fixture claude)'
 STUB
@@ -43,7 +27,7 @@ chmod +x "$TMP/bin/"* "$TMP/repo/bin/"*
 export PATH="$TMP/bin:$PATH" HOME="$TMP/home" CONFIG_DIR="$CONFIG" NOTCH_TEST_LOG="$TMP/log"
 export MEDIA_CONTROL="$TMP/none"
 
-bar() { # bar: build the bar and run the plugins whose items move per screen
+bar() {
   : > "$TMP/log"
   bash "$CONFIG/sketchybarrc" >/dev/null 2>&1
   for item in agents.claude agents.codex agents.grok bluetooth wifi; do
@@ -52,7 +36,7 @@ bar() { # bar: build the bar and run the plugins whose items move per screen
   NAME=clock CLOCK_NOW=1794423600 bash "$CONFIG/plugins/clock.sh" >/dev/null 2>&1
 }
 
-layout() { # layout <case>: one line per item drawn in the wrong place, then "ok"
+layout() {
   python3 - "$FIXTURE" "$TMP/log" "$1" <<'PY'
 import json, sys
 f = json.load(open(sys.argv[1])); case = sys.argv[3]; worst = f["worst"]
@@ -71,7 +55,6 @@ for call in map(json.loads, open(sys.argv[2])):
         while i < len(call) and not call[i].startswith("--"):
             k, _, v = call[i].partition("="); target[k] = v; i += 1
 
-# The day at its widest: a Friday with the stand-up timer, music, a long app name.
 for name, label in (("standup", None), ("sunset", worst["sunset"]), ("media", worst["media"]),
                     ("media_next", None), ("front_app", worst["front_app"])):
     items[name]["drawing"] = "on"
@@ -108,7 +91,7 @@ print("ok")
 PY
 }
 
-check() { # check <description> <expected> <actual>
+check() {
   if [[ "$3" == "$2" ]]; then echo "  ok    $1"
   else echo "  FAIL  $1:"; sed 's/^/          /' <<<"$3"; fails=$((fails + 1)); fi
 }

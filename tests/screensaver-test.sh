@@ -1,30 +1,17 @@
 #!/bin/bash
-# Checks bin/omarchy-screensaver: tty echo is off from startup, not only while
-# `read -s` waits, so a key that ends it never flashes in the corner
-# (Omarchy 4.5, omacom/omarchy#16596). Runs the script in a pty (python3) and
-# reads the tty's ECHO flag while the script waits for the window size, before
-# any `read`.
-#
-#   tests/screensaver-test.sh
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 BIN="$HERE/../bin/omarchy-screensaver"
 fails=0
-check() { # check <description> <expected> <actual>
+check() {
   if [[ "$3" == "$2" ]]; then echo "  ok    $1"
   else echo "  FAIL  $1 (expected '$2', got '$3')"; fails=$((fails + 1)); fi
 }
 command -v python3 >/dev/null || { echo "FAIL: python3 is not installed"; exit 1; }
 
 T="$(mktemp -d)"; mkdir -p "$T/home/.local/bin"
-# A stand-in ttfx (the CI runner has none): without it the script's loop spins
-# on "command not found" and floods the pty.
 printf '#!/bin/sh\nexec sleep 30\n' > "$T/home/.local/bin/ttfx"; chmod +x "$T/home/.local/bin/ttfx"
 
-# A 24x80 pty keeps the script in its size wait for 2 s: no read runs then.
-# The parent drains the pty (macOS blocks a writer on a small, full pty buffer)
-# and kills the whole session with SIGKILL if SIGTERM does not end it in 2 s,
-# so the test can never hang the run.
 ECHO_STATE="$(HOME="$T/home" python3 - "$BIN" <<'PY'
 import fcntl, os, pty, select, signal, struct, sys, termios, time
 master, slave = pty.openpty()

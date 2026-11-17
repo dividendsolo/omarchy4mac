@@ -1,21 +1,11 @@
 #!/bin/bash
-# The docs site has no front page of its own: it only repeated the README, so
-# James had it deleted at Owner QA (#73). This checks what replaced it:
-#
-#   - there is no front page (docs-site/app/(home)/ is gone)
-#   - `/` redirects to /docs (docs-site/next.config.mjs)
-#   - the desktop screenshot is the first thing on the first docs page
-#   - the site's address is https://omarchy4mac.dividendsolo.com: no vercel.app
-#     address is left anywhere in the repo, and the README links to the domain
-#
-#   tests/docs-home-test.sh
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$HERE/.." && pwd)"
 SITE="$ROOT/docs-site"
 fails=0
 
-check() { # check <description> <expected> <actual>
+check() {
   if [[ "$3" == "$2" ]]; then echo "  ok    $1"
   else echo "  FAIL  $1 (expected '$2', got '$3')"; fails=$((fails + 1)); fi
 }

@@ -1,21 +1,5 @@
 #!/bin/bash
-#
-# theme-appearance-watch — invoked by theme-appearance-listener whenever macOS
-# posts AppleInterfaceThemeChangedNotification (and once at listener startup).
-#
-# It compares the CURRENT THEME's appearance against the CURRENT SYSTEM
-# appearance and switches to a random matching theme when they disagree.
-#
-# It deliberately does NOT remember the last seen mode. The old version did,
-# and a single missed or mistimed notification left that memory stale — after
-# which every later flip looked like "no change" and the theme stayed stuck on
-# the wrong appearance until some future flip happened to resync it. Comparing
-# against reality instead means any notification at all repairs the mismatch.
 
-# launchd's default PATH lacks /opt/homebrew/bin, so `theme`'s `env bash`
-# shebang would resolve to the system bash 3.2 and break on empty arrays
-# ~/.local/bin holds `hermes`; without it the theme script skips the Hermes
-# skin step in silence and every Hermes session keeps the old skin.
 export PATH="$HOME/.local/bin:/opt/homebrew/bin:/usr/bin:/bin"
 
 THEME="$HOME/.local/bin/theme"
@@ -23,15 +7,12 @@ STATE="$HOME/.config/theme-switcher/current"
 
 log() { echo "$(date '+%H:%M:%S') $*"; }
 
-# nothing chosen yet → don't surprise-switch, `theme` hasn't been run
 [[ -s "$STATE" ]] || exit 0
 
 want="$("$THEME" --mode)"
 have="$("$THEME" --appearance 2>/dev/null)" || exit 0
 [[ "$want" == "$have" ]] && exit 0
 
-# the notification can beat the OS finishing its transition — settle, then
-# re-read before acting, so we never switch on a half-applied appearance
 sleep 1
 settled="$("$THEME" --mode)"
 if [[ "$settled" != "$want" ]]; then
@@ -40,10 +21,6 @@ if [[ "$settled" != "$want" ]]; then
 fi
 [[ "$want" == "$have" ]] && exit 0
 
-# A flip that lands while an earlier switch still holds the lock is ignored by
-# `theme`, and the theme then stays on the old appearance (light → dark 9s
-# apart, 2026-10-25). So wait for the lock, switch, and re-check until the
-# theme matches the appearance.
 LOCK="$HOME/.config/theme-switcher/lock"
 for _ in 1 2 3; do
   for _ in $(seq 60); do [[ -d "$LOCK" ]] || break; sleep 0.5; done

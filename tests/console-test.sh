@@ -1,17 +1,11 @@
 #!/bin/bash
-# Checks the Quake-style agent console (Omarchy 4.5, Super + Grave, #27):
-# the panel geometry in hammerspoon/init.lua, run under Lua, and the wiring
-# (Hammerspoon owns ⌘` and ⌘⇧`, AeroSpace no longer binds them, and a new
-# console starts the default agent). Needs `luajit` (brew install luajit), or `lua`.
-#
-#   tests/console-test.sh
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 LUA_FILE="${HAMMERSPOON_LUA:-$HERE/../hammerspoon/init.lua}"
 TOML="${AEROSPACE_TOML:-$HERE/../aerospace/aerospace.toml}"
 fails=0
 
-check() { # check <description> <expected> <actual>
+check() {
   if [[ "$3" == "$2" ]]; then echo "  ok    $1"
   else echo "  FAIL  $1 (expected '$2', got '$3')"; fails=$((fails + 1)); fi
 }
@@ -19,10 +13,8 @@ check() { # check <description> <expected> <actual>
 LUA_BIN="$(command -v luajit || command -v lua || command -v lua5.4)" ||
   { echo "FAIL: luajit is not installed (brew install luajit)"; exit 1; }
 
-# consoleFrame is a pure function between two marker lines; run that exact code.
-FN="$(sed -n '/^-- console-frame: begin/,/^-- console-frame: end/p' "$LUA_FILE")"
-frame() { # frame <x> <y> <w> <h> -> "x y w h" of the console panel
-  # On stdin, not -e: PUC Lua reads an -e chunk that starts with "--" as an option.
+FN="$(sed -n '/^local function consoleFrame(/,/^end$/p' "$LUA_FILE")"
+frame() {
   printf '%s\n' "$FN
 local f = consoleFrame({ x = $1, y = $2, w = $3, h = $4 })
 print(string.format('%d %d %d %d', f.x, f.y, f.w, f.h))" | "$LUA_BIN" - 2>&1
@@ -33,9 +25,8 @@ check "wide screen: centered 2:1 panel on the top half" "500 0 1000 500" "$(fram
 check "narrow screen: full width, top half" "0 0 800 600" "$(frame 0 0 800 1200)"
 check "second screen: placed in that screen's frame" "2060 25 1000 500" "$(frame 1560 25 2000 1000)"
 
-# toggleConsole between its markers, run with stubs for what it calls.
-TOGGLE="$(sed -n '/^-- console-toggle: begin/,/^-- console-toggle: end/p' "$LUA_FILE")"
-launches() { # launches <console state> -> how many Ghosttys one press starts
+TOGGLE="$(sed -n '/^local function toggleConsole(/,/^end$/p' "$LUA_FILE")"
+launches() {
   printf '%s\n' "consoles = { $1 }
 local n = 0
 function launchConsole() n = n + 1 end

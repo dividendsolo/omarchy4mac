@@ -6,6 +6,7 @@ workflows:
     '.github/workflows/ci.yml':
         - 'actions/checkout@v5.1.0'
         - 'actions/setup-node@v4.4.0'
+        - 'oven-sh/setup-bun@v2.2.0'
 dependencies:
     'actions/checkout@v5.1.0':
         ref: 'v5.1.0'
@@ -17,3 +18,8 @@ dependencies:
         commit: 'sha1-49933ea5288caeca8642d1e84afbd3f7d6820020'
         owner_id: 44036562
         repo_id: 189476904
+    'oven-sh/setup-bun@v2.2.0':
+        ref: 'v2.2.0'
+        commit: 'sha1-0c5077e51419868618aeaa5fe8019c62421857d6'
+        owner_id: 108928776
+        repo_id: 512644635

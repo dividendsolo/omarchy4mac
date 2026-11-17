@@ -1,37 +1,29 @@
 #!/bin/bash
-# Checks the Friday sunset item (sketchybar/plugins/sunset.sh): on Friday the bar
-# shows the sunset time, as a reminder to stop working.
-# sketchybar and curl are stubs on PATH, so the running bar is never touched.
-#
-#   tests/sunset-test.sh
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 PLUGIN="$HERE/../sketchybar/plugins/sunset.sh"
 fails=0
 TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
 mkdir -p "$TMP/bin" "$TMP/config/plugins"
-# colors.sh is written by bin/theme and is not in git, so the test brings its own.
 printf 'export RED="0xffff5f4a"\nexport ORANGE="0xffff6a3d"\n' > "$TMP/config/colors.sh"
 cp "$HERE/../sketchybar/plugins/displays.sh" "$TMP/config/plugins/"
 CONFIG_DIR="$TMP/config"
-cat > "$TMP/bin/sketchybar" <<'STUB'
-#!/bin/bash
+{ printf '#!/bin/bash\n'; cat; } > "$TMP/bin/sketchybar" <<'STUB'
 [[ "$1" == "--query" ]] && { echo '[{"arrangement-id": 1, "DirectDisplayID": 0}]'; exit 0; }
 echo "$*" >> "$SUNSET_TEST_LOG"
 STUB
-cat > "$TMP/bin/curl" <<'STUB'
-#!/bin/bash
+{ printf '#!/bin/bash\n'; cat; } > "$TMP/bin/curl" <<'STUB'
 echo "$*" >> "${CURL_TEST_LOG:-/dev/null}"
 echo "${SUNSET_TEST_WTTR}"
 STUB
 chmod +x "$TMP/bin/"*
 
-check() { # check <description> <expected substring> <actual>
+check() {
   if [[ "$3" == *"$2"* ]]; then echo "  ok    $1"
   else echo "  FAIL  $1 (expected '$2' in '$3')"; fails=$((fails + 1)); fi
 }
 
-run() { # run <name> <YYYY-MM-DD HH:MM> <wttr sunset HH:MM:SS>: prints what the plugin set
+run() {
   : > "$TMP/log"; rm -f "$TMP/cache"
   PATH="$TMP/bin:$PATH" CONFIG_DIR="$CONFIG_DIR" NAME="$1" SUNSET_NOW="$2" \
     SUNSET_CACHE="$TMP/cache" SUNSET_TEST_WTTR="$3" SUNSET_TEST_LOG="$TMP/log" bash "$PLUGIN"

@@ -1,10 +1,4 @@
 #!/bin/zsh
-# Default coding agent (v4: Setup > Defaults > Agent, `omarchy default agent`).
-# No argument: print the pick (Claude Code when none is made yet). With a name:
-# store it where v4 does, ~/.config/omarchy/defaults/agent. The output line is
-# "title|||body" so the Hammerspoon menu can show it as a notification.
-# An agent that is not installed is installed first, in a Ghostty window you
-# can watch (`--install`, Omarchy 4.5); the pick changes only if that works.
 export PATH="$HOME/.local/bin:$HOME/.bun/bin:${HOMEBREW_PREFIX:-/opt/homebrew}/bin:/usr/local/bin:$PATH"
 agent_file="$HOME/.config/omarchy/defaults/agent"
 
@@ -30,7 +24,6 @@ case "$1" in
   *) echo "Usage: omarchy-default-agent [--install] [claude|codex|grok|hermes|openclaw]" >&2; exit 1 ;;
 esac
 
-# nvm installs (codex) live outside the fixed PATH above, so ask a login shell.
 if ! command -v "$agent" >/dev/null && ! zsh -lic "command -v $agent" >/dev/null 2>&1; then
   if [[ $installing == false ]]; then
     open -na Ghostty --args -e "$HOME/.local/bin/omarchy-tui" "$HOME/.local/bin/omarchy-default-agent" --install "$agent"

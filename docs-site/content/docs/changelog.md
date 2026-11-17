@@ -9,6 +9,20 @@ dotfiles repo; entries before that date are those exports. Since then this
 repo is the only source: every change lands here by pull request, and the
 maintainer's Mac runs from a clone of it, the same as yours.
 
+## 2026-11-17
+
+- No comments anywhere in the repository, and CI fails on a new one (#99).
+  `bin/no-comments` is the shared checker (a copy of agent-stack's
+  `tools/no-comments/`, carried by the repo and run in the check job of
+  `ci.yml`, from `tests/no-comments-test.sh`, and by hand). That test also runs
+  the checker's own tests, so a comment the checker itself misses fails the
+  suite. Knowledge the comments carried lives in `CONTEXT.md` now; the
+  why-history lives in the commits. Three scripts printed their own header
+  comment for `--help` (`theme`, `omarchy-appearance`, `uninstall.sh`), so each
+  prints the same text from a `usage()` function, and the tests that sliced a
+  block of `hammerspoon/init.lua` between two comment markers slice a named
+  function instead (`consoleFrame`, `toggleConsole`, `bindDictation`).
+
 ## 2026-11-13
 
 - Every GitHub Action these workflows use is pinned to a commit, and CI now

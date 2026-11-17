@@ -1,10 +1,4 @@
 #!/usr/bin/env bash
-# Cycle to the next wallpaper for the active theme.
-# Prints "TITLE|||BODY" to stdout for Hammerspoon.
-# The folder this script really lives in: ~/.local/bin/<name> is a link into the
-# clone, and a helper added to bin/ later has no link there until install.sh
-# runs again. A git pull must be enough (2026-11-12: every theme switch skipped
-# the wallpaper, because ~/.local/bin had no omarchy-bg-set).
 self="$0"
 while [[ -L "$self" ]]; do
   link="$(readlink "$self")"
@@ -27,14 +21,12 @@ shopt -s nullglob nocaseglob
 if [ -n "$THEME" ]; then
   files=("$DIR/${THEME}_"*.{jpg,jpeg,png,heic,webp,mp4,mov,m4v})
 fi
-# Fall back to all wallpapers if the theme has none
 if [ ${#files[@]} -eq 0 ]; then
   files=("$DIR"/*.{jpg,jpeg,png,heic,webp,mp4,mov,m4v})
 fi
 shopt -u nocaseglob
 [ ${#files[@]} -eq 0 ] && { echo "Wallpaper|||No image or video files in $DIR"; exit 0; }
 
-# Use a per-theme index so cycling stays inside the theme without resetting
 STATE="${STATE_FILE}-${THEME:-all}"
 
 idx=$(cat "$STATE" 2>/dev/null || echo -1)
@@ -42,6 +34,5 @@ idx=$(( (idx + 1) % ${#files[@]} ))
 echo "$idx" > "$STATE"
 
 next="${files[$idx]}"
-# an image, or a video that loops (Omarchy 4.5)
 "$BIN_DIR/omarchy-bg-set" "$next"
 echo "Wallpaper|||$(basename "$next")"

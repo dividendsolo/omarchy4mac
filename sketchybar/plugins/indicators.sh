@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-# State indicators, Omarchy-bar style: shown only while the state is on.
-# Stay awake (caffeinate) and Do Not Disturb (an active Focus assertion).
 source "$CONFIG_DIR/colors.sh"
 source "$CONFIG_DIR/plugins/displays.sh"
 

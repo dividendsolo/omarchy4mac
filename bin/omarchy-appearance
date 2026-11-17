@@ -1,29 +1,18 @@
 #!/usr/bin/env bash
-#
-# omarchy-appearance — Omarchy 4.5's Appearance > Window Transparency / Window Corners on the Mac.
-#
-#   omarchy-appearance transparency [opaque|transparent|glassy]
-#   omarchy-appearance corners      [theme|sharp|rounded]
-#
-# With no value it prints the current choice (the menu's check mark reads it).
-# The choice is saved in ~/.config/omarchy/, so it outlives a restart:
-# sketchybarrc and bordersrc read it whenever they start.
-#
-# Transparency reaches the terminal (Ghostty background-opacity and blur) and
-# the bar (SketchyBar background alpha). Other apps stay opaque: macOS draws
-# them solid, the way Omarchy 4.5 makes apps opaque and leaves terminals
-# see-through. Corners set the JankyBorders style; macOS rounds the windows
-# themselves and no app can change that. "theme" keeps the default round
-# border: Omarchy's themes ship no corners of their own for the Mac to read.
 set -euo pipefail
 
 DIR="$HOME/.config/omarchy"
 GHOSTTY_MAC="$HOME/Library/Application Support/com.mitchellh.ghostty"
 GHOSTTY_XDG="${XDG_CONFIG_HOME:-$HOME/.config}/ghostty"
 
-usage() { sed -n '5,6p' "$0" | sed 's/^# \{0,1\}/usage: /' >&2; exit 1; }
+usage() {
+  cat >&2 <<'USAGE'
+usage: omarchy-appearance transparency [opaque|transparent|glassy]
+usage: omarchy-appearance corners      [theme|sharp|rounded]
+USAGE
+  exit 1
+}
 
-# set_key <file> <key> <value>: one `key = value` line, every old one replaced.
 set_key() {
   if grep -qE "^[[:space:]]*$2[[:space:]]*=" "$1"; then
     K="$2" V="$3" perl -0pi -e 's/^[ \t]*\Q$ENV{K}\E[ \t]*=.*$/$ENV{K} = $ENV{V}/mg' "$1"
@@ -32,7 +21,7 @@ set_key() {
   fi
 }
 
-ghostty() { # ghostty <opacity> <blur>: every config Ghostty reads (bin/theme does the same)
+ghostty() {
   local cfg found=0
   for cfg in "$GHOSTTY_MAC/config" "$GHOSTTY_XDG/config"; do
     [[ -f "$cfg" ]] || continue
@@ -71,7 +60,6 @@ case "$what:$value" in
 esac
 if [[ "$what" == transparency ]]; then
   "$(sketchybar_bin)" --reload >/dev/null 2>&1 || true
-  # Ghostty applies background-opacity on macOS only after a full restart.
   echo "Window transparency: $value. Quit and reopen Ghostty to see it."
 else
   "$(brew_bin)" services restart borders >/dev/null 2>&1 || true
