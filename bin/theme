@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
+export PATH="$PATH:/opt/homebrew/bin:/usr/local/bin"
 
 usage() {
   cat <<'USAGE'
@@ -480,7 +481,7 @@ apply_sketchybar() {
 
 reload_sketchybar() {
   if pgrep -x sketchybar >/dev/null 2>&1; then
-    /opt/homebrew/bin/sketchybar --reload >/dev/null 2>&1 \
+    sketchybar --reload >/dev/null 2>&1 \
       && echo "  ${c_dim}sketchybar${c_rst} ↻ reloaded"
   fi
 }

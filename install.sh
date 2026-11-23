@@ -29,7 +29,7 @@ if ! command -v brew >/dev/null 2>&1; then
     echo "    would: run the Homebrew installer, then install every package in the Brewfile"
   else
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    eval "$(/opt/homebrew/bin/brew shellenv)"
+    if [ -x /opt/homebrew/bin/brew ]; then eval "$(/opt/homebrew/bin/brew shellenv)"; else eval "$(/usr/local/bin/brew shellenv)"; fi
   fi
 fi
 
@@ -269,7 +269,7 @@ for kv in "font-family = JetBrainsMono Nerd Font Mono" "font-size = 16" "backgro
 done
 
 say "Syncing Omarchy themes"
-export PATH="$HOME/.local/bin:/opt/homebrew/bin:$PATH"
+export PATH="$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
 run theme --sync
 if [ ! -f "$HOME/.config/theme-switcher/current" ]; then
   say "First theme: tokyo-night"

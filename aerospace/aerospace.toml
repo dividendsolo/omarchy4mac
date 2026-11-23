@@ -13,12 +13,18 @@ default-root-container-orientation = 'auto'
 
 on-focused-monitor-changed = [
   'move-mouse monitor-lazy-center',
-  'exec-and-forget /bin/bash -c "/opt/homebrew/bin/sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$(/opt/homebrew/bin/aerospace list-workspaces --focused)"'
+  'exec-and-forget /bin/bash -c "sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$(aerospace list-workspaces --focused)"'
 ]
 on-focus-changed = ['move-mouse window-lazy-center']
 
 exec-on-workspace-change = ['/bin/bash', '-c',
-  '/opt/homebrew/bin/sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE']
+  'sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE']
+
+[exec]
+inherit-env-vars = true
+
+[exec.env-vars]
+PATH = '/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/local/sbin:${PATH}'
 
 [workspace-to-monitor-force-assignment]
 1 = ['\(1\)$', '\(2\)$', 'VA2446', 'built-in']
@@ -159,11 +165,11 @@ cmd-ctrl-period = 'exec-and-forget open -a HandBrake'
 
 cmd-ctrl-e = 'exec-and-forget open "raycast://extensions/raycast/emoji-symbols/search-emoji-symbols"'
 cmd-ctrl-alt-e = 'exec-and-forget open -a Clock'
-cmd-ctrl-alt-f = 'exec-and-forget /opt/homebrew/bin/sketchybar --bar hidden=toggle'
+cmd-ctrl-alt-f = 'exec-and-forget sketchybar --bar hidden=toggle'
 cmd-shift-ctrl-a = 'exec-and-forget open -na Ghostty --args -e $HOME/.local/bin/omarchy-agent'
 cmd-ctrl-z = '''exec-and-forget osascript -e 'tell application "System Events" to key code 28 using {option down, command down}' '''
 
-cmd-esc = 'exec-and-forget /opt/homebrew/bin/hs -c "omarchyMenu(\"System\")"'
+cmd-esc = 'exec-and-forget hs -c "omarchyMenu(\"System\")"'
 cmd-ctrl-v = 'exec-and-forget open "raycast://extensions/raycast/clipboard-history/clipboard-history"'
 
 cmd-shift-semicolon = 'mode service'

@@ -1,5 +1,8 @@
 require("hs.ipc")
 
+local BREW_PATH = "/opt/homebrew/bin:/usr/local/bin"
+local function withBrew(cmd) return "export PATH=" .. BREW_PATH .. ":$PATH; " .. cmd end
+
 local bindings = {
   { "SUPER + SPACE",            "Raycast" },
   { "ALT + SPACE",              "Dictation on / off (Hex)" },
@@ -262,7 +265,7 @@ end):start()
 
 local showAppsMenu, showThemeChooser, showOmarchyMenu, reloadIfWhole
 
-local function sh(cmd) return function() hs.execute(cmd, true) end end
+local function sh(cmd) return function() hs.execute(withBrew(cmd), true) end end
 local function app(name) return function() hs.application.launchOrFocus(name) end end
 local function url(u) return sh("open '" .. u .. "'") end
 local function settings(pane) return sh([[open "x-apple.systempreferences:]] .. pane .. [["]]) end
@@ -309,7 +312,7 @@ local MENU = {
     { text = "Background", sub = "Next image or video for this theme", action = toast("omarchy-cycle-wallpaper") },
     { text = "Font", sub = "Terminal font (Ghostty config)", action = nvimEdit(os.getenv("HOME") .. "/Library/Application Support/com.mitchellh.ghostty/config") },
     { text = "Menu Bar", sub = "SketchyBar and the macOS menu bar", children = {
-      { text = "Hide or Show", sub = "Hide or show SketchyBar", action = sh("/opt/homebrew/bin/sketchybar --bar hidden=toggle") },
+      { text = "Hide or Show", sub = "Hide or show SketchyBar", action = sh("sketchybar --bar hidden=toggle") },
       { text = "Config", sub = "Edit sketchybarrc", action = nvimEdit(D .. "/sketchybar/sketchybarrc") },
       { text = "macOS Menu Bar", sub = "Control Center settings", action = settings("com.apple.ControlCenter-Settings.extension") },
     }},
@@ -333,9 +336,9 @@ local MENU = {
     }},
     { text = "Dock", sub = "Desktop & Dock settings", action = settings("com.apple.Desktop-Settings.extension") },
     { text = "Workspace Layout", sub = "AeroSpace layout of this workspace", children = {
-      { text = "Tiles / Accordion", sub = "alt-a", action = sh("/opt/homebrew/bin/aerospace layout accordion tiles") },
-      { text = "Split Direction", sub = "alt-j", action = sh("/opt/homebrew/bin/aerospace layout tiles horizontal vertical") },
-      { text = "Float / Tile", sub = "alt-s", action = sh("/opt/homebrew/bin/aerospace layout floating tiling") },
+      { text = "Tiles / Accordion", sub = "alt-a", action = sh("aerospace layout accordion tiles") },
+      { text = "Split Direction", sub = "alt-j", action = sh("aerospace layout tiles horizontal vertical") },
+      { text = "Float / Tile", sub = "alt-s", action = sh("aerospace layout floating tiling") },
     }},
     { text = "Animations", sub = "Theme intros and reduce motion", children = {
       { text = "Theme Intros", sub = "Play or skip a theme's intro video", action = toast("omarchy-toggle-intros") },
@@ -360,7 +363,7 @@ local MENU = {
     { text = "Toggle", sub = "Switch something on or off", children = {
       { text = "Stay Awake", sub = "caffeinate on/off", action = sh([[pgrep -x caffeinate >/dev/null && pkill -x caffeinate || (caffeinate -dimsu &)]]) },
       { text = "Notifications", sub = "Do Not Disturb", action = sh([[shortcuts run "Toggle Do Not Disturb"]]) },
-      { text = "Menu Bar", sub = "Hide or show SketchyBar", action = sh("/opt/homebrew/bin/sketchybar --bar hidden=toggle") },
+      { text = "Menu Bar", sub = "Hide or show SketchyBar", action = sh("sketchybar --bar hidden=toggle") },
       { text = "Gaming Mode", sub = "Quit apps, Tailscale down, Steam", action = toast("gaming-mode") },
       { text = "Quit All", sub = "Quit every Dock app, keep Finder", action = sh("~/.local/bin/quit-all") },
       { text = "Screensaver", sub = "Enable or disable the idle screensaver", action = toast("omarchy-toggle-screensaver") },
@@ -430,10 +433,10 @@ local MENU = {
     { text = "macOS", sub = "Software Update", action = settings("com.apple.Software-Update-Settings.extension") },
     { text = "Themes", sub = "theme --sync", action = ghostty("~/.local/bin/theme --sync") },
     { text = "Config", sub = "Reload a service", children = {
-      { text = "AeroSpace", sub = "reload-config", action = sh("/opt/homebrew/bin/aerospace reload-config") },
-      { text = "SketchyBar", sub = "--reload", action = sh("/opt/homebrew/bin/sketchybar --reload") },
+      { text = "AeroSpace", sub = "reload-config", action = sh("aerospace reload-config") },
+      { text = "SketchyBar", sub = "--reload", action = sh("sketchybar --reload") },
       { text = "Hammerspoon", sub = "hs.reload()", action = function() reloadIfWhole() end },
-      { text = "Borders", sub = "brew services restart", action = sh("/opt/homebrew/bin/brew services restart borders") },
+      { text = "Borders", sub = "brew services restart", action = sh("brew services restart borders") },
     }},
   }},
   { text = "About", sub = "fastfetch", action = ghostty("fastfetch") },
@@ -750,7 +753,7 @@ end
 local function place(n, app, win)
   local c, id = consoles[n], win:id()
   hs.execute(string.format(
-    'A=/opt/homebrew/bin/aerospace; $A layout --window-id %d floating; $A move-node-to-workspace --window-id %d "$($A list-workspaces --focused)"',
+    'A=aerospace; $A layout --window-id %d floating; $A move-node-to-workspace --window-id %d "$($A list-workspaces --focused)"',
     id, id))
   local screen = hs.screen.mainScreen()
   if c.dim then c.dim:delete() end
@@ -829,6 +832,6 @@ end):start()
 
 SteamWatcher = hs.application.watcher.new(function(name, event, app)
   if event == hs.application.watcher.terminated and name == "Steam" then
-    hs.execute("/opt/homebrew/bin/sketchybar --bar hidden=off")
+    hs.execute(withBrew("sketchybar --bar hidden=off"))
   end
 end):start()
