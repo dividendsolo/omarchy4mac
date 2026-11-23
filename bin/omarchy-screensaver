@@ -1,5 +1,5 @@
 #!/bin/bash
-export PATH="$HOME/.cargo/bin:$HOME/.local/bin:/opt/homebrew/bin:$PATH"
+export PATH="$HOME/.cargo/bin:$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
 TEXT="$HOME/.config/omarchy/branding/screensaver.txt"
 [[ -f "$TEXT" ]] || { mkdir -p "$(dirname "$TEXT")"; cp "$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)/omarchy/screensaver.txt" "$TEXT"; }
 

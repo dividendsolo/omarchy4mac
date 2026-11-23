@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+export PATH="$PATH:/opt/homebrew/bin:/usr/local/bin"
+
 PLUGIN_DIR="$CONFIG_DIR/plugins"
 source "$CONFIG_DIR/colors.sh"
 
@@ -47,7 +49,7 @@ sketchybar --add item logo left \
                  icon.padding_right=8 \
                  label.drawing=off \
                  background.drawing=off \
-                 click_script="/opt/homebrew/bin/hs -c 'omarchyMenu()'"
+                 click_script="hs -c 'omarchyMenu()'"
 
 for sid in 1 2 3 4 5; do
   sketchybar --add item space."$sid" left \
@@ -57,7 +59,7 @@ for sid in 1 2 3 4 5; do
                    label.drawing=off \
                    background.color="$SURFACE" \
                    background.drawing=off \
-                   click_script="/opt/homebrew/bin/aerospace workspace $sid" \
+                   click_script="aerospace workspace $sid" \
                    script="$PLUGIN_DIR/aerospace.sh"
 done
 
@@ -143,7 +145,7 @@ sketchybar --add item updates center \
                  drawing=off \
                  update_freq=21600 \
                  script="$PLUGIN_DIR/updates.sh" \
-                 click_script="open -na Ghostty --args -e $HOME/.local/bin/omarchy-tui sh -c 'brew update && brew upgrade; /opt/homebrew/bin/sketchybar --trigger brew_upgraded'" \
+                 click_script="open -na Ghostty --args -e $HOME/.local/bin/omarchy-tui sh -c 'brew update && brew upgrade; sketchybar --trigger brew_upgraded'" \
            --subscribe updates system_woke display_change brew_upgraded
 
 sketchybar --add item theme_name center \

@@ -36,7 +36,7 @@ check "⌘⌃⌥C takes a screenshot (⇧⌘4)" \
   "$(key cmd-ctrl-alt-c | sed 's/ *$//')"
 check "⌘⌃⌥E opens the world clock" 'exec-and-forget open -a Clock' "$(key cmd-ctrl-alt-e)"
 check "⌘⌃⌥F toggles the full screen desktop" \
-  'exec-and-forget /opt/homebrew/bin/sketchybar --bar hidden=toggle' "$(key cmd-ctrl-alt-f)"
+  'exec-and-forget sketchybar --bar hidden=toggle' "$(key cmd-ctrl-alt-f)"
 
 PARITY="${PARITY:-$HERE/../docs-site/content/docs/parity.mdx}"
 echo "the parity page's table:"

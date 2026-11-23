@@ -5,6 +5,16 @@ dotfiles repo; entries before that date are those exports. Since then this
 repo is the only source: every change lands here by pull request, and the
 maintainer's Mac runs from a clone of it, the same as yours.
 
+## 2026-11-23
+
+- Intel Macs: Homebrew lives in `/usr/local` there, not `/opt/homebrew`, and
+  the port called several tools by their Apple Silicon path alone. On an
+  Intel Mac the bar did not follow workspace changes, and the full screen
+  key, the System menu key and several menu items did nothing. Every call now
+  uses the command name, and AeroSpace, Hammerspoon, SketchyBar and the
+  scripts search both Homebrew folders. `install.sh` also finds a Homebrew it
+  just installed on an Intel Mac. Not yet run on a real Intel Mac.
+
 ## 2026-11-17
 
 - omarchy4mac tracks Omarchy **4.5.0**. `OMARCHY_VERSION` says 4.5.0 and
