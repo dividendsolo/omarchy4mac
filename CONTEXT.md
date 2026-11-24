@@ -165,5 +165,10 @@ A skipped test is a failure: the checker's `vitest.no-skip.ts` fails the run.
   The actions are pinned in `actions.lock` and `gh actions-lock --verify` fails
   a workflow that adds an unpinned one. Run
   `vps/scripts/actions-lock.py lock .` in the repo after adding an action.
-- Deployment: the docs site is a Vercel project built from `docs-site/`. There
-  is no server; everything else runs on the Mac.
+- Deployment: the docs site is the Vercel project `omarchy4mac-docs` on the
+  `Dividend Solo's projects` team, connected to `dividendsolo/omarchy4mac` with
+  `docs-site` as the root directory and `main` as the production branch, so a
+  merge to `main` deploys https://omarchy4mac.dividendsolo.com by itself, and a
+  push to another branch builds a preview. Never hand-deploy the site: a `vercel
+  deploy --prod` from `docs-site/` takes the production alias off the Git
+  connection. There is no server; everything else runs on the Mac.

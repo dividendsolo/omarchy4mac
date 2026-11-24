@@ -7,6 +7,11 @@ maintainer's Mac runs from a clone of it, the same as yours.
 
 ## 2026-11-24
 
+- The docs site publishes by itself. The Vercel project `omarchy4mac-docs` had
+  no Git connection, so the documentation of 2026-11-13 never went live until
+  a hand deploy. It is connected to this repository now, with `docs-site` as
+  the root directory and `main` as the production branch, so a merge to main
+  deploys https://omarchy4mac.dividendsolo.com with no hand deploy.
 - VLC opens tiled on workspace 5 instead of floating, so ⌥F fills the
   screen below the bar the way it does on Omarchy. A floating window could not
   go full screen, and macOS full screen drew the video under the bar.

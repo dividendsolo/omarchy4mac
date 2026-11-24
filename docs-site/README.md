@@ -47,13 +47,12 @@ backticks, as the keybinding tables do.
 
 ## Deploy
 
-Vercel, on the `Dividend Solo's projects` team, project `omarchy4mac-docs`,
-with this directory as the project root:
+Vercel builds this directory on every push to `main`, so a merge deploys
+https://omarchy4mac.dividendsolo.com by itself; a push to another branch builds a
+preview. The project is `omarchy4mac-docs` on the `Dividend Solo's projects`
+team, connected to `dividendsolo/omarchy4mac` with this directory as the root
+directory. Never hand-deploy the site. The repo root's `CONTEXT.md` holds the
+same fact with the rest of the repo's facts.
 
-```sh
-cd docs-site && npx vercel deploy --prod
-```
-
-The project is linked in `.vercel/` (gitignored). Nothing here needs an env
-var; `NEXT_PUBLIC_SITE_URL` overrides the Open Graph address on a custom
-domain.
+Nothing here needs an env var; `NEXT_PUBLIC_SITE_URL` overrides the Open Graph
+address on a custom domain.
