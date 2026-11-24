@@ -222,7 +222,7 @@ run = 'layout floating'
 
 [[on-window-detected]]
 if.app-id = 'org.videolan.vlc'
-run = ['layout floating', 'move-node-to-workspace 5']
+run = ['move-node-to-workspace 5']
 
 [[on-window-detected]]
 if.app-id = 'com.valvesoftware.steam'

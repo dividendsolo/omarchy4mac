@@ -128,10 +128,11 @@ A skipped test is a failure: the checker's `vitest.no-skip.ts` fails the run.
   (com.1password.1password, com.agilebits.onepassword7), Bitwarden
   (com.bitwarden.desktop), Raycast (com.raycast.macos), Activity Monitor
   (com.apple.ActivityMonitor), Calculator (com.apple.calculator), Preview
-  (com.apple.Preview), VLC (org.videolan.vlc), Steam (com.valvesoftware.steam),
-  LocalSend (org.localsend.localsendApp) and the screensaver
+  (com.apple.Preview), Steam (com.valvesoftware.steam), LocalSend (org.localsend.localsendApp) and the screensaver
   (com.mitchellh.ghostty, the window whose title is org.omarchy.screensaver).
   Picture-in-Picture floats by window title, so it has no app-id.
+  VLC tiles on workspace 5, so ⌥F fills the screen below the bar; a floating
+  window cannot go full screen in AeroSpace.
   `tests/window-fixes-test.sh` reads this list and fails when a float rule is
   missing from it.
 - Two launchd agents, templated in `launchd/` with `/Users/YOU` paths that

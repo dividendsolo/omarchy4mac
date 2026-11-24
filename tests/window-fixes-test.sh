@@ -121,6 +121,14 @@ PY
 for id in com.1password.1password com.agilebits.onepassword7 com.bitwarden.desktop; do
   check "$id floats" 1 "$(grep -cx "$id" <<<"$floats")"
 done
+vlc_run=$(python3 - "$TOML" <<'PY'
+import sys, tomllib
+for r in tomllib.load(open(sys.argv[1], "rb")).get("on-window-detected", []):
+    if r.get("if", {}).get("app-id") == "org.videolan.vlc":
+        print(" ".join(r["run"] if isinstance(r["run"], list) else [r["run"]]))
+PY
+)
+check "VLC tiles, so ⌥F fills the screen below the bar" "move-node-to-workspace 5" "$vlc_run"
 CONTEXT_MD="${CONTEXT_MD:-$HERE/../CONTEXT.md}"
 listed=$(sed -n '/^- Floats:/,/^$/p' "$CONTEXT_MD")
 missing=""
