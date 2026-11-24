@@ -15,6 +15,7 @@ file aside, puts back the Ghostty/btop/Neovim/Claude/Obsidian/wallpaper settings
 installer snapshotted (if it did), and leaves brew packages alone.
 
 Env: OMARCHY4MAC_DIR overrides the clone location (default ~/code/omarchy4mac).
+     HOMEBREW_PREFIX is searched for brew before /opt/homebrew and /usr/local.
 USAGE
 }
 
@@ -40,12 +41,25 @@ run()  { if [ "$DRY" = 1 ]; then echo "    $*"; else "$@"; fi; }
 
 [ "$DRY" = 1 ] && say "DRY RUN: nothing will be changed"
 
+find_brew() {
+  local b
+  for b in "${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/bin/brew}" /opt/homebrew/bin/brew /usr/local/bin/brew \
+    "$(command -v brew 2>/dev/null || true)"; do
+    if [ -n "$b" ] && [ -x "$b" ]; then echo "$b"; return 0; fi
+  done
+  return 1
+}
+BREW="$(find_brew || true)"
+
 say "Stopping services"
-if command -v brew >/dev/null 2>&1; then
+if [ -n "$BREW" ]; then
   for s in sketchybar borders; do
-    brew list --formula "$s" >/dev/null 2>&1 && run brew services stop "$s" || true
+    "$BREW" list --formula "$s" >/dev/null 2>&1 && run "$BREW" services stop "$s" || true
   done
 fi
+for s in sketchybar borders; do
+  pgrep -x "$s" >/dev/null 2>&1 && run pkill -x "$s" || true
+done
 say "Unloading launchd agents"
 for label in com.omarchy-mac.aerospace-keepalive com.omarchy-mac.theme-appearance; do
   plist="$HOME/Library/LaunchAgents/$label.plist"
@@ -262,16 +276,16 @@ else
   note "kept: clone ($DIR), ~/.config/theme-switcher, ~/.config/omarchy, ~/Pictures/Wallpapers (use --purge)"
 fi
 
-if [ "$PKGS" = 1 ] && command -v brew >/dev/null 2>&1; then
+if [ "$PKGS" = 1 ] && [ -n "$BREW" ]; then
   say "Uninstalling window-manager packages"
   for c in aerospace hammerspoon; do
-    brew list --cask "$c" >/dev/null 2>&1 && run brew uninstall --cask "$c" || true
+    "$BREW" list --cask "$c" >/dev/null 2>&1 && run "$BREW" uninstall --cask "$c" || true
   done
   for f in sketchybar borders; do
-    brew list --formula "$f" >/dev/null 2>&1 && run brew uninstall "$f" || true
+    "$BREW" list --formula "$f" >/dev/null 2>&1 && run "$BREW" uninstall "$f" || true
   done
   for t in felixkratz/formulae nikitabobko/tap; do
-    brew tap | grep -qi "^$t\$" && run brew untap "$t" || true
+    "$BREW" tap | grep -qi "^$t\$" && run "$BREW" untap "$t" || true
   done
 fi
 

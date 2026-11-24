@@ -9,6 +9,14 @@ dotfiles repo; entries before that date are those exports. Since then this
 repo is the only source: every change lands here by pull request, and the
 maintainer's Mac runs from a clone of it, the same as yours.
 
+## 2026-11-24
+
+- `uninstall.sh` left SketchyBar up over the menu bar when `brew` was not on
+  the shell's PATH, which is how a fresh Mac starts after Homebrew's own
+  installer. It now finds Homebrew in `/opt/homebrew` or `/usr/local` the way
+  `install.sh` does, stops SketchyBar and borders, and ends either one that
+  is still running after the stop. `--remove-packages` finds it the same way.
+
 ## 2026-11-23
 
 - Intel Macs: Homebrew lives in `/usr/local` there, not `/opt/homebrew`, and
