@@ -326,7 +326,11 @@ run open -a Hammerspoon
 if [ "$DRY" = 1 ]; then
   echo "    would: reload AeroSpace if it is running, otherwise launch it"
 else
-  pgrep -x AeroSpace >/dev/null && aerospace reload-config || open -a AeroSpace
+  if ! pgrep -x AeroSpace >/dev/null; then
+    open -a AeroSpace
+  elif aerospace list-workspaces --focused >/dev/null 2>&1; then
+    aerospace reload-config
+  fi
 fi
 
 HEX="/Applications/Hex.app/Contents/MacOS/hex"
