@@ -7,6 +7,9 @@ maintainer's Mac runs from a clone of it, the same as yours.
 
 ## 2026-11-24
 
+- VLC opens tiled on workspace 5 instead of floating, so ⌥F fills the
+  screen below the bar the way it does on Omarchy. A floating window could not
+  go full screen, and macOS full screen drew the video under the bar.
 - The number keys go to the workspace with that number again. ⌥1 opens
   workspace 1 on whatever monitor holds it, ⌘⇧1 moves the window to workspace
   1 and follows it, and ⌘⇧⌥1 moves it without following. Since 2026-11-11 the
