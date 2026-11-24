@@ -30,6 +30,25 @@ site under `docs-site/` that Vercel builds from that directory alone: the repo's
 other files are not in that upload, so the two pages that come from the repo are
 committed there.
 
+## Copies
+
+Other places that repeat this repo's facts. The aftermath sweep checks each
+one when a fact changes, and checks the deployed page.
+
+- The score (75% of Omarchy v4.5.0): README.md, `docs-site/content/docs/`,
+  dividendsolo.com `app/omarchy4mac/page.tsx`, `components/HomeSections.tsx`,
+  and the post `content/posts/how-to-make-macos-look-and-feel-like-omarchy.mdx`
+  in dividendsolo/dividend-solo.
+- The desktop pictures: `docs-site/public/omarchy4mac-*.webp`, used by the
+  README and the docs site; dividendsolo.com `public/images/posts/` and
+  `public/omarchy4mac-og.png`.
+- The keys: `aerospace/aerospace.toml`, the docs site, and the cheat sheet
+  `lib/omarchy4mac-cheat-sheet.ts` in dividendsolo/dividend-solo.
+- The one-line pitch: the GitHub repo description, the README's first line,
+  the docs home, dividendsolo.com's project card.
+- The docs site deploys from Vercel project `omarchy4mac-docs`
+  (https://omarchy4mac.dividendsolo.com).
+
 ## Commands
 
 ```sh
