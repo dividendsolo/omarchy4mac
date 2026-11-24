@@ -12,6 +12,11 @@ maintainer's Mac runs from a clone of it, the same as yours.
   installer. It now finds Homebrew in `/opt/homebrew` or `/usr/local` the way
   `install.sh` does, stops SketchyBar and borders, and ends either one that
   is still running after the stop. `--remove-packages` finds it the same way.
+- First install: the "Starting services" step no longer prints "Can't
+  connect to AeroSpace server". AeroSpace runs there before it has its
+  Accessibility permission, so it cannot answer yet. The install now reloads
+  the AeroSpace config only when AeroSpace answers, and AeroSpace reads the
+  config when the Accessibility step restarts it.
 
 ## 2026-11-23
 

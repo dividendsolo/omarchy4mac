@@ -25,10 +25,7 @@ setup() {
   done
   stub pgrep "grep -qx -- \"\${@: -1}\" \"$TMP/running\""
   stub pkill "echo \"pkill \$*\" >> \"$TMP/log\""
-  cat > "$TMP/brew/bin/brew" <<EOF
-#!/bin/bash
-echo "brew \$*" >> "$TMP/log"
-EOF
+  printf '#!/bin/bash\necho "brew $*" >> "%s"\n' "$TMP/log" > "$TMP/brew/bin/brew"
   chmod +x "$TMP/brew/bin/brew"
 }
 
