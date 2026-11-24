@@ -5,6 +5,14 @@ dotfiles repo; entries before that date are those exports. Since then this
 repo is the only source: every change lands here by pull request, and the
 maintainer's Mac runs from a clone of it, the same as yours.
 
+## 2026-11-24
+
+- First install: the "Starting services" step no longer prints "Can't
+  connect to AeroSpace server". AeroSpace runs there before it has its
+  Accessibility permission, so it cannot answer yet. The install now reloads
+  the AeroSpace config only when AeroSpace answers, and AeroSpace reads the
+  config when the Accessibility step restarts it.
+
 ## 2026-11-23
 
 - Intel Macs: Homebrew lives in `/usr/local` there, not `/opt/homebrew`, and
