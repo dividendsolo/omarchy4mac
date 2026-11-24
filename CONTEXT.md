@@ -98,9 +98,10 @@ A skipped test is a failure: the checker's `vitest.no-skip.ts` fails the run.
 ## Desktop behaviour that must not change
 
 - AeroSpace: fullscreen keeps `outer.top`, so it never covers the bar. Five
-  workspaces per monitor; `alt-N` is the N-th workspace of the monitor you are
-  on (`bin/omarchy-workspace` reads `[workspace-to-monitor-force-assignment]`,
-  whose first pattern is a workspace's own monitor). `config-version 2` lists
+  workspaces; `alt-N` goes to workspace N on whatever monitor holds it, and
+  `cmd-shift-N` moves the window there, so the keys match the numbers on the
+  bar (2026-11-24: the per-monitor count from Omarchy 4.5 sent `alt-1` to
+  workspace 2 on the right monitor and 4 on the laptop). `config-version 2` lists
   the bound workspaces instead of guessing them from the bindings.
 - Workspace homes, each with its fallback order when a monitor is missing:
   1 the browser (left monitor, else right, else laptop); 2 Claude and Ghostty

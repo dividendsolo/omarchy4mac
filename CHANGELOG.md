@@ -7,6 +7,12 @@ maintainer's Mac runs from a clone of it, the same as yours.
 
 ## 2026-11-24
 
+- The number keys go to the workspace with that number again. ⌥1 opens
+  workspace 1 on whatever monitor holds it, ⌘⇧1 moves the window to workspace
+  1 and follows it, and ⌘⇧⌥1 moves it without following. Since 2026-11-11 the
+  keys counted the workspaces of the focused monitor instead, so on a second
+  monitor ⌥1 opened workspace 2 and on the laptop it opened workspace 4,
+  which never matched the numbers on the bar. `omarchy-workspace` is gone.
 - `uninstall.sh` left SketchyBar up over the menu bar when `brew` was not on
   the shell's PATH, which is how a fresh Mac starts after Homebrew's own
   installer. It now finds Homebrew in `/opt/homebrew` or `/usr/local` the way
