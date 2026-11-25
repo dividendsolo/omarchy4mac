@@ -1,7 +1,9 @@
 import { docsLlms } from '@/lib/source';
+import { skillLlmsEntry } from '@/lib/skill';
 
 export const revalidate = false;
 
 export async function GET() {
-  return new Response(await docsLlms.index());
+  const index = await docsLlms.index();
+  return new Response(`${index.trimEnd()}\n${skillLlmsEntry}\n`);
 }

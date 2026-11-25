@@ -47,13 +47,14 @@ backticks, as the keybinding tables do.
 
 ## Deploy
 
-Vercel, on the `Dividend Solo's projects` team, project `omarchy4mac-docs`,
-with this directory as the project root:
+Kamal, from `config/deploy.yml`, to ezio: the image builds this directory and
+nginx serves the static export from it, with `/up` for the healthcheck.
 
 ```sh
-cd docs-site && npx vercel deploy --prod
+cd docs-site && kamal deploy
 ```
 
-The project is linked in `.vercel/` (gitignored). Nothing here needs an env
-var; `NEXT_PUBLIC_SITE_URL` overrides the Open Graph address on a custom
-domain.
+Vercel project `omarchy4mac-docs` is connected to this repo, and its
+deployments answer 402 (`DEPLOYMENT_DISABLED`) under a fair-use CPU limit until
+2026-12-24; the site may move back there. Nothing here needs an env var;
+`NEXT_PUBLIC_SITE_URL` overrides the Open Graph address on a custom domain.
