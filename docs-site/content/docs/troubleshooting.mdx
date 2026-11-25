@@ -11,8 +11,11 @@ print.
 
 Neither works until macOS gives it Accessibility. `install.sh` opens System
 Settings on Privacy & Security > Accessibility and waits: turn AeroSpace and
-Hammerspoon on, press Return, and it restarts both. If you clicked past it, add
-both by hand in the same pane and restart them.
+Hammerspoon on, press Return, and it starts both. The install starts them only
+after this step, so macOS raises no "would like to control this computer"
+dialog. macOS lists an app only after it has run once, so if a switch is not
+there yet, add the app with + from `/Applications`. If you clicked past the
+step, add and turn on both in the same pane and run `install.sh` again.
 
 ## A key does nothing
 

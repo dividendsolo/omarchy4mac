@@ -161,6 +161,13 @@ A skipped test is a failure: the checker's `vitest.no-skip.ts` fails the run.
   `NSStatusItem VisibleCC Item-0` default that guards AeroSpace's
   terminate-on-launch bug when its menu-bar icon is hidden;
   `com.omarchy-mac.theme-appearance` runs the light/dark listener.
+- `install.sh` asks for Accessibility before it starts AeroSpace or
+  Hammerspoon (omarchy4mac#111). macOS raises its own "would like to control
+  this computer" dialog the first time an app asks for the permission, and the
+  dialog outlives the app, so the permission has to come first. macOS lists an
+  app in that pane only after it has run once, so the step says to add a
+  missing app with + from /Applications. The launchd agent starts AeroSpace
+  right after the step, and the step starts Hammerspoon.
 - `hammerspoon/init.lua` owns the keys AeroSpace leaves unbound, and the
   testable units are named functions the tests slice out: `consoleFrame`,
   `toggleConsole`, `bindDictation`.

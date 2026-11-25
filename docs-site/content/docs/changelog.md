@@ -11,6 +11,14 @@ maintainer's Mac runs from a clone of it, the same as yours.
 
 ## 2026-11-25
 
+- `install.sh` asks for Accessibility before it starts AeroSpace or
+  Hammerspoon. On a first run the launchd agent started AeroSpace and the
+  script opened Hammerspoon while neither had the permission, so macOS raised
+  its own "would like to control this computer" dialog for each app, and the
+  dialog stayed on screen after the switches were on and the apps restarted.
+  The permission step now comes first and starts Hammerspoon itself; AeroSpace
+  starts with the agent right after it. The step also says to add an app with
+  + from /Applications, because macOS lists an app only after it has run once.
 - A second `install.sh` run no longer stops at "Linking config". The `link()`
   helper returned the status of the already-linked note, so a rerun exited 1
   the moment it found a link already in place; the install says "Rerun this
