@@ -14,6 +14,28 @@ say()  { printf '\033[1;32m==>\033[0m %s\n' "$*"; }
 warn() { printf '\033[1;33m  !\033[0m %s\n' "$*"; WARNINGS=$((WARNINGS+1)); }
 run()  { if [ "$DRY" = 1 ]; then echo "    would: $*"; else "$@"; fi; }
 WARNINGS=0
+
+stop_app() {
+  local name="$1" i=0
+  pgrep -x "$name" >/dev/null 2>&1 || return 0
+  pkill -x "$name" || true
+  while pgrep -x "$name" >/dev/null 2>&1 && [ "$i" -lt 50 ]; do
+    sleep 0.1
+    i=$((i + 1))
+  done
+  return 0
+}
+
+wait_app() {
+  local name="$1" i=0
+  shift
+  while [ "$i" -lt 30 ]; do
+    if pgrep -x "$name" >/dev/null 2>&1 && "$@" >/dev/null 2>&1; then return 0; fi
+    sleep 0.2
+    i=$((i + 1))
+  done
+  return 1
+}
 SRC="$DIR"
 if [ "$DRY" = 1 ]; then
   printf '\033[1;33m==> DRY RUN: reporting only, nothing on this Mac will change\033[0m\n'
@@ -252,8 +274,8 @@ else
     read -r _ </dev/tty || true
     osascript -e 'quit app "System Settings"' >/dev/null 2>&1 || true
     say "Starting Hammerspoon with its new permission"
-    osascript -e 'quit app "Hammerspoon"' >/dev/null 2>&1 || true
-    sleep 1
+    stop_app AeroSpace
+    stop_app Hammerspoon
     open -a Hammerspoon
   else
     echo "    No terminal to wait on: switch both on, then open AeroSpace and Hammerspoon again."
@@ -376,6 +398,16 @@ if [ "$DRY" = 1 ]; then
     printf '\033[1;32m==> Dry run finished, no problems found. Nothing was changed.\033[0m\n'
   fi
   exit 0
+fi
+
+say "Waiting for AeroSpace and Hammerspoon to answer"
+wait_app AeroSpace aerospace list-workspaces --focused \
+  || warn "AeroSpace did not answer; its keys wait until it starts"
+if command -v hs >/dev/null 2>&1; then
+  wait_app Hammerspoon hs -t 2 -c 'return 1' \
+    || warn "Hammerspoon did not answer; open it again before its keys work"
+else
+  warn "hs is not on PATH, so the install cannot tell whether Hammerspoon is ready"
 fi
 
 say "Done. ⌥Return opens Ghostty. ⌥T switches to a random theme."
