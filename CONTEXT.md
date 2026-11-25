@@ -46,8 +46,13 @@ one when a fact changes, and checks the deployed page.
   `lib/omarchy4mac-cheat-sheet.ts` in dividendsolo/dividend-solo.
 - The one-line pitch: the GitHub repo description, the README's first line,
   the docs home, dividendsolo.com's project card.
-- The docs site deploys from Vercel project `omarchy4mac-docs`
-  (https://omarchy4mac.dividendsolo.com).
+- The agent skill: `docs-site/public/SKILL.md`, served at
+  https://omarchy4mac.dividendsolo.com/SKILL.md; `tests/docs-skill-test.sh`
+  holds the commands it names and the score it quotes to the repo.
+- The docs site deploys to ezio from `docs-site/config/deploy.yml` (Kamal, and
+  nginx serves the static export) at https://omarchy4mac.dividendsolo.com.
+  Vercel project `omarchy4mac-docs` is soft-blocked (fair-use CPU limit) until
+  2026-12-24, and the site may move back there.
 
 ## Commands
 
