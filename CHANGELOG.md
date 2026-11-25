@@ -20,7 +20,13 @@ maintainer's Mac runs from a clone of it, the same as yours.
   working. Hammerspoon also no longer reloads Ghostty with a synthetic ⌘⇧,
   keystroke: that was the only place the desktop asked macOS for the
   Accessibility (Events) permission, and macOS asks for that one with a dialog.
-
+- First install no longer stops when the System Events prompt is denied.
+  `bin/theme` reads the current wallpaper with `osascript`, and under
+  `set -euo pipefail` a denied or timed-out read failed the whole switch, so
+  the install ended right after the sketchybar step and never reached the
+  Accessibility step. A failed read now prints a warning that names the
+  System Events permission, keeps the current wallpaper, and the install
+  carries on to "Done".
 - A second `install.sh` run no longer stops at "Linking config". The `link()`
   helper returned the status of the already-linked note, so a rerun exited 1
   the moment it found a link already in place; the install says "Rerun this
