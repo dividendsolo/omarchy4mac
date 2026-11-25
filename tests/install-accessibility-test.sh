@@ -28,4 +28,16 @@ done
 echo "The step says how to add an app macOS has not listed yet:"
 check "the step points at the + button" 1 "$(grep -c 'with + from /Applications' "$ROOT/install.sh")"
 
+echo "System Settings stays open when there is no terminal to wait on:"
+TTY="$(line 'if \[ -r /dev/tty \]; then')"
+ELSE="$(awk -v from="$TTY" 'NR > from && /^  else$/ { print NR; exit }' "$ROOT/install.sh")"
+QUIT="$(line "quit app \"System Settings\"")"
+RET="$(line 'read -r _ </dev/tty')"
+if [[ -n "$QUIT" && -n "$RET" && -n "$ELSE" && "$QUIT" -gt "$RET" && "$QUIT" -lt "$ELSE" ]]; then
+  echo "  ok    System Settings quits only in the /dev/tty branch, after the Return"
+else
+  echo "  FAIL  System Settings quits at line ${QUIT:-none}, outside the /dev/tty branch (${RET:-none}..${ELSE:-none})"
+  fails=$((fails + 1))
+fi
+
 [[ "$fails" -eq 0 ]] && echo "PASS" || { echo "FAIL: $fails check(s)"; exit 1; }

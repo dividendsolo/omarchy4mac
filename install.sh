@@ -250,6 +250,7 @@ else
   if [ -r /dev/tty ]; then
     printf '    Press Return here when both switches are on... '
     read -r _ </dev/tty || true
+    osascript -e 'quit app "System Settings"' >/dev/null 2>&1 || true
     say "Starting Hammerspoon with its new permission"
     osascript -e 'quit app "Hammerspoon"' >/dev/null 2>&1 || true
     sleep 1
@@ -257,7 +258,6 @@ else
   else
     echo "    No terminal to wait on: switch both on, then open AeroSpace and Hammerspoon again."
   fi
-  osascript -e 'quit app "System Settings"' >/dev/null 2>&1 || true
 fi
 
 say "Loading launchd agents"
