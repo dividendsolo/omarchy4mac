@@ -7,6 +7,13 @@ maintainer's Mac runs from a clone of it, the same as yours.
 
 ## 2026-11-25
 
+- The docs site answers again, from ezio. It moved off the Vercel team, which
+  is paused for passing its plan's limits (agent-stack#552), and where the page
+  had answered `402` since 2026-11-24. The site is the Kamal app
+  `omarchy4mac-docs` now: a static export in an nginx image, behind the
+  Cloudflare tunnel. ezio deploys its own Kamal apps from `main`, so a merge
+  puts the site live with no hand deploy; the app joins that registry in
+  agent-stack#560.
 - The install waits for AeroSpace and Hammerspoon before it prints Done. It ends
   both with a signal (the `killall` the first run already needed) and waits until
   each is gone, then starts them again and waits until AeroSpace answers

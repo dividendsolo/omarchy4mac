@@ -46,8 +46,8 @@ one when a fact changes, and checks the deployed page.
   `lib/omarchy4mac-cheat-sheet.ts` in dividendsolo/dividend-solo.
 - The one-line pitch: the GitHub repo description, the README's first line,
   the docs home, dividendsolo.com's project card.
-- The docs site deploys from Vercel project `omarchy4mac-docs`
-  (https://omarchy4mac.dividendsolo.com).
+- The deployed docs page, https://omarchy4mac.dividendsolo.com, served from the
+  Kamal app `omarchy4mac-docs` (see Generated files and CI).
 
 ## Commands
 
@@ -196,5 +196,16 @@ A skipped test is a failure: the checker's `vitest.no-skip.ts` fails the run.
   The actions are pinned in `actions.lock` and `gh actions-lock --verify` fails
   a workflow that adds an unpinned one. Run
   `vps/scripts/actions-lock.py lock .` in the repo after adding an action.
-- Deployment: the docs site is a Vercel project built from `docs-site/`. There
-  is no server; everything else runs on the Mac.
+- Deployment: the docs site is the Kamal app `omarchy4mac-docs` on ezio, built
+  from `docs-site/` as a static export (`docs-site/Dockerfile`,
+  `docs-site/nginx.conf`, `docs-site/config/deploy.yml`) and served at
+  https://omarchy4mac.dividendsolo.com through the Cloudflare tunnel. ezio
+  deploys its own Kamal apps from `main` (agent-stack's pull-deploy reads its
+  `vps/config/apps.json` and `PULL_APPS`), so a merge to `main` puts the site
+  live with no hand deploy; `omarchy4mac-docs` joins that registry in
+  agent-stack#560, and until it does nothing deploys the docs site; no agent
+  can either, because the deploy tool has no entry for it. The Vercel project
+  `omarchy4mac-docs` keeps its Git connection to this repo (`docs-site` as the
+  root directory and `main` as the production branch), but the Vercel team is
+  soft blocked (agent-stack#552), so Vercel serves nothing here. Everything
+  else runs on the Mac.

@@ -51,5 +51,14 @@ check "the app deploys to ezio" "yes" "$got"
 got=$(grep -A2 '^ssh:' "$SITE/config/deploy.yml" 2>/dev/null | grep 'user:' | awk '{print $2}')
 check "kamal connects to ezio as div, not root" "div" "${got:-none}"
 
+hand="$(grep -ciE 'vercel (deploy|--prod)|kamal deploy' "$SITE/README.md")"
+check "the docs README hands nobody a deploy command" 0 "$hand"
+
+named="yes"
+for fact in 'omarchy4mac-docs' 'pull-deploy' 'docs-site/config/deploy.yml'; do
+  grep -q "$fact" "$ROOT/CONTEXT.md" || named="no"
+done
+check "CONTEXT.md says how the docs site deploys" "yes" "$named"
+
 if (( fails )); then echo "FAIL: $fails check(s)"; exit 1; fi
 echo "PASS"

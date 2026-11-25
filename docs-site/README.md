@@ -47,13 +47,15 @@ backticks, as the keybinding tables do.
 
 ## Deploy
 
-Vercel, on the `Dividend Solo's projects` team, project `omarchy4mac-docs`,
-with this directory as the project root:
+This directory is the Kamal app `omarchy4mac-docs` on ezio: a static export in
+an nginx image (`Dockerfile`, `nginx.conf`, `config/deploy.yml`), served at
+https://omarchy4mac.dividendsolo.com through the Cloudflare tunnel. ezio
+deploys its own Kamal apps from `main`, so a merge puts the site live with no
+hand deploy; `omarchy4mac-docs` joins that registry in agent-stack#560. Never
+deploy this directory by hand. The Vercel project `omarchy4mac-docs` keeps a
+Git connection to this repo, but the Vercel team is soft blocked, so it serves
+nothing. The repo root's `CONTEXT.md` holds the same fact with the rest of the
+repo's facts.
 
-```sh
-cd docs-site && npx vercel deploy --prod
-```
-
-The project is linked in `.vercel/` (gitignored). Nothing here needs an env
-var; `NEXT_PUBLIC_SITE_URL` overrides the Open Graph address on a custom
-domain.
+Nothing here needs an env var; `NEXT_PUBLIC_SITE_URL` overrides the Open Graph
+address on a custom domain.
