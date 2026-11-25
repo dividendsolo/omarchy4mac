@@ -19,6 +19,13 @@ maintainer's Mac runs from a clone of it, the same as yours.
   The permission step now comes first and starts Hammerspoon itself; AeroSpace
   starts with the agent right after it. The step also says to add an app with
   + from /Applications, because macOS lists an app only after it has run once.
+- First install no longer stops when the System Events prompt is denied.
+  `bin/theme` reads the current wallpaper with `osascript`, and under
+  `set -euo pipefail` a denied or timed-out read failed the whole switch, so
+  the install ended right after the sketchybar step and never reached the
+  Accessibility step. A failed read now prints a warning that names the
+  System Events permission, keeps the current wallpaper, and the install
+  carries on to "Done".
 - A second `install.sh` run no longer stops at "Linking config". The `link()`
   helper returned the status of the already-linked note, so a rerun exited 1
   the moment it found a link already in place; the install says "Rerun this

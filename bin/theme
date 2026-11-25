@@ -589,7 +589,12 @@ remember_wallpaper() {
 apply_wallpaper() {
   local name="$1" dir="$HOME/Pictures/Wallpapers"
   local current; current="$(cat "$HOME/.local/state/omarchy/background-video" 2>/dev/null)" || current=""
-  [[ -n "$current" ]] || current="$(osascript -e 'tell application "System Events" to tell current desktop to get picture' 2>/dev/null)"
+  if [[ -z "$current" ]]; then
+    current="$(osascript -e 'tell application "System Events" to tell current desktop to get picture' 2>/dev/null)" || {
+      echo "  ${c_yel}wallpaper${c_rst} ! System Events permission denied — cannot read the current wallpaper; keeping it"
+      return 0
+    }
+  fi
   remember_wallpaper "$(current_theme)" "$current" "$name"
   local remembered; remembered="$(cat "$BG_MEMORY/$name" 2>/dev/null)" || remembered=""
   [[ -f "$remembered" ]] || remembered=""
