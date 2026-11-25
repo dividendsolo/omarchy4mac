@@ -5,20 +5,22 @@ description: "One command installs Homebrew, the packages, the config links and 
 
 One command. It installs Homebrew if needed, runs the `Brewfile`, links every
 config into place (anything already there is moved to `*.bak-<date>`), compiles
-the light/dark listener, loads the launchd agents, adds the shell file to
-`~/.zshrc`, pulls the Omarchy themes, hides the Dock, the menu bar and the
-desktop widgets (SketchyBar takes the menu bar's place), and starts the
-services:
+the light/dark listener, asks for Accessibility, loads the launchd agents,
+adds the shell file to `~/.zshrc`, pulls the Omarchy themes, hides the Dock,
+the menu bar and the desktop widgets (SketchyBar takes the menu bar's place),
+and starts the services:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/dividendsolo/omarchy4mac/main/install.sh | bash
 ```
 
-Near the end, the script opens System Settings on Accessibility and waits.
-Turn on AeroSpace and Hammerspoon, press Return, and it restarts both. Then ⌥K
-for the keybindings, ⌘⇧Space for the menu. That permission step is the one
-thing a script cannot do for you; [Troubleshooting](/docs/troubleshooting)
-has the details.
+Before it starts the window manager, the script opens System Settings on
+Accessibility and waits. Turn on AeroSpace and Hammerspoon, press Return, and
+it starts both. An app macOS has not seen run is not in the list yet, so if a
+switch is missing, add the app with + from `/Applications`. Then ⌥K for the
+keybindings, ⌘⇧Space for the menu. That permission step is the one thing a
+script cannot do for you; [Troubleshooting](/docs/troubleshooting) has the
+details.
 
 ## Update
 
@@ -73,6 +75,10 @@ echo "source $D/zsh/omarchy.zsh" >> ~/.zshrc
 # Light/dark listener + AeroSpace crash watchdog (macOS 26 can kill AeroSpace)
 swiftc -O -o ~/.local/bin/theme-appearance-listener "$D/bin/theme-appearance-listener.swift"
 swiftc -O -o ~/.local/bin/omarchy-video-wallpaper "$D/bin/omarchy-video-wallpaper.swift"   # video backgrounds, theme intros
+
+# Accessibility before AeroSpace and Hammerspoon run, or macOS raises its own
+# prompt for each: add the app with + from /Applications if it is not listed
+open "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"
 for p in "$D"/launchd/*.plist; do
   sed "s|/Users/YOU|$HOME|g" "$p" > ~/Library/LaunchAgents/"${p##*/}"
   launchctl load ~/Library/LaunchAgents/"${p##*/}"

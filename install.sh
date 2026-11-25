@@ -259,6 +259,29 @@ if command -v swiftc >/dev/null 2>&1; then
 else
   say "swiftc not found; skipping the light/dark listener, its launchd agent, and video backgrounds"
 fi
+say "One manual step: Accessibility for AeroSpace and Hammerspoon"
+if [ "$DRY" = 1 ]; then
+  echo "    would: open System Settings on Accessibility, wait for both switches,"
+  echo "    would: then start Hammerspoon and the AeroSpace agent"
+else
+  echo "    System Settings opens on Privacy & Security > Accessibility."
+  echo "    Turn on AeroSpace and Hammerspoon. Neither has run yet, so if a"
+  echo "    switch is not in the list, add the app with + from /Applications:"
+  echo "    /Applications/AeroSpace.app and /Applications/Hammerspoon.app."
+  open "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility" || true
+  if [ -r /dev/tty ]; then
+    printf '    Press Return here when both switches are on... '
+    read -r _ </dev/tty || true
+    osascript -e 'quit app "System Settings"' >/dev/null 2>&1 || true
+    say "Starting Hammerspoon with its new permission"
+    stop_app AeroSpace
+    stop_app Hammerspoon
+    open -a Hammerspoon
+  else
+    echo "    No terminal to wait on: switch both on, then open AeroSpace and Hammerspoon again."
+  fi
+fi
+
 say "Loading launchd agents"
 run mkdir -p "$HOME/Library/LaunchAgents" "$HOME/Library/Logs"
 for p in "$SRC"/launchd/*.plist; do
@@ -375,23 +398,6 @@ if [ "$DRY" = 1 ]; then
     printf '\033[1;32m==> Dry run finished, no problems found. Nothing was changed.\033[0m\n'
   fi
   exit 0
-fi
-
-say "One manual step: Accessibility for AeroSpace and Hammerspoon"
-echo "    System Settings opens on Privacy & Security > Accessibility."
-echo "    Turn on AeroSpace and Hammerspoon there (close any other permission dialogs)."
-open "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility" || true
-if [ -r /dev/tty ]; then
-  printf '    Press Return here when both switches are on... '
-  read -r _ </dev/tty || true
-  say "Restarting AeroSpace and Hammerspoon with their new permission"
-  stop_app AeroSpace
-  stop_app Hammerspoon
-  open -a AeroSpace
-  open -a Hammerspoon
-  osascript -e 'quit app "System Settings"' >/dev/null 2>&1 || true
-else
-  echo "    No terminal to wait on: after you switch them on, open AeroSpace and Hammerspoon again."
 fi
 
 say "Waiting for AeroSpace and Hammerspoon to answer"
