@@ -48,5 +48,8 @@ got="no"
 grep -q 'ezio' "$SITE/config/deploy.yml" 2>/dev/null && got="yes"
 check "the app deploys to ezio" "yes" "$got"
 
+got=$(grep -A2 '^ssh:' "$SITE/config/deploy.yml" 2>/dev/null | grep 'user:' | awk '{print $2}')
+check "kamal connects to ezio as div, not root" "div" "${got:-none}"
+
 if (( fails )); then echo "FAIL: $fails check(s)"; exit 1; fi
 echo "PASS"

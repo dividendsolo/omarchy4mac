@@ -16,6 +16,9 @@ proxy:
     interval: 5
     timeout: 5
 
+ssh:
+  user: div
+
 registry:
   server: 127.0.0.1:5555
   username: omarchy4mac-docs
