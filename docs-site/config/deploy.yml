@@ -1,0 +1,29 @@
+service: omarchy4mac-docs
+image: omarchy4mac-docs
+
+servers:
+  web:
+    hosts:
+      - ezio
+
+proxy:
+  ssl: true
+  hosts:
+    - omarchy4mac.dividendsolo.com
+  app_port: 80
+  healthcheck:
+    path: /up
+    interval: 5
+    timeout: 5
+
+ssh:
+  user: div
+
+registry:
+  server: 127.0.0.1:5555
+  username: omarchy4mac-docs
+  password: omarchy4mac-docs
+
+builder:
+  arch: amd64
+  driver: docker

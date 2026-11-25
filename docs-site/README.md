@@ -47,12 +47,15 @@ backticks, as the keybinding tables do.
 
 ## Deploy
 
-Vercel builds this directory on every push to `main`, so a merge deploys
-https://omarchy4mac.dividendsolo.com by itself; a push to another branch builds a
-preview. The project is `omarchy4mac-docs` on the `Dividend Solo's projects`
-team, connected to `dividendsolo/omarchy4mac` with this directory as the root
-directory. Never hand-deploy the site. The repo root's `CONTEXT.md` holds the
-same fact with the rest of the repo's facts.
+This directory is the Kamal app `omarchy4mac-docs` on ezio: a static export in
+an nginx image (`Dockerfile`, `nginx.conf`, `config/deploy.yml`), served at
+https://omarchy4mac.dividendsolo.com through the Cloudflare tunnel. ezio
+deploys its own Kamal apps from `main`, so a merge puts the site live with no
+hand deploy; `omarchy4mac-docs` joins that registry in agent-stack#560. Never
+deploy this directory by hand. The Vercel project `omarchy4mac-docs` keeps a
+Git connection to this repo, but the Vercel team is soft blocked, so it serves
+nothing. The repo root's `CONTEXT.md` holds the same fact with the rest of the
+repo's facts.
 
 Nothing here needs an env var; `NEXT_PUBLIC_SITE_URL` overrides the Open Graph
 address on a custom domain.

@@ -5,13 +5,43 @@ dotfiles repo; entries before that date are those exports. Since then this
 repo is the only source: every change lands here by pull request, and the
 maintainer's Mac runs from a clone of it, the same as yours.
 
+## 2026-11-25
+
+- The docs site answers again, from ezio. It moved off the Vercel team, which
+  is paused for passing its plan's limits (agent-stack#552), and where the page
+  had answered `402` since 2026-11-24. The site is the Kamal app
+  `omarchy4mac-docs` now: a static export in an nginx image, behind the
+  Cloudflare tunnel. ezio deploys its own Kamal apps from `main`, so a merge
+  puts the site live with no hand deploy; the app joins that registry in
+  agent-stack#560.
+- The install waits for AeroSpace and Hammerspoon before it prints Done. It ends
+  both with a signal (the `killall` the first run already needed) and waits until
+  each is gone, then starts them again and waits until AeroSpace answers
+  `aerospace list-workspaces --focused` and Hammerspoon answers `hs`. Before, the
+  install could print Done with Hammerspoon not running: `hs` then hangs with no
+  output instead of answering, and ⌥T and Hammerspoon's own keys did nothing
+  until it was started again.
+- `uninstall.sh` ends AeroSpace and Hammerspoon with a signal too, and waits
+  until Hammerspoon is gone before it touches any config file. Hammerspoon
+  watches the Ghostty config, so a reload could run while the uninstall was
+  working. Hammerspoon also no longer reloads Ghostty with a synthetic ⌘⇧,
+  keystroke: that was the only place the desktop asked macOS for the
+  Accessibility (Events) permission, and macOS asks for that one with a dialog.
+- First install no longer stops when the System Events prompt is denied.
+  `bin/theme` reads the current wallpaper with `osascript`, and under
+  `set -euo pipefail` a denied or timed-out read failed the whole switch, so
+  the install ended right after the sketchybar step and never reached the
+  Accessibility step. A failed read now prints a warning that names the
+  System Events permission, keeps the current wallpaper, and the install
+  carries on to "Done".
+- A second `install.sh` run no longer stops at "Linking config". The `link()`
+  helper returned the status of the already-linked note, so a rerun exited 1
+  the moment it found a link already in place; the install says "Rerun this
+  script to update", so every update run failed. `link()` now returns success
+  when the link is already there.
+
 ## 2026-11-24
 
-- The docs site publishes by itself. The Vercel project `omarchy4mac-docs` had
-  no Git connection, so the documentation of 2026-11-13 never went live until
-  a hand deploy. It is connected to this repository now, with `docs-site` as
-  the root directory and `main` as the production branch, so a merge to main
-  deploys https://omarchy4mac.dividendsolo.com with no hand deploy.
 - VLC opens tiled on workspace 5 instead of floating, so ⌥F fills the
   screen below the bar the way it does on Omarchy. A floating window could not
   go full screen, and macOS full screen drew the video under the bar.

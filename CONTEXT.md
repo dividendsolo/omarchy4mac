@@ -46,8 +46,8 @@ one when a fact changes, and checks the deployed page.
   `lib/omarchy4mac-cheat-sheet.ts` in dividendsolo/dividend-solo.
 - The one-line pitch: the GitHub repo description, the README's first line,
   the docs home, dividendsolo.com's project card.
-- The docs site deploys from Vercel project `omarchy4mac-docs`
-  (https://omarchy4mac.dividendsolo.com).
+- The deployed docs page, https://omarchy4mac.dividendsolo.com, served from the
+  Kamal app `omarchy4mac-docs` (see Generated files and CI).
 
 ## Commands
 
@@ -88,6 +88,11 @@ A skipped test is a failure: the checker's `vitest.no-skip.ts` fails the run.
   Hammerspoon watcher clicks Ghostty's own Reload Configuration instead.
 - `install.sh` wraps its whole body in `{ }`: under `curl | bash` a command
   that reads stdin (`brew bundle`) would otherwise eat the rest of the script.
+- `hs` hangs with no output when Hammerspoon is not running: in the Tart VM a
+  fifteen-second alarm killed `hs -t 3 -c 'return 1'` before it returned, so its
+  own timeout does not cover that case. It is what a fresh install hit right
+  after its Done line. A script calls `hs` only while `pgrep -x Hammerspoon`
+  answers; `bin/theme`, `install.sh` and `uninstall.sh` each guard it that way.
 - The first `install.sh` run snapshots every setting `theme` rewrites, plus
   `~/.zshrc`, into `~/.local/state/omarchy4mac/originals`. Later runs leave that
   snapshot alone; `uninstall.sh` is the only thing that puts it back.
@@ -164,6 +169,13 @@ A skipped test is a failure: the checker's `vitest.no-skip.ts` fails the run.
 - `hammerspoon/init.lua` owns the keys AeroSpace leaves unbound, and the
   testable units are named functions the tests slice out: `consoleFrame`,
   `toggleConsole`, `bindDictation`.
+- The install and the uninstall end AeroSpace and Hammerspoon with a signal and
+  wait until each process is gone; the install starts them again and prints Done
+  only after AeroSpace answers `aerospace list-workspaces --focused` and
+  Hammerspoon answers `hs`. Hammerspoon posts no synthetic event: posting one
+  asks macOS for the Accessibility (Events) permission, which a fresh Mac asks
+  with a dialog, so the Ghostty reload uses Ghostty's own Reload Configuration
+  menu item alone.
 - `sketchybar/icon_map.sh` is upstream Omarchy's icon map. The comment ban
   removed its `### START-OF-ICON-MAP` markers; refresh it from upstream by hand.
 - `herdr/config.toml` is ported from Omarchy and symlinked to
@@ -184,10 +196,16 @@ A skipped test is a failure: the checker's `vitest.no-skip.ts` fails the run.
   The actions are pinned in `actions.lock` and `gh actions-lock --verify` fails
   a workflow that adds an unpinned one. Run
   `vps/scripts/actions-lock.py lock .` in the repo after adding an action.
-- Deployment: the docs site is the Vercel project `omarchy4mac-docs` on the
-  `Dividend Solo's projects` team, connected to `dividendsolo/omarchy4mac` with
-  `docs-site` as the root directory and `main` as the production branch, so a
-  merge to `main` deploys https://omarchy4mac.dividendsolo.com by itself, and a
-  push to another branch builds a preview. Never hand-deploy the site: a `vercel
-  deploy --prod` from `docs-site/` takes the production alias off the Git
-  connection. There is no server; everything else runs on the Mac.
+- Deployment: the docs site is the Kamal app `omarchy4mac-docs` on ezio, built
+  from `docs-site/` as a static export (`docs-site/Dockerfile`,
+  `docs-site/nginx.conf`, `docs-site/config/deploy.yml`) and served at
+  https://omarchy4mac.dividendsolo.com through the Cloudflare tunnel. ezio
+  deploys its own Kamal apps from `main` (agent-stack's pull-deploy reads its
+  `vps/config/apps.json` and `PULL_APPS`), so a merge to `main` puts the site
+  live with no hand deploy; `omarchy4mac-docs` joins that registry in
+  agent-stack#560, and until it does nothing deploys the docs site; no agent
+  can either, because the deploy tool has no entry for it. The Vercel project
+  `omarchy4mac-docs` keeps its Git connection to this repo (`docs-site` as the
+  root directory and `main` as the production branch), but the Vercel team is
+  soft blocked (agent-stack#552), so Vercel serves nothing here. Everything
+  else runs on the Mac.

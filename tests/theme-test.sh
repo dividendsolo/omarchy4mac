@@ -291,4 +291,26 @@ run random
 check "a press during a switch picks nothing" bash -c "! grep -q 'random pick' '$OUT'"
 rm -rf "$T"
 
+echo "theme keeps the wallpaper when System Events is denied (#110):"
+setup
+{ printf '#!/bin/bash\n'; cat; } > "$STUBS/osascript" <<EOF
+echo "osascript \$*" >> "$LOG"
+[[ "\$*" == *"get picture"* ]] && exit 1
+while [[ \$# -gt 0 ]]; do
+  if [[ "\$1" == -e ]]; then echo "\$2" >> "$T/script.log"
+    [[ "\$2" == *"get picture"* ]] && cat "$T/desktop" 2>/dev/null
+    shift 2
+  else echo "\$1" >> "$T/argv.log"; shift; fi
+done
+exit 0
+EOF
+chmod +x "$STUBS/osascript"
+echo "$H/Pictures/Wallpapers/withwall_1.jpg" > "$T/desktop"
+run withwall
+check "exits 0" test "$CODE" -eq 0
+check "runs to the end (prints done.)" grep -q '^done\.' "$OUT"
+check "warns that System Events is denied" grep -q 'System Events permission denied' "$OUT"
+check "keeps the current wallpaper" bash -c "! grep -q 'set picture' '$LOG'"
+rm -rf "$T"
+
 [[ "$fails" -eq 0 ]] && echo "PASS" || { echo "FAIL: $fails check(s)"; exit 1; }
