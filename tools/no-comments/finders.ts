@@ -448,6 +448,7 @@ const byExtension: Record<string, Finder> = {
   ".toml": findHashLineComments,
   ".txt": findHashLineComments,
   ".theme": findHashLineComments,
+  ".conf": findHashLineComments,
   ".ini": findIniComments,
   ".service": findIniComments,
   ".slice": findIniComments,
