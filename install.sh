@@ -192,7 +192,7 @@ link() {
   local src="$DIR/$1" dst="$2"
   if [ -L "$dst" ] && [ "$(readlink "$dst")" = "$src" ]; then
     [ "$DRY" = 1 ] && echo "    ok: ${dst/#$HOME/$TILDE} already linked"
-    return
+    return 0
   fi
   if [ -e "$dst" ] || [ -L "$dst" ]; then
     say "  backing up $dst -> $dst.bak-$STAMP"

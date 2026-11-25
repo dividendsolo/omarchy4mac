@@ -9,6 +9,14 @@ dotfiles repo; entries before that date are those exports. Since then this
 repo is the only source: every change lands here by pull request, and the
 maintainer's Mac runs from a clone of it, the same as yours.
 
+## 2026-11-25
+
+- A second `install.sh` run no longer stops at "Linking config". The `link()`
+  helper returned the status of the already-linked note, so a rerun exited 1
+  the moment it found a link already in place; the install says "Rerun this
+  script to update", so every update run failed. `link()` now returns success
+  when the link is already there.
+
 ## 2026-11-24
 
 - VLC opens tiled on workspace 5 instead of floating, so ⌥F fills the
