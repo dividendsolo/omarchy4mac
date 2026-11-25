@@ -173,6 +173,12 @@ describe("file types", () => {
     expect(lines("btop.theme", "# why\ntheme[main_bg]=\"#111c18\"\n")).toEqual([1]);
   });
 
+  it("reads an nginx .conf as a hash file", () => {
+    expect(classify("nginx.conf", "server {\n  listen 80;\n}\n").kind).toBe("checked");
+    expect(lines("nginx.conf", "server {\n  listen 80;\n}\n")).toEqual([]);
+    expect(lines("nginx.conf", "# why\nserver {\n  listen 80;\n}\n")).toEqual([1]);
+  });
+
   it("reads TSV as data with no comment syntax", () => {
     expect(classify("a.tsv", "a\tb\n").kind).toBe("checked");
     expect(lines("a.tsv", "# a\tb\n")).toEqual([]);
