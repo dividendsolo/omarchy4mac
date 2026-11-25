@@ -11,6 +11,12 @@ maintainer's Mac runs from a clone of it, the same as yours.
 
 ## 2026-11-25
 
+- The docs site serves `/SKILL.md`: the page an AI agent reads before it
+  touches a Mac for this repo. It says what omarchy4mac is, that it costs
+  nothing, how to look before it changes a Mac, and every command with what it
+  does. `/llms.txt` links it, and every markdown file the site serves now
+  answers `text/markdown` instead of arriving as a download, so an agent gets
+  the file itself.
 - The install waits for AeroSpace and Hammerspoon before it prints Done. It ends
   both with a signal (the `killall` the first run already needed) and waits until
   each is gone, then starts them again and waits until AeroSpace answers
