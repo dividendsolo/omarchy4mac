@@ -683,9 +683,7 @@ local ghosttyConfigs = {
 local ghosttyReloadTimer
 local function reloadGhostty()
   for _, app in ipairs(hs.application.applicationsForBundleID("com.mitchellh.ghostty")) do
-    if not app:selectMenuItem({ "Ghostty", "Reload Configuration" }) then
-      hs.eventtap.keyStroke({ "cmd", "shift" }, ",", 0, app)
-    end
+    app:selectMenuItem({ "Ghostty", "Reload Configuration" })
   end
 end
 GhosttyWatchers = {}

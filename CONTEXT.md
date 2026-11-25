@@ -88,6 +88,11 @@ A skipped test is a failure: the checker's `vitest.no-skip.ts` fails the run.
   Hammerspoon watcher clicks Ghostty's own Reload Configuration instead.
 - `install.sh` wraps its whole body in `{ }`: under `curl | bash` a command
   that reads stdin (`brew bundle`) would otherwise eat the rest of the script.
+- `hs` hangs with no output when Hammerspoon is not running: in the Tart VM a
+  fifteen-second alarm killed `hs -t 3 -c 'return 1'` before it returned, so its
+  own timeout does not cover that case. It is what a fresh install hit right
+  after its Done line. A script calls `hs` only while `pgrep -x Hammerspoon`
+  answers; `bin/theme`, `install.sh` and `uninstall.sh` each guard it that way.
 - The first `install.sh` run snapshots every setting `theme` rewrites, plus
   `~/.zshrc`, into `~/.local/state/omarchy4mac/originals`. Later runs leave that
   snapshot alone; `uninstall.sh` is the only thing that puts it back.
@@ -164,6 +169,13 @@ A skipped test is a failure: the checker's `vitest.no-skip.ts` fails the run.
 - `hammerspoon/init.lua` owns the keys AeroSpace leaves unbound, and the
   testable units are named functions the tests slice out: `consoleFrame`,
   `toggleConsole`, `bindDictation`.
+- The install and the uninstall end AeroSpace and Hammerspoon with a signal and
+  wait until each process is gone; the install starts them again and prints Done
+  only after AeroSpace answers `aerospace list-workspaces --focused` and
+  Hammerspoon answers `hs`. Hammerspoon posts no synthetic event: posting one
+  asks macOS for the Accessibility (Events) permission, which a fresh Mac asks
+  with a dialog, so the Ghostty reload uses Ghostty's own Reload Configuration
+  menu item alone.
 - `sketchybar/icon_map.sh` is upstream Omarchy's icon map. The comment ban
   removed its `### START-OF-ICON-MAP` markers; refresh it from upstream by hand.
 - `herdr/config.toml` is ported from Omarchy and symlinked to

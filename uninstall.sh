@@ -39,6 +39,18 @@ say()  { printf '\033[1;31m==>\033[0m %s\n' "$*"; }
 note() { printf '    %s\n' "$*"; }
 run()  { if [ "$DRY" = 1 ]; then echo "    $*"; else "$@"; fi; }
 
+stop_app() {
+  local app="$1" i=0
+  pgrep -x "$app" >/dev/null 2>&1 || return 0
+  run pkill -x "$app" || true
+  [ "$DRY" = 1 ] && return 0
+  while pgrep -x "$app" >/dev/null 2>&1 && [ "$i" -lt 50 ]; do
+    sleep 0.1
+    i=$((i + 1))
+  done
+  return 0
+}
+
 [ "$DRY" = 1 ] && say "DRY RUN: nothing will be changed"
 
 find_brew() {
@@ -68,8 +80,9 @@ for label in com.omarchy-mac.aerospace-keepalive com.omarchy-mac.theme-appearanc
     run rm -f "$plist"
   fi
 done
+say "Ending AeroSpace and Hammerspoon"
 for app in AeroSpace Hammerspoon; do
-  pgrep -x "$app" >/dev/null 2>&1 && run osascript -e "quit app \"$app\"" || true
+  stop_app "$app"
 done
 pgrep -f theme-appearance-listener >/dev/null 2>&1 && run pkill -f theme-appearance-listener || true
 pgrep -x omarchy-video-wallpaper >/dev/null 2>&1 && run pkill -x omarchy-video-wallpaper || true

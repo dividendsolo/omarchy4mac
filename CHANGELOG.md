@@ -7,6 +7,20 @@ maintainer's Mac runs from a clone of it, the same as yours.
 
 ## 2026-11-25
 
+- The install waits for AeroSpace and Hammerspoon before it prints Done. It ends
+  both with a signal (the `killall` the first run already needed) and waits until
+  each is gone, then starts them again and waits until AeroSpace answers
+  `aerospace list-workspaces --focused` and Hammerspoon answers `hs`. Before, the
+  install could print Done with Hammerspoon not running: `hs` then hangs with no
+  output instead of answering, and ⌥T and Hammerspoon's own keys did nothing
+  until it was started again.
+- `uninstall.sh` ends AeroSpace and Hammerspoon with a signal too, and waits
+  until Hammerspoon is gone before it touches any config file. Hammerspoon
+  watches the Ghostty config, so a reload could run while the uninstall was
+  working. Hammerspoon also no longer reloads Ghostty with a synthetic ⌘⇧,
+  keystroke: that was the only place the desktop asked macOS for the
+  Accessibility (Events) permission, and macOS asks for that one with a dialog.
+
 - A second `install.sh` run no longer stops at "Linking config". The `link()`
   helper returned the status of the already-linked note, so a rerun exited 1
   the moment it found a link already in place; the install says "Rerun this
