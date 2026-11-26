@@ -1,0 +1,66 @@
+---
+title: "Mac rice: bar, borders, wallpaper and theme from one repo"
+description: "Rice a Mac with Omarchy's parts: a bar you own, window borders, a themed terminal, editor and apps, and a wallpaper that changes with the theme."
+---
+
+![The same desktop with a Ghostty terminal open in tokyo-night: tmux on the left and Claude Code on the right](/omarchy4mac-terminal.webp)
+
+A rice is a desktop somebody tuned on purpose: the bar, the colours, the
+wallpaper and the terminal all agreeing. On Linux that usually means Hyprland
+and a hundred dotfiles. On a Mac it usually means a weekend of it. omarchy4mac
+is the whole rice in one repository:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/dividendsolo/omarchy4mac/main/install.sh | bash
+```
+
+## The four pieces of a Mac rice
+
+1. **Tiling windows.** AeroSpace moves the windows into place, so the desktop
+   looks arranged instead of piled up. [Tiling window manager for a Mac](/docs/tiling-window-manager-mac).
+2. **A bar you own.** SketchyBar replaces the hidden menu bar with workspaces,
+   the clock, the weather and the system items. [SketchyBar config](/docs/sketchybar-config).
+3. **Borders.** JankyBorders draws a border on the focused window, in the
+   theme's accent colour.
+4. **The theme.** One script paints the rest: the terminal, the editor, the bar,
+   btop, the wallpaper, and the apps. This is the part that makes it a rice
+   rather than a set of settings.
+
+## The theme script
+
+`theme --sync` pulls every theme from the Omarchy repository at the commit
+pinned in `OMARCHY_COMMIT`, renders Ghostty, btop and Neovim from Omarchy's own
+templates, and downloads each theme's backgrounds into
+`~/Pictures/Wallpapers`. After that first sync, switching is offline.
+
+```sh
+theme --sync          # fetch every theme, once
+theme -l              # list the installed ones
+theme tokyo-night     # switch to one
+theme random          # a random theme, never the current one
+theme --remove <name> # delete one; sync skips it from then on
+```
+
+⌥T is `theme random` from the desktop, and ⌘⌃P cycles the current theme's
+wallpapers. [Themes](/docs/themes) is the whole pipeline, including the video
+backgrounds and the light and dark flip.
+
+## What a switch reaches
+
+Ghostty, Neovim (LazyVim), btop, the bar's colours, the desktop picture, the
+Claude Code terminal theme, an "Omarchy" theme in every Obsidian vault the app
+knows about, and Hermes. Omarchy stops at the terminal and the editor; the rest
+is where this port goes further.
+
+The themes are Omarchy's, so the names are the ones you have seen on other
+people's desktops. `theme random` respects the macOS appearance: a light system
+gets a light theme, a dark system a dark theme, and flip the system appearance
+and the whole desktop changes with it.
+
+## Start from here
+
+Read [Install](/docs/install) for the one permission macOS asks for, then
+[What you get](/docs/what-you-get) for the menus, the `omarchy-*` commands and
+the web apps. If you would rather see the config before you run anything,
+[AeroSpace config](/docs/aerospace-config) is the file, and
+[How close is this to real Omarchy?](/docs/parity) is the honest score.

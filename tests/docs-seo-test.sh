@@ -46,6 +46,44 @@ print(f"repeated_titles={','.join(repeated(titles))}")
 print(f"repeated_descriptions={','.join(repeated(descriptions))}")
 print(f"unlisted={','.join(page.stem for page in pages if page.stem not in named)}")
 print(f"longest_description={max((len(d) for d in descriptions), default=0)}")
+
+SEARCHES = {
+    "tiling window manager mac": "tiling-window-manager-mac",
+    "aerospace config": "aerospace-config",
+    "sketchybar config": "sketchybar-config",
+    "hyprland on mac": "hyprland-on-mac",
+    "mac rice": "mac-rice",
+}
+root = pathlib.Path(sys.argv[1])
+site_url = "https://omarchy4mac.dividendsolo.com"
+readme = (root / "README.md").read_text()
+index = (content / "index.mdx").read_text()
+
+def words(text):
+    return set(re.findall(r"[a-z0-9]+", text.lower()))
+
+without_page, without_title, unlinked_readme, unlinked_index = [], [], [], []
+for query, slug in SEARCHES.items():
+    page = next((content / f"{slug}{e}" for e in (".mdx", ".md") if (content / f"{slug}{e}").is_file()), None)
+    if page is None:
+        without_page.append(slug)
+        without_title.append(slug)
+        unlinked_readme.append(slug)
+        unlinked_index.append(slug)
+        continue
+    title = value_of(fields_of(page), "title")
+    if not words(query) <= words(title):
+        without_title.append(f"{query} -> {title}")
+    if f"({site_url}/docs/{slug})" not in readme:
+        unlinked_readme.append(slug)
+    if f"(/docs/{slug})" not in index:
+        unlinked_index.append(slug)
+
+print(f"searches_without_page={','.join(without_page)}")
+print(f"searches_without_the_words={','.join(without_title)}")
+print(f"searches_unlinked_from_readme={','.join(unlinked_readme)}")
+print(f"searches_unlinked_from_index={','.join(unlinked_index)}")
+print(f"volume_record={'yes' if (root / 'docs' / 'keyword-volumes.md').is_file() else 'no'}")
 PYEOF
 
 echo "the docs pages, for the crawler:"
@@ -76,6 +114,13 @@ check "robots names the sitemap" yes \
   "$(grep -q '/sitemap.xml' "$SITE/app/robots.ts" 2>/dev/null && echo yes || echo no)"
 check "the built page check reads the sitemap and robots the build made" present \
   "$([[ -f "$SITE/scripts/check-seo.mjs" ]] && echo present || echo missing)"
+
+echo "the five searches the card names:"
+check "every search has a page of its own" "" "$(value searches_without_page)"
+check "every search page carries the search's words in its title" "" "$(value searches_without_the_words)"
+check "the README links every search page" "" "$(value searches_unlinked_from_readme)"
+check "the docs index links every search page" "" "$(value searches_unlinked_from_index)"
+check "the volume pull is recorded in docs/" yes "$(value volume_record)"
 
 echo "the address a page answers on:"
 check "the canonical origin is the docs domain" yes \

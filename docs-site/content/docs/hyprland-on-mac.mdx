@@ -1,0 +1,71 @@
+---
+title: "Hyprland on a Mac: what runs, and what cannot"
+description: "Hyprland is Linux and Wayland only, so it does not run on macOS. AeroSpace, SketchyBar and Hammerspoon give a Mac the same behaviour and keys."
+---
+
+Hyprland does not run on a Mac. It is a Wayland compositor, Wayland is Linux's
+display protocol, and macOS is not Linux. There is no build of it for macOS and
+there is not going to be one, so "Hyprland on macOS" means one of two things:
+run Linux on the Mac, or reproduce the behaviour with tools macOS does have.
+
+omarchy4mac does the second one, and it is the reason the repo exists. It takes
+Omarchy, DHH's opinionated Arch and Hyprland setup, and rebuilds the parts that
+matter with native macOS tools:
+
+| Omarchy piece | What omarchy4mac runs | Config |
+|---|---|---|
+| Hyprland | AeroSpace | `aerospace/aerospace.toml` |
+| Waybar | SketchyBar | `sketchybar/` |
+| Window borders | JankyBorders | `borders/` |
+| Keybindings and menus | Hammerspoon | `hammerspoon/` |
+| Omarchy themes | the `theme` script, synced from Omarchy | `bin/theme` |
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/dividendsolo/omarchy4mac/main/install.sh | bash
+```
+
+## What you keep
+
+The keybinding vocabulary is Hyprland's. Five workspaces, ⌥1 to ⌥5, windows
+carried between workspaces and monitors with ⌘⇧ and the arrow keys, ⌥F to fill
+the screen, ⌥A for the accordion layout, ⌥S to float a window, and ⌘⇧; for the
+service mode that joins and flattens windows. The repo's own
+[AeroSpace config](/docs/aerospace-config) is the file, and
+[Keybindings](/docs/keybindings) is the table.
+
+The bar is Omarchy's Waybar layout: workspaces and the logo on the left, the
+clock and the weather in the middle, the tray and the system items on the
+right. [SketchyBar config](/docs/sketchybar-config) walks through it.
+
+The themes are Omarchy's own. `theme --sync` pulls the theme definitions from
+the Omarchy repository at the commit pinned in `OMARCHY_COMMIT` and renders
+Ghostty, Neovim and btop from Omarchy's templates, so every theme Omarchy ships
+is a theme here. [Themes](/docs/themes) has the commands.
+
+## What you lose
+
+Hyprland features that AeroSpace has no equivalent for: groups, the scratchpad,
+pinning a window, per-window opacity and keybindings, and toggling the gaps at
+runtime. Annotation and the `hyprctl` scripting surface have no port either.
+
+Two more things are different by nature. Hyprland is a compositor, so
+animations, blur and rounded corners belong to it; on a Mac the windows are
+drawn by macOS itself, so the rounding is the system's and the transparency
+reaches the terminal, the bar and the borders only. And Hyprland follows no
+system appearance, so light and dark is a macOS setting that omarchy4mac
+watches instead.
+
+[How close is this to real Omarchy?](/docs/parity) scores the port item by
+item, at 75 per cent of Omarchy v4.5.0 today, and the
+[parity checklist](/docs/parity-checklist) is the full list, ticked or not.
+
+## The other route
+
+If you want the real thing, the Mac can run Linux: Asahi Linux on Apple
+silicon, or a virtual machine. Both give you Hyprland itself. Neither keeps
+your macOS apps, the Mac's own keyboard handling, or the Terminal, and that
+trade is the whole reason a port is interesting. omarchy4mac installs nothing
+of Arch and nothing of Linux, and leaves the Mac running macOS.
+
+[Native macOS tiling](/docs/tiling-window-manager-mac) is the same choice, seen
+from the window manager's side.

@@ -208,5 +208,9 @@ A skipped test is a failure: the checker's `vitest.no-skip.ts` fails the run.
   The actions are pinned in `actions.lock` and `gh actions-lock --verify` fails
   a workflow that adds an unpinned one. Run
   `vps/scripts/actions-lock.py lock .` in the repo after adding an action.
+- `tests/docs-links-test.sh` answers every external link with a live request,
+  except a page of the docs site that the repo holds: the site is the static
+  export of `docs-site/content/docs` and the deploy is a separate, manual step,
+  so a page is not a broken link between its commit and its deploy.
 - Deployment: the docs site is a Vercel project built from `docs-site/`. There
   is no server; everything else runs on the Mac.

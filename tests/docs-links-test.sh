@@ -17,6 +17,8 @@ content, public = root / "docs-site/content/docs", root / "docs-site/public"
 sources = [root / "README.md", root / "CHANGELOG.md", *sorted((root / "docs").glob("*.md")),
            *sorted(content.glob("*.md")), *sorted(content.glob("*.mdx"))]
 
+SITE = "https://omarchy4mac.dividendsolo.com"
+
 LINK = re.compile(r"!?\[[^\]]*\]\(\s*([^)\s]+)")
 BARE = re.compile(r"(?<![\"'(\]])(https?://[^\s)\"'<>`]+)")
 
@@ -27,10 +29,15 @@ def targets(text):
         yield m.group(1)
 
 def resolves(path, src):
-    """A site path or a repo-relative path -> does the thing it points at exist?"""
+    """A site path or a repo-relative path -> does the thing it points at exist?
+    A docs page the repo holds resolves whether it is written as /docs/x or as
+    the site's own address for it: the site is the static export of the content
+    directory, and the deploy that serves it is a separate, manual step."""
     path = path.split("#")[0].split("?")[0]
     if not path:
         return True
+    if path.startswith(SITE):
+        path = path[len(SITE):]
     if path.startswith("/docs"):
         slug = path[len("/docs"):].strip("/")
         if not slug:
@@ -70,7 +77,10 @@ for src in sources:
     for target in targets(src.read_text()):
         target = target.strip().rstrip("*.,;")
         if target.startswith(("http://", "https://")):
-            external.add(target)
+            if target.startswith(SITE + "/docs"):
+                internal.append((f"{src.relative_to(root)}: {target}", target, src))
+            else:
+                external.add(target)
         elif target and not target.startswith(("mailto:", "tel:", "#")) and "${" not in target:
             internal.append((f"{src.relative_to(root)}: {target}", target, src))
 

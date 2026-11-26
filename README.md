@@ -37,5 +37,12 @@ troubleshooting, the changelog, and the score against Omarchy v4.5.0 (75%).
 
 https://omarchy4mac.dividendsolo.com
 
+A search brought you here? The docs has a page for each of these:
+[tiling window manager for a Mac](https://omarchy4mac.dividendsolo.com/docs/tiling-window-manager-mac),
+[AeroSpace config](https://omarchy4mac.dividendsolo.com/docs/aerospace-config),
+[SketchyBar config](https://omarchy4mac.dividendsolo.com/docs/sketchybar-config),
+[Hyprland on a Mac](https://omarchy4mac.dividendsolo.com/docs/hyprland-on-mac),
+[mac rice](https://omarchy4mac.dividendsolo.com/docs/mac-rice).
+
 MIT. The reference for every behaviour is
 [omacom/omarchy](https://github.com/omacom/omarchy).

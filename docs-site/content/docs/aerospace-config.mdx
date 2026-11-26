@@ -1,0 +1,110 @@
+---
+title: "AeroSpace config: Omarchy's keybindings on a Mac"
+description: "The whole aerospace.toml omarchy4mac installs: five workspaces, the gaps, the floating apps, the window rules, and every key. Read it or copy it."
+---
+
+omarchy4mac does not ask you to write an AeroSpace config. It installs one,
+linked to `~/.aerospace.toml`, and it is the file this page walks through:
+[aerospace/aerospace.toml](https://github.com/dividendsolo/omarchy4mac/blob/main/aerospace/aerospace.toml).
+The keys are Omarchy's, so a Hyprland user does not relearn anything.
+
+The whole config arrives with the install script:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/dividendsolo/omarchy4mac/main/install.sh | bash
+```
+
+## Edit it, then reload
+
+The file lives at `~/.aerospace.toml`, which is a link into the clone. Open it,
+change a binding, and reload:
+
+```sh
+aerospace reload-config
+```
+
+From the desktop, ⌘⇧; enters service mode and `esc` reloads the config and
+leaves. Reload in the terminal the first time you edit the file: a binding
+AeroSpace cannot parse is reported there, and the window server keeps running
+the config it already has.
+
+## The header
+
+The config starts with the behaviour that makes the rest work:
+
+- `config-version = 2` lists the workspaces the keys are bound to, instead of
+  AeroSpace guessing them from the bindings. The five workspaces stay five.
+- `persistent-workspaces = ['1', '2', '3', '4', '5']` keeps all five on the bar
+  even when they are empty.
+- `default-root-container-layout = 'tiles'` and the two normalization settings
+  are what keep a tiled screen from developing holes.
+- `after-startup-command` restores the workspace layout of your last session.
+
+## The gaps
+
+```toml
+[gaps]
+inner.horizontal = 8
+inner.vertical = 8
+outer.left = 8
+outer.bottom = 8
+outer.top = 40
+outer.right = 8
+```
+
+8 pixels between windows and 8 around the edge. The top gap is 40, because the
+SketchyBar bar is 32 pixels: 32 plus the same 8-pixel gap. A fullscreen window
+keeps `outer.top`, so it never covers the bar.
+
+## The workspaces and their monitors
+
+`[workspace-to-monitor-force-assignment]` pins each workspace to a monitor by
+name, with a fallback order for when that monitor is not attached:
+
+```toml
+[workspace-to-monitor-force-assignment]
+1 = ['\(1\)$', '\(2\)$', 'VA2446', 'built-in']
+2 = ['\(2\)$', '\(1\)$', 'VA2446', 'built-in']
+3 = ['\(2\)$', '\(1\)$', 'VA2446', 'built-in']
+4 = ['built-in', '\(2\)$', '\(1\)$', 'VA2446']
+5 = ['built-in', '\(2\)$', '\(1\)$', 'VA2446']
+```
+
+The first workspace takes the left screen when there are two, the second and
+third take the right one, and the last two stay on the laptop. Unplug a monitor
+and each workspace falls to the next entry in its list. That is why ⌥1 goes to
+workspace 1 on whichever monitor is there, and never to workspace 2.
+
+## The window rules
+
+`on-window-detected` is the list that decides where an app opens. The first
+rule that matches wins, so the order in the file matters: the screensaver rule
+sits above the Ghostty rule, and a float rule above a workspace rule still
+moves the window.
+
+Apps that open floating, because a dialog in a tile is unusable: System
+Settings, Finder, 1Password, Bitwarden, Raycast, Activity Monitor, Calculator,
+Preview, Steam, LocalSend, and any window whose title matches
+`Picture.in.Picture`.
+
+Apps that open on a workspace: browsers on 1; Ghostty on 2; Claude, the
+editors and the agents on 3; Signal, WhatsApp, Telegram, Discord and Proton on
+4; Spotify and VLC on 5.
+
+## The keys
+
+The bindings are the file's bulk, and they are Omarchy's:
+[Keybindings](/docs/keybindings) lists every one of them, and ⌥K shows the same
+list from the desktop. The main mode holds workspace, focus, move, resize and
+the launch keys; `cmd-shift-semicolon` enters service mode for joining windows,
+flattening the tree, floating one window and closing all but the current one.
+
+## Keep it running
+
+AeroSpace can terminate itself on macOS 26. A launchd agent starts it at login
+and relaunches it only after a crash: a clean quit stays quit, and a five-second
+throttle stops a crash loop. The install script loads it.
+
+[Tiling window manager for a Mac](/docs/tiling-window-manager-mac) is the
+overview, and [How close is this to real Omarchy?](/docs/parity) scores the
+whole port against Omarchy v4.5.0.
