@@ -46,3 +46,7 @@ A search brought you here? The docs has a page for each of these:
 
 MIT. The reference for every behaviour is
 [omacom/omarchy](https://github.com/omacom/omarchy).
+
+I build AI droids for your GitHub repo: fixed price, fixed date, from $500,
+live in 1 to 2 weeks. If you want one built, see
+https://dividendsolo.com/work-with-me?utm_source=github&utm_medium=readme&utm_campaign=omarchy4mac
