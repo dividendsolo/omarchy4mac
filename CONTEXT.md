@@ -46,6 +46,10 @@ one when a fact changes, and checks the deployed page.
   `lib/omarchy4mac-cheat-sheet.ts` in dividendsolo/dividend-solo.
 - The one-line pitch: the GitHub repo description, the README's first line,
   the docs home, dividendsolo.com's project card.
+- The hire offer's entry price and window ("fixed price, fixed date, from
+  $500, live in 1 to 2 weeks"): the README's last line. The prices and their
+  delivery windows are `lib/tiers.ts` in dividendsolo/dividend-solo, read onto
+  its home page by `lib/home-offer.ts`.
 - The agent skill: `docs-site/public/SKILL.md`, served at
   https://omarchy4mac.dividendsolo.com/SKILL.md; `tests/docs-skill-test.sh`
   holds the commands it names and the score it quotes to the repo.
