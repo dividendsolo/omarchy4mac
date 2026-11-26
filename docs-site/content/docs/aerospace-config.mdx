@@ -77,10 +77,12 @@ workspace 1 on whichever monitor is there, and never to workspace 2.
 
 ## The window rules
 
-`on-window-detected` is the list that decides where an app opens. The first
-rule that matches wins, so the order in the file matters: the screensaver rule
-sits above the Ghostty rule, and a float rule above a workspace rule still
-moves the window.
+`on-window-detected` is the list that decides where an app opens. AeroSpace
+runs only the first rule that matches, so the order in the file matters: a rule
+placed earlier stops every rule after it, unless it sets
+`check-further-callbacks = true`. That is why the screensaver rule sits above
+the Ghostty rule: the screensaver window floats and stays where it is, and
+every other Ghostty window moves to 2.
 
 Apps that open floating, because a dialog in a tile is unusable: System
 Settings, Finder, 1Password, Bitwarden, Raycast, Activity Monitor, Calculator,
