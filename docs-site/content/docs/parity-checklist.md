@@ -1,5 +1,6 @@
 ---
 title: "Omarchy v4 (Quattro) parity on this Mac"
+description: "Every item in the scorecard, ticked or not: the keybindings, the workspace model, the theme pipeline, and what the Mac cannot do."
 ---
 
 _This page is generated from [docs/parity-v4.md](https://github.com/dividendsolo/omarchy4mac/blob/main/docs/parity-v4.md). Edit that file, then run `npm run sync-content`._

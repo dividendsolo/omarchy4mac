@@ -64,7 +64,7 @@ bin/theme [<name>|random|--list|--sync|--remove <name>|--herdr-sync on|off] [-h]
 bin/no-comments                            the comment ban over every tracked file
 for t in tests/*-test.sh; do bash "$t" || exit 1; done     the repo's whole check
 node docs-site/scripts/sync-content.mjs [--check]
-cd docs-site && npm ci && npm run check-content && npm run build
+cd docs-site && npm ci && npm run check-content && npm run build && npm run check-seo
 bun tools/no-comments/check.ts --diff origin/main     the ban, on the lines a branch adds
 bun tools/no-comments/strip.ts . [paths]              remove comments; name what it cannot
 ```

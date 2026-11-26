@@ -5,6 +5,13 @@ export const docsRoute = '/docs';
 export const docsImageRoute = '/og/docs';
 export const docsContentRoute = '/llms.mdx/docs';
 
+export const siteUrl = (
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : 'https://omarchy4mac.dividendsolo.com')
+).replace(/\/+$/, '');
+
 export const gitConfig = {
   user: 'dividendsolo',
   repo: 'omarchy4mac',

@@ -37,10 +37,19 @@ every link in the README, this content and the repo's `docs/`.
 
 ## Adding a page
 
-Write `content/docs/<name>.md` or `.mdx` with frontmatter (`title`, and
-`description` when it helps), then add `<name>` to `content/docs/meta.json`.
-Quote a description that contains a colon: YAML reads the rest as a nested
-mapping and the build stops.
+Write `content/docs/<name>.md` or `.mdx` with frontmatter (`title`, and a
+`description` — one sentence written for the search result), then add `<name>`
+to `content/docs/meta.json`. Quote a description that contains a colon: YAML
+reads the rest as a nested mapping and the build stops. `tests/docs-seo-test.sh`
+in the repo root fails on a page with no title or description, on two pages that
+share one, and on a description longer than 160 characters.
+
+A page reaches Google through `app/sitemap.ts`, which lists every page the
+content directory holds, and `app/robots.ts`, which allows crawling and names
+the sitemap. `npm run check-seo` reads the two files the build wrote and fails
+when the sitemap does not carry every page in `meta.json`, when a listed
+address has no built page, or when robots stops allowing crawlers. CI runs it
+after `npm run build` in the docs job.
 
 MDX parses `<` and `{` as JSX, so put anything like `<file>` or `<cmd>` in
 backticks, as the keybinding tables do.
@@ -57,4 +66,6 @@ cd docs-site && kamal deploy
 Vercel project `omarchy4mac-docs` is connected to this repo, and its
 deployments answer 402 (`DEPLOYMENT_DISABLED`) under a fair-use CPU limit until
 2026-12-24; the site may move back there. Nothing here needs an env var;
-`NEXT_PUBLIC_SITE_URL` overrides the Open Graph address on a custom domain.
+`NEXT_PUBLIC_SITE_URL` overrides the address the pages answer on — the Open
+Graph address, the sitemap and robots.txt — and the default is
+`https://omarchy4mac.dividendsolo.com`.

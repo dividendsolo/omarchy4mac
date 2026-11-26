@@ -8,7 +8,8 @@
     "start": "next start",
     "types:check": "next typegen && tsc --noEmit",
     "sync-content": "node scripts/sync-content.mjs",
-    "check-content": "node scripts/sync-content.mjs --check"
+    "check-content": "node scripts/sync-content.mjs --check",
+    "check-seo": "node scripts/check-seo.mjs"
   },
   "dependencies": {
     "cn": "^0.5.2",

@@ -1,5 +1,6 @@
 ---
 title: "Changelog"
+description: "Every change to omarchy4mac, newest first, from the install script to the theme pipeline."
 ---
 
 _This page is generated from [CHANGELOG.md](https://github.com/dividendsolo/omarchy4mac/blob/main/CHANGELOG.md). Edit that file, then run `npm run sync-content`._
