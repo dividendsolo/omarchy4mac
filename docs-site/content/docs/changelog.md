@@ -50,6 +50,15 @@ maintainer's Mac runs from a clone of it, the same as yours.
   the moment it found a link already in place; the install says "Rerun this
   script to update", so every update run failed. `link()` now returns success
   when the link is already there.
+- The docs pages now answer, in their first sentence, the five questions a Mac
+  user asks an AI, and `docs/ai-answers.md` records what ChatGPT, Perplexity
+  and Claude name for each one. On 2026-11-25 all of them named Omarchy itself
+  or AeroSpace, and none named omarchy4mac, so the docs home, Install and
+  "What you get" open on the answer instead of on a feature list: the home page
+  says omarchy4mac is Omarchy 4 for macOS and the Hyprland look without Linux,
+  Install says Omarchy runs on a Mac with no Linux install and no dual boot,
+  and "What you get" opens on AeroSpace. Each page's `/llms.txt` line carries
+  the same answer.
 
 ## 2026-11-24
 
