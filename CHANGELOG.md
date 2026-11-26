@@ -5,6 +5,14 @@ dotfiles repo; entries before that date are those exports. Since then this
 repo is the only source: every change lands here by pull request, and the
 maintainer's Mac runs from a clone of it, the same as yours.
 
+## 2026-11-26
+
+- `install.sh` asks for a star at the end of a fresh install. The closing lines
+  are the last thing an installer reads, and nothing there asked for one. A
+  fresh install now ends with "If it saved you an afternoon, a star helps:
+  https://github.com/dividendsolo/omarchy4mac". An update run and a dry run do
+  not show it, and it is never a prompt or a pause.
+
 ## 2026-11-25
 
 - The docs site has five more pages, one per search the repo answers: a tiling

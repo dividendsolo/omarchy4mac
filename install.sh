@@ -9,6 +9,7 @@ REPO="https://github.com/dividendsolo/omarchy4mac.git"
 DRY=0; [ "${1:-}" = "--dry-run" ] && DRY=1
 STAMP="$(date +%Y%m%d-%H%M%S)"
 ORIG="$HOME/.local/state/omarchy4mac/originals"
+FRESH=0
 
 say()  { printf '\033[1;32m==>\033[0m %s\n' "$*"; }
 warn() { printf '\033[1;33m  !\033[0m %s\n' "$*"; WARNINGS=$((WARNINGS+1)); }
@@ -144,6 +145,7 @@ if [ -d "$DIR/.git" ]; then
   fi
   run git -C "$DIR" pull --ff-only
 else
+  FRESH=1
   if [ -e "$DIR" ]; then
     warn "$DIR exists but is not a git clone; the real run's 'git clone' will fail and stop"
   fi
@@ -413,4 +415,7 @@ fi
 say "Done. ⌥Return opens Ghostty. ⌥T switches to a random theme."
 say "⌥K shows every keybinding. ⌘⇧Space opens the menu. Rerun this script to update."
 say "Your previous Ghostty/btop/Neovim/Claude/Obsidian settings are saved in $ORIG."
+if [ "$FRESH" = 1 ]; then
+  say "If it saved you an afternoon, a star helps: https://github.com/dividendsolo/omarchy4mac"
+fi
 }
