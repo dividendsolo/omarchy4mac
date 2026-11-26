@@ -1,4 +1,4 @@
 {
   "title": "omarchy4mac",
-  "pages": ["index", "install", "what-you-get", "keybindings", "themes", "uninstall", "troubleshooting", "parity", "parity-checklist", "changelog"]
+  "pages": ["index", "install", "what-you-get", "keybindings", "themes", "uninstall", "troubleshooting", "tiling-window-manager-mac", "aerospace-config", "sketchybar-config", "hyprland-on-mac", "mac-rice", "parity", "parity-checklist", "changelog"]
 }

@@ -1,0 +1,92 @@
+---
+title: "SketchyBar config: Omarchy's bar on a Mac"
+description: "The sketchybarrc omarchy4mac installs, and its plugins: workspaces, clock, weather, agent limits, and the colours the theme writes."
+---
+
+![The bar this SketchyBar config draws: the five workspaces, the focused app, the clock, the weather, the theme name and the agent limits, in tokyo-night](/omarchy4mac-desktop.webp)
+
+macOS draws a menu bar across the top and lets you hide it, not replace it.
+[SketchyBar](https://github.com/FelixKratz/SketchyBar) draws a bar you own
+instead, and omarchy4mac installs one in Omarchy's layout. The config is
+[sketchybar/sketchybarrc](https://github.com/dividendsolo/omarchy4mac/blob/main/sketchybar/sketchybarrc),
+linked to `~/.config/sketchybar`, and 16 plugins sit next to it.
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/dividendsolo/omarchy4mac/main/install.sh | bash
+```
+
+## The bar itself
+
+```sh
+sketchybar --bar \
+  position=top \
+  height=32 \
+  blur_radius=30 \
+  color="$BAR_COLOR" \
+  border_width=0 \
+  padding_left=8 \
+  padding_right=8 \
+  notch_width=200 \
+  display=all \
+  topmost=on
+```
+
+32 pixels tall, so AeroSpace's top gap is 40: the bar plus the 8-pixel gap.
+`topmost=on` draws it above everything, which is how it takes the clicks the
+hidden macOS menu bar used to take.
+
+## Left, centre and right
+
+- **Left**: the Omarchy logo, which opens the menu tree (⌘⇧Space); the five
+  workspace numbers; a separator; the focused app's name, capped at 20
+  characters and scrolling past that; and the now-playing item, with a
+  play/pause and a next button.
+- **Centre**: the recording and Do Not Disturb indicators, the clock, the
+  weather, the update badge, the theme name, and the Friday sunset and stand-up
+  reminders.
+- **Right**: the battery; the stand-up and sunset reminders a notched laptop
+  panel would hide in the middle; the clock again; volume, Wi-Fi and Bluetooth;
+  and the coding-agent limits for Claude, Codex and Grok.
+
+The centre items are drawn twice: once in the middle for external screens, and
+again on the right, where the notch of a built-in MacBook panel would otherwise
+cover them. [What you get](/docs/what-you-get) has the rest of the behaviour.
+
+## The plugins
+
+Each item's `script=` names a file in `sketchybar/plugins/`. They are small:
+`aerospace.sh` marks the focused workspace and re-reads it on the
+`aerospace_workspace_change` event that the AeroSpace config fires;
+`displays.sh` maps a monitor to an arrangement id through
+`sketchybar --query displays`; `agents.sh` reads the same numbers
+`omarchy-agent-usage` prints, and the item stays hidden when that provider has
+no login on this Mac.
+
+Add an item by copying one of the plugins and adding the `--add item` and
+`--set` block that names it, then reload.
+
+## The colours come from the theme
+
+`sketchybarrc` sources `colors.sh`, which `bin/theme` writes on every switch.
+That file is generated and gitignored: edit the theme, not the colours.
+
+```sh
+sketchybar --reload
+```
+
+Reloading is also what the theme script does after a switch, which is how the
+bar, the borders and the terminal change colour together.
+[Themes](/docs/themes) is the pipeline.
+
+## Move a widget off the bar
+
+Drag a widget off the bar and it disappears; the choice is remembered in
+`~/.config/omarchy/bar-removed`. Put them all back:
+
+```sh
+omarchy-bar-remove --reset
+```
+
+[Mac rice](/docs/mac-rice) is what the bar looks like next to everything else,
+and [Tiling window manager for a Mac](/docs/tiling-window-manager-mac) is the
+window manager it reports on.

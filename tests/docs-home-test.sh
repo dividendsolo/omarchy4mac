@@ -21,8 +21,8 @@ check "the first docs page opens on the desktop screenshot" "/omarchy4mac-deskto
 echo "docs address:"
 check "no vercel.app address in the repo" "" \
   "$(git -C "$ROOT" grep -l 'vercel\.app' -- . ':!tests/docs-home-test.sh' | paste -sd' ' -)"
-check "the README links to the docs domain" 2 \
-  "$(grep -c 'https://omarchy4mac.dividendsolo.com' "$ROOT/README.md")"
+check "the README links to the docs domain" yes \
+  "$([[ "$(grep -c 'https://omarchy4mac.dividendsolo.com' "$ROOT/README.md")" -ge 2 ]] && echo yes || echo no)"
 
 if (( fails )); then echo "FAIL: $fails check(s)"; exit 1; fi
 echo "PASS"

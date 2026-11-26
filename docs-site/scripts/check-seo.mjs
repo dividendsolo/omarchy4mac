@@ -29,8 +29,17 @@ for (const path of paths) {
   const url = `${origin}${path}`;
   if (!listed.includes(url)) problems.push(`${url} is not in out/sitemap.xml`);
   const page = join(out, path.slice(1));
-  const built = (await exists(`${page}.html`)) || (await exists(join(page, 'index.html')));
-  if (!built) problems.push(`${url} has no built page in out/`);
+  const html = (await exists(`${page}.html`)) ? `${page}.html` : join(page, 'index.html');
+  if (!(await exists(html))) {
+    problems.push(`${url} has no built page in out/`);
+    continue;
+  }
+  const markup = await readFile(html, 'utf8');
+  for (const [, src] of markup.matchAll(/<img\b[^>]*?\ssrc="([^"]+)"/g)) {
+    const file = decodeURIComponent(src.replaceAll('&amp;', '&').split(/[?#]/)[0]);
+    const served = src.startsWith('/') && !src.includes('?') && (await exists(join(out, file.slice(1))));
+    if (!served) problems.push(`${url} shows an image that out/ does not hold: ${src}`);
+  }
 }
 
 for (const url of listed) {

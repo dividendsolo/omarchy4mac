@@ -1,0 +1,80 @@
+---
+title: "Tiling window manager for a Mac: AeroSpace with Omarchy's keys"
+description: "AeroSpace tiles the windows on a Mac with Omarchy's keys: five workspaces in total, each with a home monitor. One install script sets up the whole desktop."
+---
+
+![The finished desktop: Omarchy's bar across the top with five workspaces, over a rocket-launch wallpaper](/omarchy4mac-desktop.webp)
+
+macOS has no tiling window manager of its own. Apps come up wherever they like,
+and windows overlap. omarchy4mac installs [AeroSpace](https://github.com/nikitabobko/AeroSpace),
+a tiling window manager for macOS, and configures it the way Omarchy does on
+Linux:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/dividendsolo/omarchy4mac/main/install.sh | bash
+```
+
+The install script links the config, starts AeroSpace, and waits until it
+answers. [Install](/docs/install) has every step, including the one permission
+macOS asks for.
+
+## What tiling does here
+
+Every window takes a share of the screen instead of floating over the others.
+Open a second window and the first one resizes to make room. Close it and the
+rest grow back. Nothing overlaps, and no window is ever hidden behind another.
+
+The keys are Omarchy's, so they are the ones a Hyprland user already knows:
+
+| Keys | What it does |
+|---|---|
+| ⌥1 to ⌥5 | Go to workspace 1 to 5 |
+| ⌘⇧1 to ⌘⇧5 | Move the focused window there |
+| ⌘← ⌘↓ ⌘↑ ⌘→ | Focus the window in that direction, across monitors |
+| ⌘⇧← ⌘⇧↓ ⌘⇧↑ ⌘⇧→ | Move the focused window in that direction |
+| ⌥= and ⌥- | Grow and shrink the window |
+| ⌥F or ⌘⌥F | Full screen, below the bar |
+| ⌥S | Toggle the window between floating and tiled |
+| ⌥A and ⌥J | Accordion layout and tiles layout |
+| ⌘⇧; | Service mode: join, flatten, float, close the others |
+| ⌥K | The searchable keybinding overlay |
+
+[Keybindings](/docs/keybindings) holds the full list, and ⌥K shows the same
+list from the desktop.
+
+## Five workspaces in total, each with a home monitor
+
+AeroSpace keeps five workspaces, numbered 1 to 5, and every key matches the
+number drawn on the bar. Each workspace belongs to a monitor, and each one
+names its fallback monitors for when you have fewer screens attached. Workspace
+1 is the browser; 2 is the terminal; 3 is Claude, the editors and the agents; 4
+is comms; 5 is music.
+
+Windows land on the right workspace by themselves. A browser moves to
+workspace 1, Ghostty to 2, an editor or an agent to 3, Signal and WhatsApp to
+4, Spotify to 5. System Settings, Finder, 1Password, Raycast and Preview open
+floating: a dialog in a tile is unusable.
+
+The gaps are 8 pixels, and the top gap is 40, which is the 32-pixel bar plus
+the same 8 pixels. [What you get](/docs/what-you-get) lists the rest.
+
+## What a Mac cannot do
+
+AeroSpace has no groups, no scratchpad, no pin, no per-window opacity and no
+runtime gap toggle, so those Omarchy keys have no port here.
+[How close is this to real Omarchy?](/docs/parity) counts all of it.
+
+## The other tiling window managers for macOS
+
+AeroSpace is the one this repo configures, because its keybinding vocabulary is
+the closest a Mac gets to Hyprland. The others are real options, and honest
+ones:
+
+- [yabai](https://github.com/koekeishiya/yabai) tiles too, and does more with
+  scripting, but its full features need System Integrity Protection turned off.
+- [Amethyst](https://github.com/ianyh/Amethyst) is the easiest to start with: a
+  preference pane, preset layouts, and no config file to write.
+
+If you want the Omarchy keybindings, the bar and the themes with it, install
+this repo and change nothing. [AeroSpace config](/docs/aerospace-config) shows
+the file it installs, if you would rather read it first.
