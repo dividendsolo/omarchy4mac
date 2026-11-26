@@ -15,6 +15,11 @@ maintainer's Mac runs from a clone of it, the same as yours.
   `docs/keyword-volumes.md` records what the keyword data and the Search
   Console say, and the one rule the five were picked by: no volume source
   reachable from the build machine can order those searches by volume.
+- The screenshots on the docs site load again. The static export pointed every
+  picture at Next's image route, which nginx does not serve, so each page showed
+  the alt text in place of the picture. The pictures are now served as the files
+  themselves, and `check-seo` fails the build when a page shows an image that
+  the export does not hold.
 - `install.sh` asks for Accessibility before it starts AeroSpace or
   Hammerspoon. On a first run the launchd agent started AeroSpace and the
   script opened Hammerspoon while neither had the permission, so macOS raised
