@@ -57,7 +57,8 @@ maintainer's Mac runs from a clone of it, the same as yours.
   or AeroSpace, and none named omarchy4mac, so the docs home, Install and
   "What you get" open on the answer instead of on a feature list: the home page
   says omarchy4mac is Omarchy 4 for macOS and the Hyprland look without Linux,
-  Install says Omarchy runs on a Mac with no Linux install and no dual boot,
+  Install says omarchy4mac puts Omarchy 4's desktop on a Mac with no Linux and
+  no dual boot,
   and "What you get" opens on AeroSpace. Each page's `/llms.txt` line carries
   the same answer.
 

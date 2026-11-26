@@ -72,9 +72,14 @@ echo "the answer-first line on each page:"
 check "the home page opens on what the product is" yes \
   "$(grep -qF 'omarchy4mac is Omarchy 4 for macOS: a native port that brings the Omarchy' \
     "$CONTENT/index.mdx" && echo yes || echo no)"
-check "the install page answers whether Omarchy runs on a Mac" yes \
-  "$(grep -qF 'Yes. You can run Omarchy on a Mac with no Linux install and no dual boot' \
-    "$CONTENT/install.mdx" && echo yes || echo no)"
+INSTALL_LEAD="$(sed -n 's/^description: *"\{0,1\}\([^"]*\)"\{0,1\}$/\1/p' "$CONTENT/install.mdx")"
+INSTALL_FIRST="$(awk 'f==2 && NF {print; exit} /^---$/ {f++}' "$CONTENT/install.mdx")"
+check "the install answer names omarchy4mac as the thing that runs on a Mac" yes \
+  "$([[ "$INSTALL_LEAD" == "Yes: omarchy4mac puts Omarchy 4's desktop on a Mac, with no Linux and no dual boot"* ]] && echo yes || echo no)"
+check "the install page body opens on what install.sh does, not on the lead again" yes \
+  "$([[ "$INSTALL_FIRST" == '`install.sh` '* ]] && echo yes || echo no)"
+check "docs/ai-answers.md links the card that holds the re-ask" yes \
+  "$(grep -qE 'github\.com/dividendsolo/omarchy4mac/issues/[0-9]+' "$FILE" && echo yes || echo no)"
 check "the what-you-get page opens on AeroSpace, not on a heading" yes \
   "$(grep -qF 'The window manager is **AeroSpace**' "$CONTENT/what-you-get.mdx" && echo yes || echo no)"
 

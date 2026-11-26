@@ -76,7 +76,7 @@ the page's `description`, which is the line `llms.txt` carries for it.
 | Page | Questions | Answer-first line, now the page's first paragraph | In `/llms.txt` |
 |---|---|---|---|
 | `/docs` | 2, 4 | "omarchy4mac is Omarchy 4 for macOS: a native port that brings the Omarchy desktop to a Mac you keep — no Linux, no Arch, no dual boot, nothing wiped. It is the answer to \"how do I make macOS look like Hyprland\": AeroSpace tiles the windows where Hyprland would, SketchyBar draws the bar where Waybar would, JankyBorders draws the active window's border, and one script themes the whole desktop from Omarchy's own theme files." | yes: `app/llms.txt/route.ts` serves the index that `lib/source.ts` builds from each page's `description`, and this page's now states what the product is |
-| `/docs/install` | 1 | "Yes. You can run Omarchy on a Mac with no Linux install and no dual boot: `install.sh` puts Omarchy 4's desktop on macOS, and the same command updates it later." | yes: the `description` now says the same thing |
+| `/docs/install` | 1 | "Yes: omarchy4mac puts Omarchy 4's desktop on a Mac, with no Linux and no dual boot. One command installs it and updates it later." It names omarchy4mac, not Omarchy, as the thing that runs: Omarchy itself is an Arch Linux distribution. It is the page's lead, and the body then opens on what `install.sh` does | yes: it is the page's `description` |
 | `/docs/what-you-get` | 3, 5 | "The window manager is AeroSpace: free, open source, i3-style tiling for macOS, and it never asks you to disable System Integrity Protection. That is the line that settles AeroSpace against yabai for most people. Yabai tiles automatically and uses the native macOS Spaces, and its basic tiling also runs with SIP on, but its advanced features need SIP partly disabled." | yes: the `description` now names AeroSpace and the no-SIP-change point |
 
 The other columns of the card's checklist were already true of these pages and
@@ -87,7 +87,8 @@ the Fumadocs layout rather than to a page.
 
 ## Re-ask
 
-Due 2026-12-09: two weeks after this ship, so the changed pages are crawled
+Due 2026-12-09, held by [omarchy4mac#136](https://github.com/dividendsolo/omarchy4mac/issues/136)
+with the card's 3-week Tier A check: two weeks after this ship, so the changed pages are crawled
 before the five questions are asked again. What to look for:
 
 - `omarchy4mac named?` on at least 2 of the 5 questions. That is the card's
