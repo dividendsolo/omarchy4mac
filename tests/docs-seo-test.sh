@@ -62,7 +62,10 @@ index = (content / "index.mdx").read_text()
 def words(text):
     return set(re.findall(r"[a-z0-9]+", text.lower()))
 
-without_page, without_title, unlinked_readme, unlinked_index = [], [], [], []
+picture = re.compile(r"!\[[^\]]+\]\((/[^)\s]+\.(?:webp|png|jpe?g))\)")
+public = root / "docs-site" / "public"
+
+without_page, without_title, unlinked_readme, unlinked_index, without_picture = [], [], [], [], []
 for query, slug in SEARCHES.items():
     page = next((content / f"{slug}{e}" for e in (".mdx", ".md") if (content / f"{slug}{e}").is_file()), None)
     if page is None:
@@ -70,6 +73,7 @@ for query, slug in SEARCHES.items():
         without_title.append(slug)
         unlinked_readme.append(slug)
         unlinked_index.append(slug)
+        without_picture.append(slug)
         continue
     title = value_of(fields_of(page), "title")
     if not words(query) <= words(title):
@@ -78,11 +82,14 @@ for query, slug in SEARCHES.items():
         unlinked_readme.append(slug)
     if f"(/docs/{slug})" not in index:
         unlinked_index.append(slug)
+    if not any((public / src.lstrip("/")).is_file() for src in picture.findall(page.read_text())):
+        without_picture.append(slug)
 
 print(f"searches_without_page={','.join(without_page)}")
 print(f"searches_without_the_words={','.join(without_title)}")
 print(f"searches_unlinked_from_readme={','.join(unlinked_readme)}")
 print(f"searches_unlinked_from_index={','.join(unlinked_index)}")
+print(f"searches_without_a_picture={','.join(without_picture)}")
 print(f"volume_record={'yes' if (root / 'docs' / 'keyword-volumes.md').is_file() else 'no'}")
 PYEOF
 
@@ -120,6 +127,7 @@ check "every search has a page of its own" "" "$(value searches_without_page)"
 check "every search page carries the search's words in its title" "" "$(value searches_without_the_words)"
 check "the README links every search page" "" "$(value searches_unlinked_from_readme)"
 check "the docs index links every search page" "" "$(value searches_unlinked_from_index)"
+check "every search page shows a screenshot the site serves" "" "$(value searches_without_a_picture)"
 check "the volume pull is recorded in docs/" yes "$(value volume_record)"
 
 echo "the address a page answers on:"
