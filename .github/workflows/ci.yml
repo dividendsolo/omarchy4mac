@@ -41,3 +41,5 @@ jobs:
         working-directory: docs-site
       - run: npm run build
         working-directory: docs-site
+      - run: npm run check-seo
+        working-directory: docs-site
